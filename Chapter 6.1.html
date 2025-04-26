@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6: Point Estimation Summary</title>
+
+    <!-- Google Fonts - Roboto Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Keyframes for Animations (FadeIn) */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Fonts & Base Styling (from index theme) */
+        body {
+            font-family: 'Roboto Mono', monospace;
+            color: #e0e0e0; /* Light grey text for readability */
+            line-height: 1.7;
+            padding: 25px;
+            background-color: #1a1a1a; /* Simple dark background */
+            min-height: 100vh;
+        }
+
+        /* Headings (from index theme) */
+        h1, h2 {
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+            margin-bottom: 1.5em; /* Matches index */
+        }
+
+        h1 {
+            font-size: 2.4em; /* Matches index */
+            color: #ffffff; /* White heading */
+            font-weight: 700;
+            padding-bottom: 12px;
+            margin-top: 1.5em; /* Matches index */
+            margin-bottom: 1.5em; /* Matches index */
+            border-bottom: 2px solid #ffffff; /* White border */
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.1s;
+            letter-spacing: -0.5px; /* Matches index */
+        }
+
+        h2 {
+            font-size: 1.6em; /* Matches index */
+            color: #cccccc; /* Lighter grey subheading */
+            font-weight: 500;
+            margin-top: 30px; /* Retain some top margin for sections */
+            margin-bottom: 1.5em; /* Consistent bottom margin */
+            border-bottom: 1px solid #555555; /* Darker border for contrast */
+            padding-bottom: 5px;
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.3s; /* Staggered animation */
+        }
+
+        /* Main Content Area (from index theme) */
+        main {
+            max-width: 800px; /* Matches index */
+            margin: 40px auto; /* Matches index */
+            background-color: rgba(30, 30, 30, 0.85); /* Dark grey, slightly transparent */
+            padding: 35px 45px; /* Matches index */
+            border-radius: 10px; /* Matches index */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7); /* Matches index */
+            backdrop-filter: blur(6px); /* Matches index */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle light border */
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.2s;
+        }
+
+        /* Paragraph and List styling */
+        p {
+            margin-bottom: 1em;
+            color: inherit; /* Ensure uses body color */
+        }
+
+        ul {
+            margin-left: 25px; /* Slightly more indent */
+            list-style: disc; /* Use standard disc bullets */
+            margin-bottom: 1em;
+        }
+
+        li {
+            margin-bottom: 8px; /* Slightly more space between list items */
+        }
+
+        strong, .math-var { /* Style for emphasized text and math variables */
+            font-weight: 500; /* Consistent with index headings/links */
+            color: #ffffff; /* Brighter white for emphasis */
+        }
+        .math-var { /* Ensure italics for math variables */
+             font-style: italic;
+             margin: 0 2px; /* Consistent small spacing */
+        }
+
+
+        /* Formula Container Styling (Adapting index list item styles) */
+        .formula-container {
+            margin: 15px 0 20px 0; /* Adjusted margins */
+            padding: 15px 20px; /* Adjusted padding */
+            background-color: rgba(45, 45, 45, 0.9); /* Match index list item bg */
+            border-radius: 6px; /* Match index list item radius */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Default subtle border */
+            overflow-x: auto;
+            transition: background-color 0.3s ease, border-color 0.3s ease; /* Add border transition */
+            cursor: pointer;
+            font-size: 1.1em;
+            line-height: 1.5;
+            color: #e0e0e0; /* Text color inside formulas */
+            border-left: 4px solid transparent; /* Add placeholder for hover border like index list */
+        }
+
+        .formula-container:hover {
+            background-color: rgba(60, 60, 60, 0.95); /* Match index list item hover bg */
+            border-left-color: #a6e3a1; /* GREEN hover border like index list */
+            border-color: rgba(166, 227, 161, 0.5); /* Slightly green border on hover */
+        }
+
+        .formula-container.copied {
+            background-color: rgba(166, 227, 161, 0.2); /* Transparent green background on copy */
+            border-color: #a6e3a1; /* Green border on copy */
+            border-left-color: #a6e3a1; /* Ensure left border stays green */
+        }
+
+        /* Style for math elements within formula containers */
+        .formula-container i { /* General italics within formulas */
+            font-style: italic;
+            margin: 0 1px;
+        }
+        .formula-container sub, .formula-container sup {
+            line-height: 0;
+            font-size: 0.75em;
+            position: relative; /* Help positioning if needed */
+             top: -0.2em; /* Adjust baseline slightly for superscripts */
+        }
+         .formula-container sub {
+            top: 0.2em; /* Adjust baseline slightly for subscripts */
+        }
+        .formula-container .fraction {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            margin: 0 0.2em;
+        }
+        .formula-container .numerator {
+            display: block;
+            border-bottom: 1px solid #cccccc; /* Use light grey for fraction line */
+            padding-bottom: 2px;
+            line-height: 1.1;
+        }
+        .formula-container .denominator {
+            display: block;
+            padding-top: 2px;
+            line-height: 1.1;
+        }
+        .formula-container .summation {
+             font-size: 1.4em; /* Make summation symbol larger */
+             vertical-align: middle;
+             margin: 0 0.1em;
+        }
+
+
+        /* Footer Styling (from index) */
+        footer {
+            text-align: center;
+            margin-top: 70px;
+            padding-bottom: 35px;
+            font-size: 0.85em;
+            color: #888888; /* Dim grey for footer */
+             animation: fadeIn 1s ease-out both;
+             animation-delay: 0.7s; /* Delay animation */
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Chapter 6: Point Estimation Summary</h1>
+    </header>
+
+    <main>
+
+        <h2>Introduction (Page 247)</h2>
+        <p>
+            This chapter focuses on <strong>Point Estimation</strong>.
+        </p>
+        <ul>
+            <li><strong>Goal:</strong> The main objective is to estimate an unknown population <strong>parameter</strong>, like the population mean (denoted by the Greek letter <span class="math-var">μ</span>) or a population proportion (<span class="math-var">p</span>).</li>
+            <li><strong>How:</strong> We use data from a sample taken from the population.</li>
+            <li><strong>What we compute:</strong> We calculate a single number from the sample data. This number serves as an "educated guess" for the true, unknown value of the parameter.</li>
+            <li><strong>Terminology:</strong> This calculated number is called a <strong>point estimate</strong>.</li>
+        </ul>
+        <p>The chapter is divided into two main sections:</p>
+        <ul>
+            <li><strong>Section 6.1:</strong> Introduces the general ideas and concepts behind point estimation.</li>
+            <li><strong>Section 6.2:</strong> Describes two specific methods for finding point estimates: the method of moments and the method of maximum likelihood.</li>
+        </ul>
+        <p>Let's move on to Section 6.1 on the next page.</p>
+
+        <h2>Section 6.1: Some General Concepts of Point Estimation (Page 248)</h2>
+        <p>
+            <strong>Statistical Inference:</strong> This field is usually about drawing conclusions about population characteristics (parameters). We need sample data to do this.
+        </p>
+        <ul>
+            <li><strong>Parameter:</strong> A characteristic of the population distribution, like the true average breaking strength (<span class="math-var">μ</span>) or the population variance (<span class="math-var">σ</span><sup>2</sup>) of breaking strengths. We use the generic Greek letter <span class="math-var">θ</span> (theta) to represent any parameter of interest.</li>
+            <li><strong>Sample Data:</strong> Before we collect data, we think of the sample observations as random variables (<span class="math-var">X</span><sub>1</sub>, <span class="math-var">X</span><sub>2</sub>, ..., <span class="math-var">X</span><sub>n</sub>).</li>
+            <li><strong>Statistic:</strong> Any function calculated from the sample random variables (e.g., sample mean <span class="math-var">X̄</span>, sample standard deviation <span class="math-var">S</span>). Since statistics are functions of random variables, they are also random variables themselves. For instance, if we have two samples, <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>m</sub> and <span class="math-var">Y</span><sub>1</sub>, ..., <span class="math-var">Y</span><sub>n</sub>, the difference in sample means, <span class="math-var">X̄</span> − <span class="math-var">Ȳ</span>, is a statistic used to make inferences about the difference in population means, <span class="math-var">μ</span><sub>1</sub> − <span class="math-var">μ</span><sub>2</sub>.</li>
+        </ul>
+
+        <h2>Definition: Point Estimate and Point Estimator (Page 248)</h2>
+        <ul>
+            <li>A <strong>point estimate</strong> of a parameter <span class="math-var">θ</span> is a single number, calculated from sample data, that represents a sensible value for <span class="math-var">θ</span>.</li>
+            <li>The <strong>point estimator</strong> is the statistic (the formula or rule) used to calculate the point estimate.</li>
+        </ul>
+        <p><strong>Example (Battery Lifetime):</strong></p>
+        <ul>
+            <li>Parameter of interest: <span class="math-var">μ</span> (true average lifetime).</li>
+            <li>Sample data (<span class="math-var">n</span>=3): <span class="math-var">x</span><sub>1</sub> = 5.0, <span class="math-var">x</span><sub>2</sub> = 6.4, <span class="math-var">x</span><sub>3</sub> = 5.9 hours.</li>
+            <li>Estimator used: The sample mean, <span class="math-var">X̄</span>.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\bar{X} = \frac{X_1 + X_2 + X_3}{3}" title="Click to copy LaTeX">
+                    <i>X̄</i> = <span class="fraction">
+                        <span class="numerator"><i>X</i><sub>1</sub> + <i>X</i><sub>2</sub> + <i>X</i><sub>3</sub></span>
+                        <span class="denominator">3</span>
+                    </span>
+                </div>
+            </li>
+            <li>Point Estimate calculated: <span class="math-var">x̄</span>.
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\bar{x} = \frac{5.0 + 6.4 + 5.9}{3} = 5.77" title="Click to copy LaTeX">
+                     <i>x̄</i> = <span class="fraction">
+                         <span class="numerator">5.0 + 6.4 + 5.9</span>
+                         <span class="denominator">3</span>
+                       </span> = 5.77 hours.
+                 </div>
+            </li>
+        </ul>
+        <p>So, 5.77 is our point estimate for <span class="math-var">μ</span>. If we had a different sample (e.g., 5.6, 4.5, 6.1), the same estimator (<span class="math-var">X̄</span>) would yield a different point estimate (5.40).</p>
+        <p><strong>Notation:</strong> We often use <span class="math-var">θ̂</span> (theta hat) to denote both the estimator and the point estimate.</p>
+        <ul>
+            <li><span class="math-var">μ̂</span> = <span class="math-var">X̄</span> means "the point estimator for <span class="math-var">μ</span> is the sample mean <span class="math-var">X̄</span>".
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\mu} = \bar{X}" title="Click to copy LaTeX">
+                    <i>μ̂</i> = <i>X̄</i>
+                </div>
+            </li>
+            <li><span class="math-var">μ̂</span> = 5.77 means "the point estimate for <span class="math-var">μ</span> is 5.77".
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\mu} = 5.77" title="Click to copy LaTeX">
+                     <i>μ̂</i> = 5.77
+                </div>
+            </li>
+        </ul>
+        <p>It's good practice to report both the estimator used (e.g., <span class="math-var">X̄</span>) and the resulting estimate (e.g., 5.77).</p>
+
+        <p><strong>Example 6.1: Bumper Crashes (Page 249)</strong></p>
+        <ul>
+            <li>Scenario: A new bumper is tested in 25 crashes (<span class="math-var">n</span>=25). <span class="math-var">X</span> is the number of crashes with no visible damage.</li>
+            <li>Parameter of interest: <span class="math-var">p</span> = the true proportion of all such crashes resulting in no damage.</li>
+            <li>Observed data: <span class="math-var">x</span> = 15 crashes had no damage.</li>
+            <li>Estimator: A reasonable estimator for the population proportion <span class="math-var">p</span> is the sample proportion, <span class="math-var">p̂</span>.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{p} = \frac{X}{n}" title="Click to copy LaTeX">
+                    <i>p̂</i> = <span class="fraction">
+                        <span class="numerator"><i>X</i></span>
+                        <span class="denominator"><i>n</i></span>
+                    </span>
+                </div>
+            </li>
+            <li>Estimate: The point estimate for <span class="math-var">p</span> is <span class="math-var">p̂</span>.
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{p} = \frac{x}{n} = \frac{15}{25} = 0.60" title="Click to copy LaTeX">
+                     <i>p̂</i> = <span class="fraction">
+                         <span class="numerator"><i>x</i></span>
+                         <span class="denominator"><i>n</i></span>
+                       </span> = <span class="fraction">
+                         <span class="numerator">15</span>
+                         <span class="denominator">25</span>
+                       </span> = 0.60
+                 </div>
+            </li>
+        </ul>
+
+        <h2>Multiple Estimators (Page 249)</h2>
+        <p>Often, there's more than one reasonable way to estimate a parameter.</p>
+
+        <p><strong>Example 6.2: Dielectric Breakdown Voltage (Page 249)</strong></p>
+        <ul>
+            <li>Data: 20 observations of breakdown voltage.</li>
+            <li>Assumption: The data comes from a normal distribution with mean <span class="math-var">μ</span>. Since a normal distribution is symmetric, <span class="math-var">μ</span> is also the median.</li>
+            <li>Goal: Estimate <span class="math-var">μ</span>.</li>
+            <li>Several possible estimators and their resulting estimates from the data:
+                <ul>
+                    <li>a. Estimator: Sample mean (<span class="math-var">X̄</span>). Estimate: <span class="math-var">x̄</span> = 27.793.</li>
+                    <li>b. Estimator: Sample median (<span class="math-var">X̃</span>). Estimate: <span class="math-var">x̃</span> = (27.94 + 27.98)/2 = 27.960.</li>
+                    <li>c. Estimator: Midrange [<span class="math-var">min(X)</span> + <span class="math-var">max(X)</span>]/2. Estimate: (24.46 + 30.88)/2 = 27.670.</li>
+                    <li>d. Estimator: 10% Trimmed Mean (<span class="math-var">X̄</span><sub>tr(10)</sub>). Estimate: <span class="math-var">x̄</span><sub>tr(10)</sub> = 27.838.</li>
+                </ul>
+            </li>
+            <li>Question: Which estimator is best? We can't tell just by looking at one sample's estimates. We need to ask: Which estimator tends to produce estimates closest to the true value (<span class="math-var">μ</span>) over many different samples?</li>
+        </ul>
+
+        <p><strong>Example 6.3: Asphalt Voids (Page 250)</strong></p>
+        <ul>
+            <li>Data: 52 observations on <span class="math-var">X</span> = voids filled with asphalt (%).</li>
+            <li>Goal: Estimate the population variance <span class="math-var">σ</span><sup>2</sup>.</li>
+            <li>Estimator 1: Sample variance <span class="math-var">S</span><sup>2</sup>.
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="S^2 = \frac{\sum_{i=1}^n (X_i - \bar{X})^2}{n-1}" title="Click to copy LaTeX">
+                      <i>S</i><sup>2</sup> = <span class="fraction">
+                          <span class="numerator"><span class="summation">∑</span>(<i>X</i><sub>i</sub> − <i>X̄</i>)<sup>2</sup></span>
+                          <span class="denominator"><i>n</i>−1</span>
+                        </span>
+                 </div>
+                 Estimate: <span class="math-var">s</span><sup>2</sup> = 41.126 (from Minitab output or calculation). The corresponding estimate for the standard deviation <span class="math-var">σ</span> is <span class="math-var">ô</span> = <span class="math-var">s</span>.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\sigma} = s = \sqrt{41.126} = 6.413" title="Click to copy LaTeX">
+                    <i>ô</i> = <i>s</i> = √41.126 = 6.413
+                </div>
+            </li>
+            <li>Estimator 2: An alternative estimator for <span class="math-var">σ</span><sup>2</sup> uses <span class="math-var">n</span> in the denominator:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\sigma}^2 = \frac{\sum_{i=1}^n (X_i - \bar{X})^2}{n}" title="Click to copy LaTeX">
+                      <i>ô</i><sup>2</sup> = <span class="fraction">
+                          <span class="numerator"><span class="summation">∑</span>(<i>X</i><sub>i</sub> − <i>X̄</i>)<sup>2</sup></span>
+                          <span class="denominator"><i>n</i></span>
+                        </span>
+                 </div>
+                 Estimate: 2097.4124 / 52 = 40.335.
+            </li>
+            <li>Why prefer <span class="math-var">S</span><sup>2</sup>? We'll see later that <span class="math-var">S</span><sup>2</sup> has desirable properties (it's unbiased).</li>
+            <li>Estimating based on assumed distribution: If we know (or assume) the data follows a specific distribution (like the Weibull distribution mentioned in the example), we can estimate the parameters of that distribution (<span class="math-var">α</span> and <span class="math-var">β</span> for Weibull) and then plug those estimates into the formula for the variance of that distribution type.</li>
+            <li>In the example, estimating Weibull parameters <span class="math-var">α</span> and <span class="math-var">β</span> led to an estimate of <span class="math-var">σ</span><sup>2</sup> = 56.035. This relies heavily on the Weibull assumption being correct. <span class="math-var">S</span><sup>2</sup> is more general if the distribution type is uncertain.</li>
+        </ul>
+
+        <h2>Accuracy of Estimators (Page 251)</h2>
+        <p>
+            An estimator <span class="math-var">θ̂</span> is a random variable, meaning its value varies from sample to sample.
+            We can write:
+        </p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\theta} = \theta + \text{error of estimation}" title="Click to copy LaTeX">
+             <i>θ̂</i> = <i>θ</i> + error of estimation
+        </div>
+        <p>
+            A good estimator is one that produces small errors, meaning the estimate <span class="math-var">θ̂</span> is close to the true value <span class="math-var">θ</span>.
+        </p>
+        <ul>
+            <li><strong>Mean Squared Error (MSE):</strong> A common measure of accuracy is the expected squared error:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="MSE = E[(\hat{\theta} - \theta)^2]" title="Click to copy LaTeX">
+                     MSE = <i>E</i>[(<i>θ̂</i> − <i>θ</i>)<sup>2</sup>]
+                </div>
+                A smaller MSE indicates a better estimator, on average.
+            </li>
+            <li><strong>Challenge:</strong> MSE usually depends on the unknown value of <span class="math-var">θ</span>. Often, one estimator might have a smaller MSE for some <span class="math-var">θ</span> values, while another is better for other <span class="math-var">θ</span> values. Finding one estimator with the smallest MSE for all possible <span class="math-var">θ</span> values is usually not possible.</li>
+        </ul>
+
+        <h2>Unbiased Estimators (Page 251)</h2>
+        <p>
+            Since minimizing MSE universally is hard, we often restrict our attention to estimators with desirable properties. One such property is <strong>unbiasedness</strong>.
+        </p>
+        <ul>
+            <li><strong>Concept:</strong> Imagine a measuring instrument. An "unbiased" instrument, when used repeatedly, produces measurements that scatter around the true value without a systematic tendency to be too high or too low. A "biased" instrument systematically overestimates or underestimates (See Figure 6.1, page 251).</li>
+            <li><strong>Definition:</strong> A point estimator <span class="math-var">θ̂</span> is <strong>unbiased</strong> if its expected value equals the true parameter value for all possible values of <span class="math-var">θ</span>. That is:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(\hat{\theta}) = \theta" title="Click to copy LaTeX">
+                     <i>E</i>(<i>θ̂</i>) = <i>θ</i>
+                </div>
+            </li>
+            <li><strong>Bias:</strong> If <span class="math-var">θ̂</span> is not unbiased, its <strong>bias</strong> is defined as:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\text{Bias}(\hat{\theta}) = E(\hat{\theta}) - \theta" title="Click to copy LaTeX">
+                     Bias(<i>θ̂</i>) = <i>E</i>(<i>θ̂</i>) − <i>θ</i>
+                </div>
+            </li>
+            <li><strong>Interpretation:</strong> The probability distribution (sampling distribution) of an unbiased estimator <span class="math-var">θ̂</span> is "centered" at the true value <span class="math-var">θ</span> (See Figure 6.2, page 252). "Centered" refers to the mean (expected value) of the distribution.</li>
+        </ul>
+
+        <p><strong>Example (Sample Proportion): (Page 252)</strong></p>
+        <ul>
+            <li>Let <span class="math-var">X</span> be binomial(<span class="math-var">n</span>, <span class="math-var">p</span>). The estimator for <span class="math-var">p</span> is <span class="math-var">p̂</span> = <span class="math-var">X</span>/<span class="math-var">n</span>.</li>
+            <li>
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(\hat{p}) = E(X/n) = \frac{1}{n} E(X) = \frac{1}{n} (np) = p" title="Click to copy LaTeX">
+                     <i>E</i>(<i>p̂</i>) = <i>E</i>(<i>X</i>/<i>n</i>) = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span> <i>E</i>(<i>X</i>) = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span> (<i>np</i>) = <i>p</i>
+                </div>
+            </li>
+            <li>Since <span class="math-var">E(p̂) = p</span> for any <span class="math-var">p</span> between 0 and 1, the sample proportion <span class="math-var">p̂ = X/n</span> is an unbiased estimator of <span class="math-var">p</span>.</li>
+        </ul>
+
+        <p><strong>Example 6.4: Uniform Distribution U[0, θ] (Page 252)</strong></p>
+        <ul>
+            <li>Goal: Estimate the upper limit <span class="math-var">θ</span> based on a sample <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub>.</li>
+            <li>Estimator 1: <span class="math-var">θ̂</span><sub>1</sub> = max(<span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub>). (The largest value in the sample).</li>
+            <li>Is <span class="math-var">θ̂</span><sub>1</sub> unbiased? Intuitively, no. The largest sample value can never be larger than the true upper limit <span class="math-var">θ</span>, but it can (and usually will) be smaller. So, on average, it will underestimate <span class="math-var">θ</span>.</li>
+            <li>It's shown that:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(\hat{\theta}_1) = \frac{n}{n+1} \theta" title="Click to copy LaTeX">
+                     <i>E</i>(<i>θ̂</i><sub>1</sub>) = <span class="fraction"><span class="numerator"><i>n</i></span><span class="denominator"><i>n</i>+1</span></span> <i>θ</i>
+                </div>
+            </li>
+            <li>Since n/(n+1) &lt; 1, <span class="math-var">E(θ̂<sub>1</sub>) &lt; θ</span>. <span class="math-var">θ̂</span><sub>1</sub> is biased.</li>
+            <li>The bias is:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\text{Bias} = E(\hat{\theta}_1) - \theta = \frac{n}{n+1}\theta - \theta = -\frac{1}{n+1}\theta" title="Click to copy LaTeX">
+                      Bias = <i>E</i>(<i>θ̂</i><sub>1</sub>) − <i>θ</i> = <span class="fraction"><span class="numerator"><i>n</i></span><span class="denominator"><i>n</i>+1</span></span><i>θ</i> − <i>θ</i> = −<span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i>+1</span></span><i>θ</i>
+                 </div>
+                 The bias approaches 0 as the sample size <span class="math-var">n</span> gets large.
+            </li>
+            <li>Estimator 2: (Page 253) We can modify <span class="math-var">θ̂</span><sub>1</sub> to make it unbiased. Consider <span class="math-var">θ̂</span><sub>2</sub>:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\theta}_2 = \frac{n+1}{n} \max(X_1, \dots, X_n)" title="Click to copy LaTeX">
+                     <i>θ̂</i><sub>2</sub> = <span class="fraction"><span class="numerator"><i>n</i>+1</span><span class="denominator"><i>n</i></span></span> max(<i>X</i><sub>1</sub>, ..., <i>X</i><sub>n</sub>)
+                </div>
+            </li>
+            <li>
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(\hat{\theta}_2) = E\left\{ \frac{n+1}{n} \max(X_1, \dots, X_n) \right\} = \frac{n+1}{n} E\{\max(X_1, \dots, X_n)\} = \frac{n+1}{n} \left( \frac{n}{n+1}\theta \right) = \theta" title="Click to copy LaTeX">
+                     <i>E</i>(<i>θ̂</i><sub>2</sub>) = <i>E</i>{ <span class="fraction"><span class="numerator"><i>n</i>+1</span><span class="denominator"><i>n</i></span></span> max(<i>X</i><sub>1</sub>, ..., <i>X</i><sub>n</sub>) } = <span class="fraction"><span class="numerator"><i>n</i>+1</span><span class="denominator"><i>n</i></span></span> <i>E</i>{max(<i>X</i><sub>1</sub>, ..., <i>X</i><sub>n</sub>)} <br>
+                     = <span class="fraction"><span class="numerator"><i>n</i>+1</span><span class="denominator"><i>n</i></span></span> [ <span class="fraction"><span class="numerator"><i>n</i></span><span class="denominator"><i>n</i>+1</span></span><i>θ</i> ] = <i>θ</i>
+                 </div>
+            </li>
+            <li>So, <span class="math-var">θ̂</span><sub>2</sub> is an unbiased estimator of <span class="math-var">θ</span>. Using the data from the example (<span class="math-var">n</span>=5, max=4.2), the estimate is <span class="math-var">θ̂</span><sub>2</sub> = (6/5)*4.2 = 5.04.</li>
+        </ul>
+
+        <h2>Principle of Unbiased Estimation (Page 253)</h2>
+        <p>
+            If you have to choose between several estimators for <span class="math-var">θ</span>, select one that is unbiased.
+        </p>
+        <p>
+            Based on this principle, in Example 6.4, we should prefer <span class="math-var">θ̂</span><sub>2</sub> over <span class="math-var">θ̂</span><sub>1</sub>.
+        </p>
+
+        <h2>Unbiasedness of S² (Page 253)</h2>
+        <p><strong>Proposition:</strong> Let <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub> be a random sample from a distribution with mean <span class="math-var">μ</span> and variance <span class="math-var">σ</span><sup>2</sup>. The sample variance <span class="math-var">S</span><sup>2</sup> is an unbiased estimator for <span class="math-var">σ</span><sup>2</sup>.</p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="S^2 = \frac{\sum_{i=1}^n (X_i - \bar{X})^2}{n-1}" title="Click to copy LaTeX">
+            <i>S</i><sup>2</sup> = <span class="fraction">
+                <span class="numerator"><span class="summation">∑</span>(<i>X</i><sub>i</sub> − <i>X̄</i>)<sup>2</sup></span>
+                <span class="denominator"><i>n</i>−1</span>
+                </span>
+        </div>
+        <p><strong>Proof Outline:</strong> (Page 253) The proof uses the property <span class="math-var">E(Y<sup>2</sup>) = V(Y) + [E(Y)]<sup>2</sup></span> and properties of expected values and variances applied to sample sums and means. It shows:</p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(S^2) = \sigma^2" title="Click to copy LaTeX">
+            <i>E</i>(<i>S</i><sup>2</sup>) = <i>σ</i><sup>2</sup>
+        </div>
+
+        <p><strong>Alternative Estimator:</strong> (Page 254) The estimator using <span class="math-var">n</span> in the denominator, let's call it <span class="math-var">ô</span><sup>2</sup>.</p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\sigma}^2 = \frac{\sum (X_i - \bar{X})^2}{n} = \frac{n-1}{n} S^2" title="Click to copy LaTeX">
+            <i>ô</i><sup>2</sup> = <span class="fraction"><span class="numerator"><span class="summation">∑</span>(<i>X</i><sub>i</sub> − <i>X̄</i>)<sup>2</sup></span><span class="denominator"><i>n</i></span></span> = <span class="fraction"><span class="numerator"><i>n</i>−1</span><span class="denominator"><i>n</i></span></span> <i>S</i><sup>2</sup>
+        </div>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(\hat{\sigma}^2) = E\left\{\frac{n-1}{n} S^2\right\} = \frac{n-1}{n} E(S^2) = \frac{n-1}{n} \sigma^2" title="Click to copy LaTeX">
+            <i>E</i>(<i>ô</i><sup>2</sup>) = <i>E</i>{<span class="fraction"><span class="numerator"><i>n</i>−1</span><span class="denominator"><i>n</i></span></span> <i>S</i><sup>2</sup>} = <span class="fraction"><span class="numerator"><i>n</i>−1</span><span class="denominator"><i>n</i></span></span> <i>E</i>(<i>S</i><sup>2</sup>) = <span class="fraction"><span class="numerator"><i>n</i>−1</span><span class="denominator"><i>n</i></span></span> <i>σ</i><sup>2</sup>
+        </div>
+        <p>Since (n-1)/n &lt; 1, this estimator is biased. Its bias is:</p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\text{Bias} = E(\hat{\sigma}^2) - \sigma^2 = \frac{n-1}{n}\sigma^2 - \sigma^2 = -\frac{1}{n}\sigma^2" title="Click to copy LaTeX">
+             Bias = <i>E</i>(<i>ô</i><sup>2</sup>) − <i>σ</i><sup>2</sup> = <span class="fraction"><span class="numerator"><i>n</i>−1</span><span class="denominator"><i>n</i></span></span><i>σ</i><sup>2</sup> − <i>σ</i><sup>2</sup> = −<span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span><i>σ</i><sup>2</sup>
+        </div>
+        <p>It tends to underestimate <span class="math-var">σ</span><sup>2</sup>. This is why <span class="math-var">S</span><sup>2</sup> (with n-1) is generally preferred.</p>
+
+        <p><strong>Important Note:</strong> While <span class="math-var">S</span><sup>2</sup> is unbiased for <span class="math-var">σ</span><sup>2</sup>, the sample standard deviation <span class="math-var">S = √S</span><sup>2</sup> is <strong>not</strong> generally an unbiased estimator for <span class="math-var">σ</span>. Taking the square root destroys the unbiasedness property. However, the bias of <span class="math-var">S</span> is usually small unless <span class="math-var">n</span> is very small, and <span class="math-var">S</span> is commonly used to estimate <span class="math-var">σ</span>.</p>
+
+        <h2>Unbiased Estimators for the Mean (Page 254)</h2>
+        <p><strong>Proposition:</strong></p>
+        <ul>
+            <li>If <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub> is a random sample from any distribution with mean <span class="math-var">μ</span>, then the sample mean <span class="math-var">X̄</span> is an unbiased estimator of <span class="math-var">μ</span>. (Since <span class="math-var">E(X̄) = μ</span>).</li>
+            <li>If the distribution is also continuous and symmetric, then the sample median (<span class="math-var">X̃</span>) and any trimmed mean (like <span class="math-var">X̄</span><sub>tr(10)</sub>) are also unbiased estimators of <span class="math-var">μ</span>.</li>
+        </ul>
+
+        <p><strong>Example 6.5: Regression Through the Origin (Page 254-255)</strong></p>
+        <ul>
+            <li>Scenario: We assume the mean of <span class="math-var">Y</span> is proportional to <span class="math-var">x</span>, <span class="math-var">E(Y) = βx</span>, but individual <span class="math-var">Y</span> values vary randomly around this line. The <span class="math-var">x</span> values are considered fixed.</li>
+            <li>Goal: Estimate the slope parameter <span class="math-var">β</span>.</li>
+            <li>Data: 6 pairs of (<span class="math-var">x</span>, <span class="math-var">y</span>) values are given, plotted in Figure 6.3.</li>
+            <li>Three possible estimators for <span class="math-var">β</span> are proposed <em>(Note: The text notes potential discrepancies in the definition of β̂₁ and β̂₂. We follow the formulas used in the text's expectation calculations)</em>:
+                <ul>
+                    <li>
+                        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\beta}_1 = \frac{1}{n} \sum \frac{Y_i}{x_i}" title="Click to copy LaTeX">
+                             <i>β̂</i><sub>1</sub> = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span> <span class="summation">∑</span> <span class="fraction"><span class="numerator"><i>Y</i><sub>i</sub></span><span class="denominator"><i>x</i><sub>i</sub></span></span>
+                        </div>
+                    </li>
+                    <li>
+                         <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\beta}_2 = \frac{\sum Y_i}{\sum x_i}" title="Click to copy LaTeX">
+                              <i>β̂</i><sub>2</sub> = <span class="fraction"><span class="numerator"><span class="summation">∑</span> <i>Y</i><sub>i</sub></span><span class="denominator"><span class="summation">∑</span> <i>x</i><sub>i</sub></span></span>
+                         </div>
+                    </li>
+                    <li>
+                        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\beta}_3 = \frac{\sum (x_i Y_i)}{\sum (x_i^2)}" title="Click to copy LaTeX">
+                             <i>β̂</i><sub>3</sub> = <span class="fraction"><span class="numerator"><span class="summation">∑</span> (<i>x</i><sub>i</sub> <i>Y</i><sub>i</sub>)</span><span class="denominator"><span class="summation">∑</span> (<i>x</i><sub>i</sub><sup>2</sup>)</span></span>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+             <li>Calculated estimates: 1.3497, 1.1875, 1.1222 respectively.</li>
+             <li><strong>Unbiasedness check</strong> (using <span class="math-var">E(Yᵢ) = βxᵢ</span> and treating <span class="math-var">x</span>ᵢ as constants):
+                <ul>
+                    <li>
+                        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(\hat{\beta}_1) = E\left[ \frac{1}{n} \sum \frac{Y_i}{x_i} \right] = \frac{1}{n} \sum \frac{E(Y_i)}{x_i} = \frac{1}{n} \sum \frac{\beta x_i}{x_i} = \frac{1}{n} \sum \beta = \frac{1}{n} (n\beta) = \beta" title="Click to copy LaTeX">
+                             <i>E</i>(<i>β̂</i><sub>1</sub>) = <i>E</i>[ <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span> <span class="summation">∑</span> <span class="fraction"><span class="numerator"><i>Y</i><sub>i</sub></span><span class="denominator"><i>x</i><sub>i</sub></span></span> ] = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span> <span class="summation">∑</span>[ <span class="fraction"><span class="numerator"><i>E</i>(<i>Y</i><sub>i</sub>)</span><span class="denominator"><i>x</i><sub>i</sub></span></span> ] = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span> <span class="summation">∑</span>[ <span class="fraction"><span class="numerator"><i>βx</i><sub>i</sub></span><span class="denominator"><i>x</i><sub>i</sub></span></span> ] = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span> <span class="summation">∑</span><i>β</i> = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span> (<i>nβ</i>) = <i>β</i>. Unbiased.
+                        </div>
+                    </li>
+                     <li>
+                        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(\hat{\beta}_2) = E\left[ \frac{\sum Y_i}{\sum x_i} \right] = \frac{1}{\sum x_i} E(\sum Y_i) = \frac{1}{\sum x_i} \sum E(Y_i) = \frac{1}{\sum x_i} \sum (\beta x_i) = \frac{\beta \sum x_i}{\sum x_i} = \beta" title="Click to copy LaTeX">
+                             <i>E</i>(<i>β̂</i><sub>2</sub>) = <i>E</i>[ <span class="fraction"><span class="numerator"><span class="summation">∑</span> <i>Y</i><sub>i</sub></span><span class="denominator"><span class="summation">∑</span> <i>x</i><sub>i</sub></span></span> ] = [<span class="fraction"><span class="numerator">1</span><span class="denominator"><span class="summation">∑</span><i>x</i><sub>i</sub></span></span>] <i>E</i>(<span class="summation">∑</span><i>Y</i><sub>i</sub>) = [<span class="fraction"><span class="numerator">1</span><span class="denominator"><span class="summation">∑</span><i>x</i><sub>i</sub></span></span>] <span class="summation">∑</span><i>E</i>(<i>Y</i><sub>i</sub>) = [<span class="fraction"><span class="numerator">1</span><span class="denominator"><span class="summation">∑</span><i>x</i><sub>i</sub></span></span>] <span class="summation">∑</span>(<i>βx</i><sub>i</sub>) = <span class="fraction"><span class="numerator"><i>β</i> <span class="summation">∑</span><i>x</i><sub>i</sub></span><span class="denominator"><span class="summation">∑</span><i>x</i><sub>i</sub></span></span> = <i>β</i>. Unbiased.
+                        </div>
+                     </li>
+                     <li>
+                        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(\hat{\beta}_3) = E\left[ \frac{\sum (x_i Y_i)}{\sum (x_i^2)} \right] = \frac{1}{\sum x_i^2} E(\sum x_i Y_i) = \frac{1}{\sum x_i^2} \sum x_i E(Y_i) = \frac{1}{\sum x_i^2} \sum x_i (\beta x_i) = \frac{\beta \sum x_i^2}{\sum x_i^2} = \beta" title="Click to copy LaTeX">
+                              <i>E</i>(<i>β̂</i><sub>3</sub>) = <i>E</i>[ <span class="fraction"><span class="numerator"><span class="summation">∑</span> (<i>x</i><sub>i</sub> <i>Y</i><sub>i</sub>)</span><span class="denominator"><span class="summation">∑</span> (<i>x</i><sub>i</sub><sup>2</sup>)</span></span> ] = [<span class="fraction"><span class="numerator">1</span><span class="denominator"><span class="summation">∑</span><i>x</i><sub>i</sub><sup>2</sup></span></span>] <i>E</i>(<span class="summation">∑</span><i>x</i><sub>i</sub><i>Y</i><sub>i</sub>) = [<span class="fraction"><span class="numerator">1</span><span class="denominator"><span class="summation">∑</span><i>x</i><sub>i</sub><sup>2</sup></span></span>] <span class="summation">∑</span><i>x</i><sub>i</sub><i>E</i>(<i>Y</i><sub>i</sub>) = [<span class="fraction"><span class="numerator">1</span><span class="denominator"><span class="summation">∑</span><i>x</i><sub>i</sub><sup>2</sup></span></span>] <span class="summation">∑</span><i>x</i><sub>i</sub>(<i>βx</i><sub>i</sub>) = <span class="fraction"><span class="numerator"><i>β</i> <span class="summation">∑</span><i>x</i><sub>i</sub><sup>2</sup></span><span class="denominator"><span class="summation">∑</span><i>x</i><sub>i</sub><sup>2</sup></span></span> = <i>β</i>. Unbiased.
+                        </div>
+                     </li>
+                 </ul>
+             </li>
+             <li><strong>Outcome:</strong> All three estimators are unbiased. The principle of unbiasedness alone doesn't help us choose between them. We need another criterion.</li>
+        </ul>
+
+        <h2>Estimators with Minimum Variance (Page 255-256)</h2>
+        <p>
+            When we have multiple unbiased estimators, we prefer the one that is most precise, meaning its values vary the least from sample to sample around the true value <span class="math-var">θ</span>. We measure this spread using variance.
+        </p>
+        <ul>
+            <li><strong>Principle of Minimum Variance Unbiased Estimation (MVUE):</strong> Among all estimators of <span class="math-var">θ</span> that are unbiased, choose the one that has the minimum variance. This estimator is called the <strong>Minimum Variance Unbiased Estimator (MVUE)</strong> of <span class="math-var">θ</span>.</li>
+            <li><strong>Rationale:</strong> An unbiased estimator with smaller variance is more likely to produce an estimate close to the true value <span class="math-var">θ</span> (See Figure 6.4a, page 256). Figure 6.4b shows estimates from 10 samples for two unbiased estimators; the one with smaller variance (likely <span class="math-var">θ̂</span>₂) shows less scatter.</li>
+        </ul>
+
+        <p><strong>Example 6.5 Result:</strong> (Page 256) For the regression problem (assuming <span class="math-var">Y</span>ᵢ are normally distributed with mean <span class="math-var">βx</span>ᵢ and constant variance <span class="math-var">σ</span>²), it can be shown that <span class="math-var">β̂</span>₃ is the MVUE for <span class="math-var">β</span>. It has the smallest variance among all unbiased estimators of <span class="math-var">β</span>.</p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\beta}_3 = \frac{\sum (x_i Y_i)}{\sum (x_i^2)}" title="Click to copy LaTeX">
+            <i>β̂</i><sub>3</sub> = <span class="fraction"><span class="numerator"><span class="summation">∑</span> (<i>x</i><sub>i</sub> <i>Y</i><sub>i</sub>)</span><span class="denominator"><span class="summation">∑</span> (<i>x</i><sub>i</sub><sup>2</sup>)</span></span>
+       </div>
+
+        <p><strong>Example 6.6: Uniform Distribution U[0, θ] (Page 256)</strong></p>
+        <p>We have two unbiased estimators for <span class="math-var">θ</span>:</p>
+        <ul>
+            <li>
+                <span class="math-var">θ̂</span><sub>1</sub> = [<span class="fraction"><span class="numerator">(<i>n</i>+1)</span><span class="denominator"><i>n</i></span></span>] * max(<span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub>) (Previously called <span class="math-var">θ̂</span>₂ in Example 6.4)
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\theta}_1 = \frac{n+1}{n} \max(X_1, \dots, X_n)" title="Click to copy LaTeX">
+                     <i>θ̂</i><sub>1</sub> = <span class="fraction"><span class="numerator"><i>n</i>+1</span><span class="denominator"><i>n</i></span></span> max(<i>X</i><sub>1</sub>, ..., <i>X</i><sub>n</sub>)
+                 </div>
+            </li>
+            <li>
+                <span class="math-var">θ̂</span>₂ = 2<span class="math-var">X̄</span> (Since <span class="math-var">E(X) = θ/2</span> for uniform [0,θ], <span class="math-var">E(2X̄) = 2 * E(X̄) = 2 * (θ/2) = θ</span>)
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\theta}_2 = 2\bar{X}" title="Click to copy LaTeX">
+                     <i>θ̂</i><sub>2</sub> = 2<i>X̄</i>
+                 </div>
+            </li>
+        </ul>
+        <p>Which has smaller variance?</p>
+        <ul>
+            <li><span class="math-var">V(X) = (B−A)</span>²/12 = (<span class="math-var">θ</span>−0)²/12 = <span class="math-var">θ</span>²/12.
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="V(X) = \frac{\theta^2}{12}" title="Click to copy LaTeX">
+                     <i>V</i>(<i>X</i>) = <span class="fraction"><span class="numerator"><i>θ</i><sup>2</sup></span><span class="denominator">12</span></span>
+                 </div>
+            </li>
+            <li><span class="math-var">V(X̄) = V(X)/n = θ</span>²/(12<span class="math-var">n</span>).
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="V(\bar{X}) = \frac{V(X)}{n} = \frac{\theta^2}{12n}" title="Click to copy LaTeX">
+                     <i>V</i>(<i>X̄</i>) = <span class="fraction"><span class="numerator"><i>V</i>(<i>X</i>)</span><span class="denominator"><i>n</i></span></span> = <span class="fraction"><span class="numerator"><i>θ</i><sup>2</sup></span><span class="denominator">12<i>n</i></span></span>
+                 </div>
+            </li>
+             <li><span class="math-var">V(θ̂</span>₂) = <span class="math-var">V(2X̄) = 2</span>² * <span class="math-var">V(X̄) = 4 * θ</span>²/(12<span class="math-var">n</span>) = <span class="math-var">θ</span>²/(3<span class="math-var">n</span>).
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="V(\hat{\theta}_2) = V(2\bar{X}) = 4 V(\bar{X}) = 4 \frac{\theta^2}{12n} = \frac{\theta^2}{3n}" title="Click to copy LaTeX">
+                     <i>V</i>(<i>θ̂</i><sub>2</sub>) = <i>V</i>(2<i>X̄</i>) = 4 <i>V</i>(<i>X̄</i>) = 4 <span class="fraction"><span class="numerator"><i>θ</i><sup>2</sup></span><span class="denominator">12<i>n</i></span></span> = <span class="fraction"><span class="numerator"><i>θ</i><sup>2</sup></span><span class="denominator">3<i>n</i></span></span>
+                 </div>
+            </li>
+            <li>It can be shown (using results from Exercise 32 mentioned in the text) that:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="V(\hat{\theta}_1) = \frac{\theta^2}{n(n+2)}" title="Click to copy LaTeX">
+                     <i>V</i>(<i>θ̂</i><sub>1</sub>) = <span class="fraction"><span class="numerator"><i>θ</i><sup>2</sup></span><span class="denominator"><i>n</i>(<i>n</i>+2)</span></span>
+                 </div>
+            </li>
+        </ul>
+        <p>Compare variances: <span class="math-var">V(θ̂₁) &lt; V(θ̂₂)</span> if <span class="math-var">θ</span>²/[<span class="math-var">n(n+2)</span>] &lt; <span class="math-var">θ</span>²/(3<span class="math-var">n</span>). This simplifies to <span class="math-var">n(n+2)</span> &gt; 3<span class="math-var">n</span>, or <span class="math-var">n</span>+2 &gt; 3, which means <span class="math-var">n</span> &gt; 1.</p>
+        <p><strong>Conclusion:</strong> For <span class="math-var">n</span> > 1, <span class="math-var">θ̂</span>₁ = [<span class="fraction"><span class="numerator">(<i>n</i>+1)</span><span class="denominator"><i>n</i></span></span>] * max(<span class="math-var">X</span>) has smaller variance than <span class="math-var">θ̂</span>₂ = 2<span class="math-var">X̄</span>.</p>
+        <p>Advanced result: <span class="math-var">θ̂</span>₁ is actually the MVUE for <span class="math-var">θ</span> in this case.</p>
+
+        <h2>Theorem: MVUE for Normal Mean (Page 257)</h2>
+        <p>
+            If <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub> is a random sample from a normal distribution with parameters <span class="math-var">μ</span> and <span class="math-var">σ</span>, then the sample mean <span class="math-var">X̄</span> is the <strong>MVUE</strong> for <span class="math-var">μ</span>.
+        </p>
+        <p>
+            This is a very important result. When you have reason to believe your data is normally distributed, <span class="math-var">X̄</span> is the best unbiased estimator for the population mean <span class="math-var">μ</span> in terms of variance. For the data in Example 6.2 (page 249), assuming normality, the best estimate for <span class="math-var">μ</span> is <span class="math-var">x̄</span> = 27.793.
+        </p>
+
+        <p><strong>Biased Estimators vs MVUE:</strong> (Page 257) Sometimes, a biased estimator might be preferred over the MVUE if the biased estimator has a significantly smaller MSE (Mean Squared Error). Figure 6.5 illustrates a biased estimator (<span class="math-var">θ̂</span>₁) whose distribution is more concentrated around the true <span class="math-var">θ</span> than the MVUE (<span class="math-var">θ̂</span>₂). However, finding such estimators and verifying their properties can be complex, and MVUEs are often easier to find and work with.</p>
+
+        <h2>Some Complications (Page 257-258)</h2>
+        <p>
+            The choice of the "best" estimator isn't always simple and can depend heavily on the underlying population distribution.
+        </p>
+        <p><strong>Example 6.7: Estimating Thermal Conductivity μ (Page 257)</strong></p>
+        <p>We want to estimate <span class="math-var">μ</span>, which is the center of symmetry for three possible distribution families:</p>
+        <ul>
+            <li>(6.1) Normal distribution</li>
+            <li>(6.2) Cauchy distribution (bell-shaped but with much heavier tails; mean technically doesn't exist, but <span class="math-var">μ</span> is the center/median)</li>
+            <li>(6.3) Uniform distribution</li>
+        </ul>
+        <p>We consider four estimators from Example 6.2: <span class="math-var">X̄</span> (sample mean), <span class="math-var">X̃</span> (sample median), <span class="math-var">X̄</span><sub>e</sub> (average of min and max), and <span class="math-var">X̄</span><sub>tr(10)</sub> (trimmed mean).</p>
+        <p>Which estimator is best depends on the true distribution:</p>
+        <ul>
+            <li><strong>If Normal:</strong> <span class="math-var">X̄</span> is best (it's the MVUE).</li>
+            <li><strong>If Cauchy:</strong> <span class="math-var">X̄</span> and <span class="math-var">X̄</span><sub>e</sub> are terrible because they are highly sensitive to the outliers likely under a heavy-tailed Cauchy distribution. <span class="math-var">X̃</span> (median) is much better.</li>
+            <li><strong>If Uniform:</strong> <span class="math-var">X̄</span><sub>e</sub> is the best (related to the MVUE derived from max(<span class="math-var">X</span>) in Example 6.6). <span class="math-var">X̄</span> is greatly influenced by extreme values, but uniform has no tails, making extreme values impossible relative to the range.</li>
+            <li><strong>Trimmed Mean (<span class="math-var">X̄</span><sub>tr(10)</sub>):</strong> While not the absolute best in any of these specific cases, it performs reasonably well across all three scenarios. It's not as good as <span class="math-var">X̄</span> for Normal, not as good as <span class="math-var">X̃</span> for Cauchy (perhaps), and not as good as <span class="math-var">X̄</span><sub>e</sub> for Uniform, but it doesn't perform terribly in any situation, unlike <span class="math-var">X̄</span> or <span class="math-var">X̄</span><sub>e</sub> which can be very bad if the distribution assumption is wrong.</li>
+        </ul>
+
+        <p><strong>Robust Estimators:</strong> (Page 258) Because trimmed means (with small trimming percentages like 10% or 20%) offer good performance over a range of distribution shapes (especially symmetric ones), they are called <strong>robust estimators</strong>. They are resistant to violations of assumptions or the presence of outliers.</p>
+
+        <p><strong>Example 6.8: Censored Exponential Lifetimes (Page 258)</strong></p>
+        <ul>
+            <li>Scenario: Components have exponential lifetime distribution with parameter <span class="math-var">λ</span>, mean <span class="math-var">μ</span> = 1/<span class="math-var">λ</span>. We test <span class="math-var">n</span> components but stop the experiment after the <span class="math-var">r</span>-th failure (where <span class="math-var">r</span> &lt; <span class="math-var">n</span>). This is called censoring.</li>
+            <li>Data: <span class="math-var">Y</span>₁, <span class="math-var">Y</span>₂, ..., <span class="math-var">Y</span>ᵣ (the first <span class="math-var">r</span> failure times).</li>
+            <li>Total Accumulated Lifetime:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="T_r = \sum_{i=1}^r Y_i + (n-r)Y_r" title="Click to copy LaTeX">
+                     <i>T</i><sub>r</sub> = <span class="summation">∑</span><sub>i=1</sub><sup>r</sup> <i>Y</i><sub>i</sub> + (<i>n−r</i>)<i>Y</i><sub>r</sub>
+                     &nbsp;&nbsp;&nbsp; (The first r components failed at times Yᵢ, and the remaining n-r components all lasted at least until time Yᵣ).
+                </div>
+            </li>
+            <li>Estimator Proposed:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\mu} = \frac{T_r}{r}" title="Click to copy LaTeX">
+                     <i>μ̂</i> = <span class="fraction"><span class="numerator"><i>T</i><sub>r</sub></span><span class="denominator"><i>r</i></span></span>
+                </div>
+            </li>
+            <li>Is it unbiased for <span class="math-var">μ</span> = 1/<span class="math-var">λ</span>?</li>
+            <li>The text rewrites <span class="math-var">T</span>ᵣ using time differences and uses properties of exponential distribution (memoryless property and minimum of k exponentials).
+                <ul>
+                    <li><span class="math-var">E(Y</span>₁) = 1/(<span class="math-var">nλ</span>) (minimum of <span class="math-var">n</span> exponentials)</li>
+                    <li><span class="math-var">E(Y</span>₂ − <span class="math-var">Y</span>₁) = 1/[(<span class="math-var">n</span>−1)<span class="math-var">λ</span>] (minimum of remaining <span class="math-var">n</span>−1 exponentials)</li>
+                    <li>...</li>
+                    <li><span class="math-var">E(Y</span>ᵣ − <span class="math-var">Y</span><sub>ᵣ₋₁</sub>) = 1/[(<span class="math-var">n−r</span>+1)<span class="math-var">λ</span>]</li>
+                </ul>
+            </li>
+             <li>Using the alternative expression for <span class="math-var">T</span>ᵣ involving these differences:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(T_r) = \frac{r}{\lambda}" title="Click to copy LaTeX">
+                     <i>E</i>(<i>T</i><sub>r</sub>) = <span class="fraction"><span class="numerator"><i>r</i></span><span class="denominator"><i>λ</i></span></span>
+                </div>
+             </li>
+             <li>Therefore:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="E(\hat{\mu}) = E(T_r / r) = \frac{1}{r} E(T_r) = \frac{1}{r} \left( \frac{r}{\lambda} \right) = \frac{1}{\lambda} = \mu" title="Click to copy LaTeX">
+                      <i>E</i>(<i>μ̂</i>) = <i>E</i>(<i>T</i><sub>r</sub> / <i>r</i>) = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>r</i></span></span> <i>E</i>(<i>T</i><sub>r</sub>) = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>r</i></span></span> ( <span class="fraction"><span class="numerator"><i>r</i></span><span class="denominator"><i>λ</i></span></span> ) = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>λ</i></span></span> = <i>μ</i>
+                 </div>
+             </li>
+            <li>Yes, <span class="math-var">μ̂ = T</span>ᵣ / <span class="math-var">r</span> is an unbiased estimator for <span class="math-var">μ</span>.</li>
+            <li>Example Calculation: <span class="math-var">n</span>=20, <span class="math-var">r</span>=10. Data given. Estimate <span class="math-var">μ̂</span> = 111.5.</li>
+            <li><strong>Trade-off:</strong> The censored experiment finishes faster than waiting for all <span class="math-var">n</span> failures. However, the estimator <span class="math-var">T</span>ᵣ/<span class="math-var">r</span> has a larger variance (<span class="math-var">V(T</span>ᵣ/<span class="math-var">r) = 1/(λ</span>²<span class="math-var">r) = μ</span>²/<span class="math-var">r</span>) than the estimator <span class="math-var">X̄</span> from the full experiment (<span class="math-var">V(X̄) = σ</span>²/<span class="math-var">n = μ</span>²/<span class="math-var">n</span>, since <span class="math-var">σ=μ</span> for exponential), because <span class="math-var">r &lt; n</span>. There's a trade-off between experimental time and estimator precision.</li>
+        </ul>
+
+        <h2>Reporting a Point Estimate: The Standard Error (Page 259)</h2>
+        <p>
+            A point estimate is more informative if accompanied by a measure of its precision (how much it's likely to vary from the true value).
+        </p>
+        <ul>
+            <li>
+                <strong>Definition: Standard Error</strong><br>
+                The <strong>standard error</strong> of an estimator <span class="math-var">θ̂</span> is its standard deviation, denoted <span class="math-var">σ</span><sub><span class="math-var">θ̂</span></sub> = √<span class="math-var">V(θ̂)</span>. It measures the typical deviation between the estimator <span class="math-var">θ̂</span> and the true parameter <span class="math-var">θ</span>.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\sigma_{\hat{\theta}} = \sqrt{V(\hat{\theta})}" title="Click to copy LaTeX">
+                     <i>σ</i><sub><i>θ̂</i></sub> = √<i>V</i>(<i>θ̂</i>)
+                </div>
+            </li>
+             <li>
+                <strong>Definition: Estimated Standard Error</strong><br>
+                Often, the formula for <span class="math-var">σ</span><sub><span class="math-var">θ̂</span></sub> contains unknown parameters (like <span class="math-var">σ</span> in <span class="math-var">σ</span><sub><span class="math-var">X̄</span></sub> = <span class="math-var">σ</span>/√<span class="math-var">n</span>).
+                When we substitute estimates for these unknown parameters, we get the <strong>estimated standard error</strong>, denoted <span class="math-var">s</span><sub><span class="math-var">θ̂</span></sub>.
+            </li>
+        </ul>
+
+        <p><strong>Example 6.9: Standard Error of X̄ (Page 259)</strong></p>
+        <ul>
+            <li>Estimator: <span class="math-var">μ̂ = X̄</span> (assuming normal data, so <span class="math-var">X̄</span> is best).</li>
+            <li>Standard Error:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\sigma_{\bar{X}} = \frac{\sigma}{\sqrt{n}}" title="Click to copy LaTeX">
+                     <i>σ</i><sub><i>X̄</i></sub> = <span class="fraction"><span class="numerator"><i>σ</i></span><span class="denominator">√<i>n</i></span></span>
+                </div>
+            </li>
+            <li>If <span class="math-var">σ</span> = 1.5 and <span class="math-var">n</span> = 20 (from Example 6.2), <span class="math-var">σ</span><sub><span class="math-var">X̄</span></sub> = 1.5/√20 = 0.335.</li>
+            <li>If <span class="math-var">σ</span> is unknown, we estimate it using <span class="math-var">s</span> = 1.462.</li>
+            <li>Estimated Standard Error:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="s_{\bar{X}} = \frac{s}{\sqrt{n}} = \frac{1.462}{\sqrt{20}} = 0.327" title="Click to copy LaTeX">
+                     <i>s</i><sub><i>X̄</i></sub> = <span class="fraction"><span class="numerator"><i>s</i></span><span class="denominator">√<i>n</i></span></span> = <span class="fraction"><span class="numerator">1.462</span><span class="denominator">√20</span></span> = 0.327
+                </div>
+            </li>
+        </ul>
+
+        <p><strong>Example 6.10: Standard Error of p̂ (Page 259)</strong></p>
+        <ul>
+            <li>Estimator: <span class="math-var">p̂ = X/n</span>.</li>
+            <li>Standard Error: <span class="math-var">σ</span><sub><span class="math-var">p̂</span></sub> = √<span class="math-var">V(p̂)</span>.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\sigma_{\hat{p}} = \sqrt{V(\hat{p})} = \sqrt{V(X/n)} = \sqrt{\frac{1}{n^2} V(X)} = \sqrt{\frac{1}{n^2} (npq)} = \sqrt{\frac{pq}{n}}" title="Click to copy LaTeX">
+                     <i>σ</i><sub><i>p̂</i></sub> = √<i>V</i>(<i>p̂</i>) = √<i>V</i>(<i>X</i>/<i>n</i>) = √{ <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i><sup>2</sup></span></span> <i>V</i>(<i>X</i>) } = √{ <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i><sup>2</sup></span></span> (<i>npq</i>) } = √{ <span class="fraction"><span class="numerator"><i>pq</i></span><span class="denominator"><i>n</i></span></span> }
+                </div>
+            </li>
+            <li>Since <span class="math-var">p</span> (and <span class="math-var">q</span>=1-<span class="math-var">p</span>) are unknown, we estimate them using <span class="math-var">p̂ = x/n</span> and <span class="math-var">q̂</span> = 1-<span class="math-var">p̂</span>.</li>
+            <li>Estimated Standard Error:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="s_{\hat{p}} = \sqrt{\frac{\hat{p}\hat{q}}{n}}" title="Click to copy LaTeX">
+                      <i>s</i><sub><i>p̂</i></sub> = √{ <span class="fraction"><span class="numerator"><i>p̂q̂</i></span><span class="denominator"><i>n</i></span></span> }
+                 </div>
+            </li>
+            <li>For Example 6.1 data (<span class="math-var">n</span>=25, <span class="math-var">x</span>=15, <span class="math-var">p̂</span>=0.6), <span class="math-var">s</span><sub><span class="math-var">p̂</span></sub> = √[(0.6)(0.4)/25] = 0.098.</li>
+            <li>An upper bound for the standard error can be found by noting <span class="math-var">pq</span> is maximized when <span class="math-var">p=q</span>=0.5, so:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\sigma_{\hat{p}} \le \sqrt{\frac{0.25}{n}} = \frac{1}{2\sqrt{n}}" title="Click to copy LaTeX">
+                     <i>σ</i><sub><i>p̂</i></sub> ≤ √{ <span class="fraction"><span class="numerator">0.25</span><span class="denominator"><i>n</i></span></span> } = <span class="fraction"><span class="numerator">1</span><span class="denominator">2√<i>n</i></span></span>
+                </div>
+                In this case, ≤ 1/(2√25) = 0.10.
+            </li>
+        </ul>
+
+        <p><strong>Interpretation of Standard Error (Page 260)</strong></p>
+        <ul>
+            <li>If the estimator <span class="math-var">θ̂</span> has an approximately normal distribution (which is often true for large <span class="math-var">n</span> due to the Central Limit Theorem), we can be reasonably confident that the true value <span class="math-var">θ</span> lies within about 2 standard errors (or estimated standard errors) of the estimate <span class="math-var">θ̂</span>.</li>
+            <li>Example: For <span class="math-var">μ̂</span> = 28.50 and <span class="math-var">s</span><sub><span class="math-var">X̄</span></sub> = 0.60, the interval 28.50 ± 2(0.60) = (27.30, 29.70) likely contains the true <span class="math-var">μ</span>.</li>
+            <li>If <span class="math-var">θ̂</span> is unbiased but not necessarily normal, Chebyshev's inequality implies that the estimate <span class="math-var">θ̂</span> will be within <span class="math-var">k</span> standard errors of the true value <span class="math-var">θ</span> with probability at least 1 - 1/<span class="math-var">k</span>². For <span class="math-var">k</span>=4, this means the estimate is within 4 standard errors at least 1 - 1/16 = 93.75% of the time. The text states "at most 6% of the time" will it deviate by more than 4 standard errors, which is equivalent. This is a very conservative bound.</li>
+        </ul>
+        <p>In summary: The standard error (or estimated standard error) gives a measure of the plausible distance between the estimate and the true parameter value.</p>
+
+        <h2>The Bootstrap Method (Page 260-261)</h2>
+        <p>
+            What if the estimator <span class="math-var">θ̂</span> is complex, and we can't easily derive a formula for its variance <span class="math-var">V(θ̂)</span> or standard error <span class="math-var">σ</span><sub><span class="math-var">θ̂</span></sub>? The <strong>bootstrap</strong> is a computer-intensive method to estimate the standard error.
+        </p>
+
+        <p><strong>Parametric Bootstrap:</strong></p>
+        <ol>
+            <li>Assume the population distribution belongs to a specific family <span class="math-var">f(x; θ)</span>.</li>
+            <li>Obtain an estimate <span class="math-var">θ̂</span> from the original data (e.g., <span class="math-var">θ̂</span> = 21.7).</li>
+            <li>Generate many (<span class="math-var">B</span>) "bootstrap samples" (each of size <span class="math-var">n</span>) from the distribution <span class="math-var">f(x; θ̂)</span> (i.e., using the estimated parameter value).</li>
+            <li>For each bootstrap sample <span class="math-var">j</span>, calculate the estimate <span class="math-var">θ̂</span><sub><span class="math-var">j</span></sub><sup>*</sup>. This gives <span class="math-var">B</span> bootstrap estimates: <span class="math-var">θ̂</span><sub>1</sub><sup>*</sup>, <span class="math-var">θ̂</span><sub>2</sub><sup>*</sup>, ..., <span class="math-var">θ̂</span><sub><span class="math-var">B</span></sub><sup>*</sup>.</li>
+            <li>The bootstrap estimate of the standard error is simply the sample standard deviation of these <span class="math-var">B</span> bootstrap estimates:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="s_{\hat{\theta}}^* = \sqrt{\frac{\sum_{j=1}^B (\hat{\theta}_j^* - \bar{\theta}^*)^2}{B-1}}" title="Click to copy LaTeX">
+                     <i>s</i><sub><i>θ̂</i></sub><sup>*</sup> = √{ <span class="fraction">
+                         <span class="numerator"><span class="summation">∑</span><sub>j=1</sub><sup>B</sup> (<i>θ̂</i><sub>j</sub><sup>*</sup> − <i>θ̄</i><sup>*</sup>)<sup>2</sup></span>
+                         <span class="denominator"><i>B</i>−1</span>
+                       </span> }
+                       &nbsp;&nbsp;&nbsp;(where <i>θ̄</i><sup>*</sup> is the average of the B bootstrap estimates).
+                </div>
+            </li>
+        </ol>
+
+        <p><strong>Example 6.11: Bootstrap for Exponential Parameter λ (Page 260)</strong></p>
+        <ul>
+            <li>Data: 10 breakdown times, assumed exponential <span class="math-var">f(x; λ) = λe</span><sup><span class="math-var">−λx</span></sup>.</li>
+            <li>Original Estimate: <span class="math-var">λ̂</span> = 1/<span class="math-var">x̄</span> = 1/55.087 = 0.018153.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\hat{\lambda} = 1/\bar{x}" title="Click to copy LaTeX">
+                     <i>λ̂</i> = 1/<i>x̄</i>
+                </div>
+            </li>
+            <li>Bootstrap Process: Generate <span class="math-var">B</span>=100 samples (<span class="math-var">n</span>=10 each) from an Exponential distribution with <span class="math-var">λ</span> = 0.018153.</li>
+            <li>Calculate <span class="math-var">λ̂</span><sup>*</sup> for each sample (e.g., first sample gave <span class="math-var">λ̂</span><sub>1</sub><sup>*</sup> = 0.01832).</li>
+            <li>Calculate the standard deviation of the 100 resulting <span class="math-var">λ̂</span><sup>*</sup> values.</li>
+            <li>Result: The estimated standard error for <span class="math-var">λ̂</span> is <span class="math-var">s</span><sub><span class="math-var">λ̂</span></sub><sup>*</sup> = 0.0091.</li>
+        </ul>
+
+        <p><strong>Non-Parametric Bootstrap:</strong> (Page 261)</p>
+        <ul>
+            <li>Used when we don't want to assume a specific distributional family <span class="math-var">f(x; θ)</span>.</li>
+            <li>How it works: Treat the original sample (<span class="math-var">x</span>₁, ..., <span class="math-var">x</span><sub>n</sub>) itself as the best representation of the population.</li>
+            <li>Generate <span class="math-var">B</span> bootstrap samples, each of size <span class="math-var">n</span>, by sampling <strong>with replacement</strong> from the original data {<span class="math-var">x</span>₁, ..., <span class="math-var">x</span><sub>n</sub>}.</li>
+            <li>Calculate the estimate <span class="math-var">θ̂</span><sup>*</sup> for each bootstrap sample.</li>
+            <li>Calculate the standard deviation of the <span class="math-var">B</span> bootstrap estimates <span class="math-var">θ̂</span><sub>1</sub><sup>*</sup>, ..., <span class="math-var">θ̂</span><sub><span class="math-var">B</span></sub><sup>*</sup> to get the estimated standard error (<span class="math-var">s</span><sub><span class="math-var">θ̂</span></sub><sup>*</sup>).</li>
+            <li>This was suggested for estimating the standard error of the trimmed mean in Example 6.2, where no specific distribution was assumed for the bootstrap.</li>
+        </ul>
+
+    </main>
+
+    <footer>
+        <!-- Empty Footer matching index style -->
+    </footer>
+
+    <script>
+        // Function to copy LaTeX code (remains unchanged)
+        function copyFormulaLatex(element) {
+            const latexString = element.getAttribute('data-latex');
+            if (!latexString) {
+                console.error('No LaTeX data found for this element.');
+                return;
+            }
+            navigator.clipboard.writeText(latexString).then(() => {
+                element.classList.add('copied');
+                const originalTitle = element.title;
+                element.title = 'Copied!';
+                setTimeout(() => {
+                    element.classList.remove('copied');
+                    element.title = originalTitle;
+                 }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy LaTeX: ', err);
+                alert('Failed to copy text. Check console (F12) for details.');
+            });
+        }
+    </script>
+
+</body></html>

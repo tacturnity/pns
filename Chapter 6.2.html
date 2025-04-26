@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point Estimation Methods Summary</title>
+
+    <!-- Google Fonts - Roboto Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Keyframes for Animations (FadeIn) */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Fonts & Base Styling (from index theme) */
+        body {
+            font-family: 'Roboto Mono', monospace;
+            color: #e0e0e0; /* Light grey text for readability */
+            line-height: 1.7;
+            padding: 25px;
+            background-color: #1a1a1a; /* Simple dark background */
+            min-height: 100vh;
+        }
+
+        /* Headings (from index theme) */
+        h1, h2 {
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+            margin-bottom: 1.5em; /* Matches index */
+        }
+
+        h1 {
+            font-size: 2.4em; /* Matches index */
+            color: #ffffff; /* White heading */
+            font-weight: 700;
+            padding-bottom: 12px;
+            margin-top: 1.5em; /* Matches index */
+            margin-bottom: 1.5em; /* Matches index */
+            border-bottom: 2px solid #ffffff; /* White border */
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.1s;
+            letter-spacing: -0.5px; /* Matches index */
+        }
+
+        h2 {
+            font-size: 1.6em; /* Matches index */
+            color: #cccccc; /* Lighter grey subheading */
+            font-weight: 500;
+            margin-top: 30px; /* Retain some top margin for sections */
+            margin-bottom: 1.5em; /* Consistent bottom margin */
+            border-bottom: 1px solid #555555; /* Darker border for contrast */
+            padding-bottom: 5px;
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.3s; /* Staggered animation */
+        }
+
+        /* Main Content Area (from index theme) */
+        main {
+            max-width: 800px; /* Matches index */
+            margin: 40px auto; /* Matches index */
+            background-color: rgba(30, 30, 30, 0.85); /* Dark grey, slightly transparent */
+            padding: 35px 45px; /* Matches index */
+            border-radius: 10px; /* Matches index */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7); /* Matches index */
+            backdrop-filter: blur(6px); /* Matches index */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle light border */
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.2s;
+        }
+
+        /* Paragraph and List styling */
+        p {
+            margin-bottom: 1em;
+            color: inherit; /* Ensure uses body color */
+        }
+
+        ul {
+            margin-left: 25px; /* Slightly more indent */
+            list-style: disc; /* Use standard disc bullets */
+            margin-bottom: 1em;
+        }
+
+        li {
+            margin-bottom: 8px; /* Slightly more space between list items */
+        }
+
+        strong, .math-var { /* Style for emphasized text and math variables */
+            font-weight: 500; /* Consistent with index headings/links */
+            color: #ffffff; /* Brighter white for emphasis */
+        }
+        .math-var { /* Ensure italics for math variables */
+             font-style: italic;
+             margin: 0 2px; /* Consistent small spacing */
+        }
+        .math-symbol { /* Non-italicized symbols like sum, pi */
+            font-style: normal;
+            margin: 0 2px;
+            color: #ffffff;
+        }
+        .math-op { /* For operators like E, V, P, L, ln, max */
+            font-style: normal;
+            margin: 0 2px;
+            color: #ffffff;
+        }
+
+
+        /* Formula Container Styling (Adapting index list item styles) */
+        .formula-container {
+            margin: 15px 0 20px 0; /* Adjusted margins */
+            padding: 15px 20px; /* Adjusted padding */
+            background-color: rgba(45, 45, 45, 0.9); /* Match index list item bg */
+            border-radius: 6px; /* Match index list item radius */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Default subtle border */
+            overflow-x: auto;
+            transition: background-color 0.3s ease, border-color 0.3s ease; /* Add border transition */
+            cursor: pointer;
+            font-size: 1.1em;
+            line-height: 1.5;
+            color: #e0e0e0; /* Text color inside formulas */
+            border-left: 4px solid transparent; /* Add placeholder for hover border like index list */
+            white-space: nowrap; /* Prevent wrapping inside formula */
+        }
+
+        .formula-container:hover {
+            background-color: rgba(60, 60, 60, 0.95); /* Match index list item hover bg */
+            border-left-color: #a6e3a1; /* GREEN hover border like index list */
+            border-color: rgba(166, 227, 161, 0.5); /* Slightly green border on hover */
+        }
+
+        .formula-container.copied {
+            background-color: rgba(166, 227, 161, 0.2); /* Transparent green background on copy */
+            border-color: #a6e3a1; /* Green border on copy */
+            border-left-color: #a6e3a1; /* Ensure left border stays green */
+        }
+
+        /* Style for math elements within formula containers */
+        .formula-container i, .formula-container .math-var { /* General italics within formulas */
+            font-style: italic;
+            margin: 0 1px;
+        }
+        .formula-container .math-op { /* Operators within formulas */
+            font-style: normal;
+            margin: 0 2px;
+        }
+        .formula-container .math-symbol { /* Symbols like sum, pi within formulas */
+            font-style: normal;
+            margin: 0 2px;
+            font-size: 1.2em; /* Slightly larger for symbols */
+            vertical-align: middle;
+        }
+         .formula-container .hat { /* Style for hat accent */
+            position: relative;
+            display: inline-block;
+        }
+        .formula-container .hat::after {
+            content: '^';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -0.6em; /* Adjust position of hat */
+            text-align: center;
+            font-size: 0.8em;
+        }
+         .formula-container .bar { /* Style for bar accent */
+            position: relative;
+            display: inline-block;
+            padding-top: 0.1em; /* Add space for the bar */
+        }
+        .formula-container .bar::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -0.1em; /* Adjust position of bar */
+            border-top: 1px solid #e0e0e0;
+        }
+         .formula-container .sum-limits { /* Style for sum limits (visual only) */
+            display: block;
+            font-size: 0.7em;
+            line-height: 1;
+            text-align: center;
+        }
+         .formula-container .sum-symbol-container { /* Container for sum symbol and limits */
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 0.2em;
+         }
+
+        .formula-container sub, .formula-container sup {
+            line-height: 0;
+            font-size: 0.75em;
+            position: relative; /* Help positioning if needed */
+             top: -0.2em; /* Adjust baseline slightly for superscripts */
+        }
+         .formula-container sub {
+            top: 0.2em; /* Adjust baseline slightly for subscripts */
+        }
+        .formula-container .fraction {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            margin: 0 0.2em;
+        }
+        .formula-container .numerator {
+            display: block;
+            border-bottom: 1px solid #cccccc; /* Use light grey for fraction line */
+            padding-bottom: 2px;
+            line-height: 1.1;
+        }
+        .formula-container .denominator {
+            display: block;
+            padding-top: 2px;
+            line-height: 1.1;
+        }
+        .formula-container .bracket { /* Simple brackets */
+             font-size: 1.2em;
+             vertical-align: middle;
+             margin: 0 0.1em;
+        }
+        .formula-container .floor-bracket { /* Floor brackets */
+            font-size: 1.2em;
+            vertical-align: middle;
+            margin: 0 0.1em;
+            border-left: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+            padding: 0 0.1em;
+        }
+         .formula-container .floor-bracket-right {
+            border-left: none;
+            border-right: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+         }
+
+
+        /* Footer Styling (from index) */
+        footer {
+            text-align: center;
+            margin-top: 70px;
+            padding-bottom: 35px;
+            font-size: 0.85em;
+            color: #888888; /* Dim grey for footer */
+             animation: fadeIn 1s ease-out both;
+             animation-delay: 0.7s; /* Delay animation */
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Section 6.2: Methods of Point Estimation</h1>
+    </header>
+
+    <main>
+        <p>(Summary based on pages 264-272)</p>
+        <p>
+            This section introduces two specific methods for deriving point estimators for unknown parameters:
+        </p>
+        <ul>
+            <li>The <strong>Method of Moments (MoM)</strong></li>
+            <li>The <strong>Method of Maximum Likelihood (MLE)</strong></li>
+        </ul>
+        <p>
+            These are called <strong>"constructive" methods</strong> because they provide a clear procedure for finding an estimator in a given situation.
+        </p>
+        <p>
+            <strong>Comparison:</strong> While <strong>MLEs</strong> often have better <strong>efficiency</strong> properties (meaning they tend to have lower variance, especially for large samples), they can sometimes be more computationally intensive than <strong>MoM</strong> estimators. Both methods can sometimes yield <strong>unbiased</strong> estimators.
+        </p>
+
+        <h2>The Method of Moments (MoM) (Pages 264-265)</h2>
+        <p>
+            <strong>Basic Idea:</strong> Match sample characteristics (specifically, sample moments) to their corresponding theoretical population moments, which are functions of the unknown parameters. Then, solve the resulting equations for the parameters.
+        </p>
+        <p><strong>Definition: Population and Sample Moments (Page 264)</strong></p>
+        <p>
+            For a random sample <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub> from a pmf or pdf <span class="math-var">f</span>(<span class="math-var">x</span>):
+        </p>
+        <ul>
+            <li>The <span class="math-var">k</span><sup>th</sup> <strong>population moment</strong> is <span class="math-op">E</span>(<span class="math-var">X</span><sup><span class="math-var">k</span></sup>). This is a characteristic of the distribution.</li>
+            <li>The <span class="math-var">k</span><sup>th</sup> <strong>sample moment</strong> is:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\frac{1}{n} \sum_{i=1}^{n} X_i^k}" title="Click to copy LaTeX">
+                    <span class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator"><i>n</i></span>
+                    </span>
+                    <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                    <i>X</i><sub><i>i</i></sub><sup><i>k</i></sup>
+                </div>
+                 (the average of the sample values raised to the power <span class="math-var">k</span>).
+            </li>
+            <li>The first population moment (<span class="math-var">k</span>=1) is <span class="math-op">E</span>(<span class="math-var">X</span>) = <span class="math-var">μ</span>.</li>
+            <li>The first sample moment (<span class="math-var">k</span>=1) is:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\bar{X} = \frac{1}{n} \sum_{i=1}^{n} X_i}" title="Click to copy LaTeX">
+                    <span class="bar"><i>X</i></span> =
+                    <span class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator"><i>n</i></span>
+                    </span>
+                     <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                    <i>X</i><sub><i>i</i></sub>
+                </div>
+                (the sample mean).
+            </li>
+            <li>The second population moment (<span class="math-var">k</span>=2) is <span class="math-op">E</span>(<span class="math-var">X</span><sup>2</sup>).</li>
+            <li>The second sample moment (<span class="math-var">k</span>=2) is:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\frac{1}{n} \sum_{i=1}^{n} X_i^2}" title="Click to copy LaTeX">
+                     <span class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator"><i>n</i></span>
+                    </span>
+                     <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                    <i>X</i><sub><i>i</i></sub><sup>2</sup>
+                 </div>
+            </li>
+        </ul>
+
+        <p><strong>Definition: Method of Moments Estimators (Page 265)</strong></p>
+        <ul>
+            <li>Let the distribution depend on <span class="math-var">m</span> unknown parameters: <span class="math-var">θ</span><sub>1</sub>, <span class="math-var">θ</span><sub>2</sub>, ..., <span class="math-var">θ</span><sub>m</sub>.</li>
+            <li>To find the MoM estimators, set the first <span class="math-var">m</span> sample moments equal to the first <span class="math-var">m</span> population moments:</li>
+        </ul>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{E(X) = \frac{1}{n} \sum_{i=1}^{n} X_i = \bar{X}}" title="Click to copy LaTeX">
+            <span class="math-op">E</span>(<i>X</i>) =
+            <span class="fraction">
+                <span class="numerator">1</span>
+                <span class="denominator"><i>n</i></span>
+            </span>
+             <span class="sum-symbol-container">
+                <span class="sum-limits">n</span>
+                <span class="math-symbol">Σ</span>
+                <span class="sum-limits">i=1</span>
+            </span>
+            <i>X</i><sub><i>i</i></sub> = <span class="bar"><i>X</i></span>
+        </div>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{E(X^2) = \frac{1}{n} \sum_{i=1}^{n} X_i^2}" title="Click to copy LaTeX">
+             <span class="math-op">E</span>(<i>X</i><sup>2</sup>) =
+             <span class="fraction">
+                <span class="numerator">1</span>
+                <span class="denominator"><i>n</i></span>
+            </span>
+              <span class="sum-symbol-container">
+                <span class="sum-limits">n</span>
+                <span class="math-symbol">Σ</span>
+                <span class="sum-limits">i=1</span>
+            </span>
+             <i>X</i><sub><i>i</i></sub><sup>2</sup>
+        </div>
+        <p style="text-align:center;">...</p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{E(X^m) = \frac{1}{n} \sum_{i=1}^{n} X_i^m}" title="Click to copy LaTeX">
+             <span class="math-op">E</span>(<i>X</i><sup><i>m</i></sup>) =
+             <span class="fraction">
+                <span class="numerator">1</span>
+                <span class="denominator"><i>n</i></span>
+            </span>
+             <span class="sum-symbol-container">
+                <span class="sum-limits">n</span>
+                <span class="math-symbol">Σ</span>
+                <span class="sum-limits">i=1</span>
+            </span>
+             <i>X</i><sub><i>i</i></sub><sup><i>m</i></sup>
+        </div>
+        <ul>
+             <li>The population moments <span class="math-op">E</span>(<span class="math-var">X</span><sup><span class="math-var">k</span></sup>) will be functions of <span class="math-var">θ</span><sub>1</sub>, ..., <span class="math-var">θ</span><sub>m</sub>.</li>
+             <li>Solve this system of <span class="math-var">m</span> equations for the <span class="math-var">m</span> unknown parameters <span class="math-var">θ</span><sub>1</sub>, ..., <span class="math-var">θ</span><sub>m</sub>. The solutions are the MoM estimators <span class="hat"><span class="math-var">θ</span></span><sub>1</sub>, ..., <span class="hat"><span class="math-var">θ</span></span><sub>m</sub>.</li>
+        </ul>
+
+        <p><strong>Example 6.12: Exponential Distribution (Page 265)</strong></p>
+        <ul>
+            <li>Distribution: Exponential with one parameter, <span class="math-var">λ</span>.</li>
+            <li>We need one equation (<span class="math-var">m</span>=1). Match the first moments: <span class="math-op">E</span>(<span class="math-var">X</span>) = <span class="bar"><span class="math-var">X</span></span>.</li>
+            <li>For exponential, <span class="math-op">E</span>(<span class="math-var">X</span>) = 1/<span class="math-var">λ</span>.</li>
+            <li>Equation: 1/<span class="math-var">λ</span> = <span class="bar"><span class="math-var">X</span></span>.</li>
+            <li>Solving for <span class="math-var">λ</span> gives the MoM estimator:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\lambda} = \frac{1}{\bar{X}}}" title="Click to copy LaTeX">
+                    <span class="hat"><i>λ</i></span> =
+                    <span class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator"><span class="bar"><i>X</i></span></span>
+                    </span>
+                </div>
+            </li>
+        </ul>
+
+        <p><strong>Example 6.13: Gamma Distribution (Page 265)</strong></p>
+        <ul>
+            <li>Distribution: Gamma with two parameters, <span class="math-var">α</span> and <span class="math-var">β</span>.</li>
+            <li>We need two equations (<span class="math-var">m</span>=2). Match the first two moments:</li>
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{E(X) = \bar{X}}" title="Click to copy LaTeX">
+                    <span class="math-op">E</span>(<i>X</i>) = <span class="bar"><i>X</i></span>
+                </div>
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{E(X^2) = \frac{1}{n} \sum_{i=1}^{n} X_i^2}" title="Click to copy LaTeX">
+                     <span class="math-op">E</span>(<i>X</i><sup>2</sup>) =
+                     <span class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator"><i>n</i></span>
+                    </span>
+                     <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                    <i>X</i><sub><i>i</i></sub><sup>2</sup>
+                 </div>
+            <li>For Gamma, <span class="math-op">E</span>(<span class="math-var">X</span>) = <span class="math-var">αβ</span> and <span class="math-op">E</span>(<span class="math-var">X</span>²) = <span class="math-op">V</span>(<span class="math-var">X</span>) + [<span class="math-op">E</span>(<span class="math-var">X</span>)]² = <span class="math-var">αβ</span>² + (<span class="math-var">αβ</span>)² = <span class="math-var">α</span>(<span class="math-var">α</span>+1)<span class="math-var">β</span>².</li>
+            <li>Equations:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\alpha \beta = \bar{X} \quad (1)}" title="Click to copy LaTeX">
+                    <i>α</i> <i>β</i> = <span class="bar"><i>X</i></span> &nbsp;&nbsp;&nbsp;(1)
+                </div>
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\alpha(\alpha+1)\beta^2 = \frac{1}{n} \sum_{i=1}^{n} X_i^2 \quad (2)}" title="Click to copy LaTeX">
+                    <i>α</i>(<i>α</i>+1)<i>β</i><sup>2</sup> =
+                    <span class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator"><i>n</i></span>
+                    </span>
+                     <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                    <i>X</i><sub><i>i</i></sub><sup>2</sup> &nbsp;&nbsp;&nbsp;(2)
+                </div>
+            </li>
+            <li>Solving this system leads to the MoM estimators:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\beta} = \frac{\frac{1}{n}\sum_{i=1}^{n} X_i^2 - \bar{X}^2}{\bar{X}}}" title="Click to copy LaTeX">
+                    <span class="hat"><i>β</i></span> =
+                    <span class="fraction">
+                        <span class="numerator">
+                            <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span>
+                             <span class="sum-symbol-container">
+                                <span class="sum-limits">n</span>
+                                <span class="math-symbol">Σ</span>
+                                <span class="sum-limits">i=1</span>
+                            </span>
+                            <i>X</i><sub><i>i</i></sub><sup>2</sup> − <span class="bar"><i>X</i></span><sup>2</sup>
+                        </span>
+                        <span class="denominator"><span class="bar"><i>X</i></span></span>
+                    </span>
+                </div>
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\alpha} = \frac{\bar{X}}{\hat{\beta}} = \frac{\bar{X}^2}{\frac{1}{n}\sum_{i=1}^{n} X_i^2 - \bar{X}^2}}" title="Click to copy LaTeX">
+                     <span class="hat"><i>α</i></span> =
+                     <span class="fraction">
+                        <span class="numerator"><span class="bar"><i>X</i></span></span>
+                        <span class="denominator"><span class="hat"><i>β</i></span></span>
+                     </span> =
+                     <span class="fraction">
+                        <span class="numerator"><span class="bar"><i>X</i></span><sup>2</sup></span>
+                        <span class="denominator">
+                            <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span>
+                              <span class="sum-symbol-container">
+                                <span class="sum-limits">n</span>
+                                <span class="math-symbol">Σ</span>
+                                <span class="sum-limits">i=1</span>
+                            </span>
+                             <i>X</i><sub><i>i</i></sub><sup>2</sup> − <span class="bar"><i>X</i></span><sup>2</sup>
+                        </span>
+                     </span>
+                </div>
+            </li>
+            <li>Illustration: Using survival time data (<span class="math-var">n</span>=20, <span class="bar"><span class="math-var">x</span></span> = 113.5, (1/<span class="math-var">n</span>)<span class="math-symbol">Σ</span><span class="math-var">x</span><sub><span class="math-var">i</span></sub>² = 14087.8):
+                 <span class="hat"><span class="math-var">α</span></span> ≈ 10.7, <span class="hat"><span class="math-var">β</span></span> ≈ 10.6.
+            </li>
+        </ul>
+
+        <p><strong>Example 6.14: Generalized Negative Binomial Distribution (Page 266)</strong></p>
+        <ul>
+            <li>Distribution: Depends on parameters <span class="math-var">r</span> and <span class="math-var">p</span>. Need two equations (<span class="math-var">m</span>=2).</li>
+            <li>Match first two moments: <span class="math-op">E</span>(<span class="math-var">X</span>) = <span class="bar"><span class="math-var">X</span></span>, <span class="math-op">E</span>(<span class="math-var">X</span>²) = (1/<span class="math-var">n</span>)<span class="math-symbol">Σ</span><span class="math-var">X</span><sub><span class="math-var">i</span></sub>².</li>
+            <li>For Neg Binomial, <span class="math-op">E</span>(<span class="math-var">X</span>) = <span class="math-var">r</span>(1−<span class="math-var">p</span>)/<span class="math-var">p</span> and <span class="math-op">E</span>(<span class="math-var">X</span>²) = <span class="math-op">V</span>(<span class="math-var">X</span>) + [<span class="math-op">E</span>(<span class="math-var">X</span>)]².</li>
+            <li>Solving the system yields MoM estimators:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{p} = \frac{\bar{X}}{\frac{1}{n}\sum_{i=1}^{n} X_i^2 - \bar{X}^2}}" title="Click to copy LaTeX">
+                    <span class="hat"><i>p</i></span> =
+                    <span class="fraction">
+                        <span class="numerator"><span class="bar"><i>X</i></span></span>
+                        <span class="denominator">
+                             <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span>
+                              <span class="sum-symbol-container">
+                                <span class="sum-limits">n</span>
+                                <span class="math-symbol">Σ</span>
+                                <span class="sum-limits">i=1</span>
+                            </span>
+                             <i>X</i><sub><i>i</i></sub><sup>2</sup> − <span class="bar"><i>X</i></span><sup>2</sup>
+                        </span>
+                    </span>
+                 </div>
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{r} = \frac{\bar{X}^2}{\frac{1}{n}\sum_{i=1}^{n} X_i^2 - \bar{X}^2 - \bar{X}}}" title="Click to copy LaTeX">
+                    <span class="hat"><i>r</i></span> =
+                    <span class="fraction">
+                        <span class="numerator"><span class="bar"><i>X</i></span><sup>2</sup></span>
+                        <span class="denominator">
+                            <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span>
+                            <span class="sum-symbol-container">
+                                <span class="sum-limits">n</span>
+                                <span class="math-symbol">Σ</span>
+                                <span class="sum-limits">i=1</span>
+                            </span>
+                            <i>X</i><sub><i>i</i></sub><sup>2</sup> − <span class="bar"><i>X</i></span><sup>2</sup> − <span class="bar"><i>X</i></span>
+                        </span>
+                    </span>
+                 </div>
+            </li>
+            <li>Illustration: Hockey goals data (<span class="math-var">n</span>=420 games, <span class="bar"><span class="math-var">x</span></span> = 2.98, (1/<span class="math-var">n</span>)<span class="math-symbol">Σ</span><span class="math-var">x</span><sub><span class="math-var">i</span></sub>² = 12.40):
+                 <span class="hat"><span class="math-var">p</span></span> ≈ 0.85, <span class="hat"><span class="math-var">r</span></span> ≈ 16.5.
+            </li>
+            <li><strong>Issue:</strong> The denominator for <span class="hat"><span class="math-var">r</span></span> can be negative if the sample variance is less than the sample mean. Since <span class="math-var">r</span> must be positive, a negative estimate suggests the model might be inappropriate or the MoM estimator is flawed here.</li>
+        </ul>
+
+        <h2>Maximum Likelihood Estimation (MLE) (Pages 266-268)</h2>
+        <p>
+            <strong>Introduction:</strong> Developed by R.A. Fisher in the 1920s. Often recommended, especially for large samples, due to good efficiency properties.
+        </p>
+        <p>
+            <strong>Basic Idea:</strong> Find the parameter value(s) that make the observed sample data most probable or most likely to have occurred.
+        </p>
+
+        <p><strong>Example 6.15: Bernoulli Trials (Strong Passwords) (Pages 266-267)</strong></p>
+        <ul>
+            <li>Scenario: <span class="math-var">n</span>=10 individuals. Let <span class="math-var">X</span><sub><span class="math-var">i</span></sub> = 1 if the <span class="math-var">i</span><sup>th</sup> person has strong protection, <span class="math-var">X</span><sub><span class="math-var">i</span></sub> = 0 otherwise. Assume independence. <span class="math-var">p</span> = P(strong protection).</li>
+            <li>Data (<span class="math-symbol">Σ</span><span class="math-var">x</span><sub><span class="math-var">i</span></sub> = 3, <span class="math-var">n</span>=10).</li>
+            <li>Probability of the observed sample (joint pmf, likelihood function):
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{L(p) = f(x_1, ..., x_{10}; p) = p^{\sum_{i=1}^{n} x_i} (1-p)^{n - \sum_{i=1}^{n} x_i} = p^3 (1-p)^7}" title="Click to copy LaTeX">
+                    <span class="math-op">L</span>(<i>p</i>) = <span class="math-op">f</span>(<i>x</i><sub>1</sub>, ..., <i>x</i><sub>10</sub>; <i>p</i>) =
+                    <i>p</i><sup><span class="sum-symbol-container"><span class="math-symbol" style="font-size:1em;">Σ</span><sub style="font-size:0.7em;">i=1</sub><sup><span style="font-size:0.7em;">n</span></sup></span><i>x</i><sub><i>i</i></sub></sup>
+                    (1−<i>p</i>)<sup><i>n</i> − <span class="sum-symbol-container"><span class="math-symbol" style="font-size:1em;">Σ</span><sub style="font-size:0.7em;">i=1</sub><sup><span style="font-size:0.7em;">n</span></sup></span><i>x</i><sub><i>i</i></sub></sup> =
+                    <i>p</i><sup>3</sup> (1−<i>p</i>)<sup>7</sup>
+                </div>
+                <!-- Note: The visual display for inline sum limits is tricky; LaTeX code is correct -->
+            </li>
+            <li>Question: For which value of <span class="math-var">p</span> is this probability maximized?</li>
+            <li><strong>Log-Likelihood:</strong> It's often easier to maximize the natural logarithm:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\ln[L(p)] = \ln[p^3(1-p)^7] = 3\ln(p) + 7\ln(1-p)}" title="Click to copy LaTeX">
+                    <span class="math-op">ln</span>[<span class="math-op">L</span>(<i>p</i>)] = <span class="math-op">ln</span>[<i>p</i><sup>3</sup>(1−<i>p</i>)<sup>7</sup>] = 3<span class="math-op">ln</span>(<i>p</i>) + 7<span class="math-op">ln</span>(1−<i>p</i>)
+                </div>
+            </li>
+            <li>Calculus: Find the derivative with respect to <span class="math-var">p</span> and set it to zero:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\frac{d}{dp} [\ln(L)] = \frac{3}{p} - \frac{7}{1-p}}" title="Click to copy LaTeX">
+                    <span class="fraction">
+                        <span class="numerator"><span class="math-op">d</span></span>
+                        <span class="denominator"><span class="math-op">d</span><i>p</i></span>
+                    </span>
+                    [<span class="math-op">ln</span>(<span class="math-op">L</span>)] =
+                    <span class="fraction"><span class="numerator">3</span><span class="denominator"><i>p</i></span></span> −
+                    <span class="fraction"><span class="numerator">7</span><span class="denominator">1−<i>p</i></span></span>
+                </div>
+            </li>
+            <li>Set to 0: 3/<span class="math-var">p</span> = 7/(1−<span class="math-var">p</span>) => <span class="math-var">p</span> = 3/10 = 0.30.</li>
+            <li>Result: The value <span class="math-var">p</span>=0.30 maximizes the likelihood. This is the <strong>Maximum Likelihood Estimate (MLE)</strong>.</li>
+            <li>Note: If only X=3 (number of successes) was known, the pmf is Binomial. Maximizing this gives the same result.</li>
+        </ul>
+
+        <p><strong>Definition: Likelihood Function and MLE (Page 268)</strong></p>
+        <ul>
+            <li>Let <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub> have a joint pmf or pdf <span class="math-var">f</span>(<span class="math-var">x</span><sub>1</sub>, ..., <span class="math-var">x</span><sub>n</sub>; <span class="math-var">θ</span><sub>1</sub>, ..., <span class="math-var">θ</span><sub>m</sub>).</li>
+            <li>When viewed as a function of the parameters <span class="math-var">θ</span><sub>1</sub>, ..., <span class="math-var">θ</span><sub>m</sub> after observing data <span class="math-var">x</span><sub>1</sub>, ..., <span class="math-var">x</span><sub>n</sub>, it's the <strong>likelihood function</strong>:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{L(\theta_1, ..., \theta_m) = f(x_1, ..., x_n; \theta_1, ..., \theta_m)}" title="Click to copy LaTeX">
+                    <span class="math-op">L</span>(<i>θ</i><sub>1</sub>, ..., <i>θ</i><sub><i>m</i></sub>) = <span class="math-op">f</span>(<i>x</i><sub>1</sub>, ..., <i>x</i><sub><i>n</i></sub>; <i>θ</i><sub>1</sub>, ..., <i>θ</i><sub><i>m</i></sub>)
+                </div>
+            </li>
+            <li>The <strong>Maximum Likelihood Estimates (MLEs)</strong> <span class="hat"><span class="math-var">θ</span></span><sub>1</sub>, ..., <span class="hat"><span class="math-var">θ</span></span><sub>m</sub> are the parameter values that maximize <span class="math-op">L</span>.</li>
+            <li>The corresponding <strong>Maximum Likelihood Estimators</strong> replace <span class="math-var">x</span><sub><span class="math-var">i</span></sub> with <span class="math-var">X</span><sub><span class="math-var">i</span></sub>.</li>
+            <li><strong>Interpretation:</strong> The likelihood function measures how "likely" the observed sample is for different parameter values. MLEs make the observed data seem most plausible.</li>
+        </ul>
+
+        <p><strong>Example 6.16: Exponential Distribution (Page 268)</strong></p>
+        <ul>
+            <li>Sample: <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub> from Exponential(<span class="math-var">λ</span>).</li>
+            <li>Likelihood function:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{L(\lambda) = \prod_{i=1}^n (\lambda e^{-\lambda x_i}) = \lambda^n e^{-\lambda \sum_{i=1}^{n} x_i}}" title="Click to copy LaTeX">
+                    <span class="math-op">L</span>(<i>λ</i>) =
+                    <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Π</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                     (<i>λ</i><span class="math-op">e</span><sup>−<i>λx</i><sub><i>i</i></sub></sup>) =
+                    <i>λ</i><sup><i>n</i></sup> <span class="math-op">e</span><sup>−<i>λ</i><span class="sum-symbol-container"><span class="math-symbol" style="font-size:1em;">Σ</span><sub style="font-size:0.7em;">i=1</sub><sup><span style="font-size:0.7em;">n</span></sup></span><i>x</i><sub><i>i</i></sub></sup>
+                </div>
+            </li>
+             <li>Log-Likelihood:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\ln[L(\lambda)] = n \ln(\lambda) - \lambda \sum_{i=1}^{n} x_i}" title="Click to copy LaTeX">
+                     <span class="math-op">ln</span>[<span class="math-op">L</span>(<i>λ</i>)] = <span class="math-var">n</span> <span class="math-op">ln</span>(<i>λ</i>) − <i>λ</i>
+                      <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                     <i>x</i><sub><i>i</i></sub>
+                 </div>
+             </li>
+            <li>Derivative w.r.t. <span class="math-var">λ</span>:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\frac{d}{d\lambda} [\ln(L)] = \frac{n}{\lambda} - \sum_{i=1}^{n} x_i}" title="Click to copy LaTeX">
+                    <span class="fraction">
+                        <span class="numerator"><span class="math-op">d</span></span>
+                        <span class="denominator"><span class="math-op">d</span><i>λ</i></span>
+                    </span>
+                     [<span class="math-op">ln</span>(<span class="math-op">L</span>)] =
+                     <span class="fraction"><span class="numerator"><i>n</i></span><span class="denominator"><i>λ</i></span></span> −
+                     <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                     <i>x</i><sub><i>i</i></sub>
+                 </div>
+            </li>
+            <li>Set to 0: <span class="math-var">n</span>/<span class="math-var">λ</span> = <span class="math-symbol">Σ</span><span class="math-var">x</span><sub><span class="math-var">i</span></sub> => <span class="math-var">λ</span> = <span class="math-var">n</span> / <span class="math-symbol">Σ</span><span class="math-var">x</span><sub><span class="math-var">i</span></sub> = 1 / (<span class="math-symbol">Σ</span><span class="math-var">x</span><sub><span class="math-var">i</span></sub>/<span class="math-var">n</span>) = 1/<span class="bar"><span class="math-var">x</span></span>.</li>
+            <li>MLE for <span class="math-var">λ</span>:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\lambda} = \frac{1}{\bar{X}}}" title="Click to copy LaTeX">
+                     <span class="hat"><i>λ</i></span> =
+                     <span class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator"><span class="bar"><i>X</i></span></span>
+                     </span>
+                 </div>
+                 (Same as MoM estimator, but not unbiased).
+            </li>
+        </ul>
+
+        <p><strong>Example 6.17: Normal Distribution (Pages 268-269)</strong></p>
+        <ul>
+             <li>Sample: <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub> from Normal(<span class="math-var">μ</span>, <span class="math-var">σ</span>²). Parameters are <span class="math-var">μ</span> and <span class="math-var">σ</span>².</li>
+             <li>Log-Likelihood:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\ln[L(\mu, \sigma^2)] = -\frac{n}{2}\ln(2\pi) - \frac{n}{2}\ln(\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^{n}(x_i-\mu)^2}" title="Click to copy LaTeX">
+                     <span class="math-op">ln</span>[<span class="math-op">L</span>(<i>μ</i>, <i>σ</i><sup>2</sup>)] = −<span class="fraction"><span class="numerator"><i>n</i></span><span class="denominator">2</span></span><span class="math-op">ln</span>(2<i>π</i>) − <span class="fraction"><span class="numerator"><i>n</i></span><span class="denominator">2</span></span><span class="math-op">ln</span>(<i>σ</i><sup>2</sup>) − <span class="fraction"><span class="numerator">1</span><span class="denominator">2<i>σ</i><sup>2</sup></span></span>
+                       <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                     (<i>x</i><sub><i>i</i></sub>−<i>μ</i>)<sup>2</sup>
+                 </div>
+            </li>
+            <li>Partial derivatives set to 0 yield:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\frac{\partial}{\partial \mu} [\ln(L)] = 0 \implies \sum_{i=1}^{n}(x_i-\mu)=0 \implies \mu = \bar{x}}" title="Click to copy LaTeX">
+                    <span class="fraction"><span class="numerator">∂</span><span class="denominator">∂<i>μ</i></span></span> [<span class="math-op">ln</span>(<span class="math-op">L</span>)] = 0 &nbsp;⟹&nbsp;
+                      <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                     (<i>x</i><sub><i>i</i></sub>−<i>μ</i>)=0 &nbsp;⟹&nbsp; <i>μ</i> = <span class="bar"><i>x</i></span>
+                 </div>
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\frac{\partial}{\partial(\sigma^2)} [\ln(L)] = 0 \implies \sigma^2 = \frac{1}{n}\sum_{i=1}^{n}(x_i-\mu)^2}" title="Click to copy LaTeX">
+                    <span class="fraction"><span class="numerator">∂</span><span class="denominator">∂(<i>σ</i><sup>2</sup>)</span></span> [<span class="math-op">ln</span>(<span class="math-op">L</span>)] = 0 &nbsp;⟹&nbsp; <i>σ</i><sup>2</sup> = <span class="fraction"><span class="numerator">1</span><span class="denominator"><i>n</i></span></span>
+                      <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                     (<i>x</i><sub><i>i</i></sub>−<i>μ</i>)<sup>2</sup>
+                 </div>
+            </li>
+             <li>Substituting <span class="math-var">μ</span>=<span class="bar"><span class="math-var">x</span></span> into the second result gives the MLEs:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\mu} = \bar{X}}" title="Click to copy LaTeX">
+                     <span class="hat"><i>μ</i></span> = <span class="bar"><i>X</i></span>
+                 </div>
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\sigma}^2 = \frac{1}{n} \sum_{i=1}^{n} (X_i - \bar{X})^2}" title="Click to copy LaTeX">
+                      <span class="hat"><i>σ</i></span><sup>2</sup> =
+                      <span class="fraction">
+                          <span class="numerator">1</span>
+                          <span class="denominator"><i>n</i></span>
+                      </span>
+                       <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                       (<i>X</i><sub><i>i</i></sub> − <span class="bar"><i>X</i></span>)<sup>2</sup>
+                 </div>
+            </li>
+            <li>Note: The MLE for <span class="math-var">σ</span>² uses divisor <span class="math-var">n</span>, unlike the unbiased estimator <span class="math-var">S</span>² which uses <span class="math-var">n</span>−1.</li>
+        </ul>
+
+        <p><strong>Example 6.18: Poisson Process in 2D (Page 269)</strong></p>
+        <ul>
+            <li><strong>Scenario 1:</strong> Count <span class="math-var">X</span><sub><span class="math-var">i</span></sub> in <span class="math-var">n</span> fixed regions <span class="math-var">R</span><sub><span class="math-var">i</span></sub> with areas <span class="math-var">a</span>(<span class="math-var">R</span><sub><span class="math-var">i</span></sub>). <span class="math-var">X</span><sub><span class="math-var">i</span></sub> ~ Poisson(<span class="math-var">λa</span>(<span class="math-var">R</span><sub><span class="math-var">i</span></sub>)). Parameter is <span class="math-var">λ</span> (events/area).</li>
+            <li>Taking log-likelihood, differentiating w.r.t <span class="math-var">λ</span>, and setting to 0 yields:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\lambda} = \frac{\sum_{i=1}^{n} X_i}{\sum_{i=1}^{n} a(R_i)} = \frac{\text{Total events observed}}{\text{Total area sampled}}}" title="Click to copy LaTeX">
+                    <span class="hat"><i>λ</i></span> =
+                    <span class="fraction">
+                        <span class="numerator">
+                             <span class="sum-symbol-container">
+                                <span class="sum-limits">n</span>
+                                <span class="math-symbol">Σ</span>
+                                <span class="sum-limits">i=1</span>
+                             </span>
+                             <i>X</i><sub><i>i</i></sub>
+                         </span>
+                        <span class="denominator">
+                             <span class="sum-symbol-container">
+                                <span class="sum-limits">n</span>
+                                <span class="math-symbol">Σ</span>
+                                <span class="sum-limits">i=1</span>
+                            </span>
+                            <span class="math-op">a</span>(<i>R</i><sub><i>i</i></sub>)
+                        </span>
+                    </span> =
+                    <span class="fraction">
+                        <span class="numerator" style="font-size:0.9em;">Total events observed</span>
+                        <span class="denominator" style="font-size:0.9em;">Total area sampled</span>
+                    </span>
+                </div>
+                 (This MLE is unbiased).
+            </li>
+            <li><strong>Scenario 2:</strong> Distance sampling. Measure <span class="math-var">Y</span><sub><span class="math-var">i</span></sub> = distance to nearest plant for <span class="math-var">n</span> points. pdf of <span class="math-var">Y</span> is <span class="math-var">f</span><sub><span class="math-var">Y</span></sub>(<span class="math-var">y</span>; <span class="math-var">λ</span>) = 2<span class="math-var">πλye</span><sup>−<span class="math-var">λπy</span>²</sup>, <span class="math-var">y</span>≥0.</li>
+             <li>Finding the MLE yields:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\lambda} = \frac{n}{\pi \sum_{i=1}^{n} Y_i^2}}" title="Click to copy LaTeX">
+                     <span class="hat"><i>λ</i></span> =
+                     <span class="fraction">
+                         <span class="numerator"><i>n</i></span>
+                         <span class="denominator"><i>π</i>
+                            <span class="sum-symbol-container">
+                                <span class="sum-limits">n</span>
+                                <span class="math-symbol">Σ</span>
+                                <span class="sum-limits">i=1</span>
+                            </span>
+                              <i>Y</i><sub><i>i</i></sub><sup>2</sup>
+                         </span>
+                     </span>
+                 </div>
+             </li>
+            <li>Comparison: The two methods give different estimators; choice depends on context (sparse vs. dense).</li>
+        </ul>
+
+         <p><strong>Example 6.19: Weibull Distribution (Page 270)</strong></p>
+         <ul>
+             <li>Sample: <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub> from Weibull(<span class="math-var">α</span>, <span class="math-var">β</span>).</li>
+             <li>Taking partial derivatives of the log-likelihood w.r.t. <span class="math-var">α</span> and <span class="math-var">β</span> and setting to zero yields complex equations that usually require numerical methods to solve for the MLEs <span class="hat"><span class="math-var">α</span></span> and <span class="hat"><span class="math-var">β</span></span>.</li>
+         </ul>
+
+        <h2>Estimating Functions of Parameters (Page 270)</h2>
+        <p><strong>Proposition: The Invariance Principle</strong></p>
+        <p>
+            If <span class="hat"><span class="math-var">θ</span></span><sub>1</sub>, ..., <span class="hat"><span class="math-var">θ</span></span><sub>m</sub> are the MLEs of <span class="math-var">θ</span><sub>1</sub>, ..., <span class="math-var">θ</span><sub>m</sub>, then the MLE of any function <span class="math-var">h</span>(<span class="math-var">θ</span><sub>1</sub>, ..., <span class="math-var">θ</span><sub>m</sub>) is simply the function evaluated at the MLEs: <span class="math-var">h</span>(<span class="hat"><span class="math-var">θ</span></span><sub>1</sub>, ..., <span class="hat"><span class="math-var">θ</span></span><sub>m</sub>).
+        </p>
+
+        <p><strong>Example 6.20: Normal Standard Deviation (Page 270)</strong></p>
+        <ul>
+            <li>We found MLEs <span class="hat"><span class="math-var">μ</span></span> = <span class="bar"><span class="math-var">X</span></span> and <span class="hat"><span class="math-var">σ</span></span>² = <span class="math-symbol">Σ</span>(<span class="math-var">X</span><sub><span class="math-var">i</span></sub> − <span class="bar"><span class="math-var">X</span></span>)² / <span class="math-var">n</span>.</li>
+            <li>The standard deviation is <span class="math-var">σ</span> = <span class="math-var">h</span>(<span class="math-var">μ</span>, <span class="math-var">σ</span>²) = √(<span class="math-var">σ</span>²).</li>
+            <li>By the invariance principle, the MLE of <span class="math-var">σ</span> is:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\sigma} = \sqrt{\hat{\sigma}^2} = \sqrt{ \frac{1}{n} \sum_{i=1}^{n} (X_i - \bar{X})^2 }}" title="Click to copy LaTeX">
+                    <span class="hat"><i>σ</i></span> = √( <span class="hat"><i>σ</i></span><sup>2</sup> ) =
+                    √<span class="bracket">[</span>
+                    <span class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator"><i>n</i></span>
+                    </span>
+                      <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                     (<i>X</i><sub><i>i</i></sub> − <span class="bar"><i>X</i></span>)<sup>2</sup>
+                     <span class="bracket">]</span>
+                </div>
+            </li>
+            <li>Note: This differs from the sample standard deviation <span class="math-var">S</span>.</li>
+        </ul>
+
+         <p><strong>Example 6.21: Weibull Mean (Pages 270-271)</strong></p>
+         <ul>
+            <li>The mean of a Weibull distribution is:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\mu = \beta \Gamma(1 + 1/\alpha)}" title="Click to copy LaTeX">
+                     <i>μ</i> = <i>β</i> <span class="math-symbol">Γ</span>(1 + 1/<i>α</i>)
+                 </div>
+            </li>
+             <li>If <span class="hat"><span class="math-var">α</span></span> and <span class="hat"><span class="math-var">β</span></span> are the (numerically computed) MLEs of <span class="math-var">α</span> and <span class="math-var">β</span>.</li>
+             <li>The MLE of the mean <span class="math-var">μ</span> is:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\mu} = \hat{\beta} \Gamma(1 + 1/\hat{\alpha})}" title="Click to copy LaTeX">
+                     <span class="hat"><i>μ</i></span> = <span class="hat"><i>β</i></span> <span class="math-symbol">Γ</span>(1 + 1/<span class="hat"><i>α</i></span>)
+                 </div>
+            </li>
+            <li>The text notes that <span class="bar"><span class="math-var">X</span></span> is unbiased for <span class="math-var">μ</span>, but <span class="hat"><span class="math-var">μ</span></span> is the MLE and considered better for large <span class="math-var">n</span>.</li>
+            <li>Illustration: Data gives <span class="hat"><span class="math-var">α</span></span> = 11.9731, <span class="hat"><span class="math-var">β</span></span> = 77.0153, yielding <span class="hat"><span class="math-var">μ</span></span> = 73.80 (close to <span class="bar"><span class="math-var">x</span></span> = 73.88).</li>
+         </ul>
+
+        <h2>Large Sample Behavior of the MLE (Page 271)</h2>
+        <p>
+            MLEs are popular largely because of their excellent properties when the sample size (<span class="math-var">n</span>) is large.
+        </p>
+        <p><strong>Proposition: Under general conditions:</strong></p>
+        <ul>
+            <li>For large <span class="math-var">n</span>, the MLE <span class="hat"><span class="math-var">θ</span></span> is approximately unbiased:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{E(\hat{\theta}) \approx \theta}" title="Click to copy LaTeX">
+                      <span class="math-op">E</span>(<span class="hat"><i>θ</i></span>) ≈ <i>θ</i>
+                 </div>
+            </li>
+            <li>For large <span class="math-var">n</span>, the variance of the MLE, <span class="math-op">V</span>(<span class="hat"><span class="math-var">θ</span></span>), is nearly the smallest possible variance among all estimators.</li>
+        </ul>
+        <p>
+            <strong>Conclusion:</strong> For large <span class="math-var">n</span>, the MLE is approximately the <strong>MVUE (Minimum Variance Unbiased Estimator)</strong>. Because of these properties and the availability of methods to find them, MLE is the most widely used estimation technique (requires specifying the distribution family).
+        </p>
+
+        <h2>Some Complications (Pages 271-272)</h2>
+        <p>
+            Calculus (setting derivatives to zero) doesn't always work to find the maximum of the likelihood function.
+        </p>
+
+        <p><strong>Example 6.22: Uniform Distribution U[0, θ] (Page 271)</strong></p>
+        <ul>
+            <li>Sample: <span class="math-var">X</span><sub>1</sub>, ..., <span class="math-var">X</span><sub>n</sub> from Uniform[0, <span class="math-var">θ</span>]. Parameter is <span class="math-var">θ</span>.</li>
+            <li>Likelihood function:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{L(\theta) = \frac{1}{\theta^n} \quad \text{for } 0 \le x_i \le \theta \text{ for all } i}" title="Click to copy LaTeX">
+                    <span class="math-op">L</span>(<i>θ</i>) =
+                    <span class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator"><i>θ</i><sup><i>n</i></sup></span>
+                    </span>
+                     &nbsp;&nbsp; for 0 ≤ <i>x</i><sub><i>i</i></sub> ≤ <i>θ</i> for all <i>i</i>
+                </div>
+                 Equivalently, <span class="math-op">L</span>(<span class="math-var">θ</span>) = 1/<span class="math-var">θ</span><sup><span class="math-var">n</span></sup> if <span class="math-var">θ</span> ≥ max(<span class="math-var">x</span><sub>1</sub>, ..., <span class="math-var">x</span><sub>n</sub>), and <span class="math-op">L</span>(<span class="math-var">θ</span>) = 0 otherwise.
+            </li>
+            <li>This function <span class="math-op">L</span>(<span class="math-var">θ</span>) is maximized when <span class="math-var">θ</span> is as small as possible, subject to the constraint <span class="math-var">θ</span> ≥ max(<span class="math-var">x</span>).</li>
+            <li>The smallest possible value is <span class="math-var">θ</span> = max(<span class="math-var">x</span><sub>1</sub>, ..., <span class="math-var">x</span><sub>n</sub>).</li>
+             <li>MLE for <span class="math-var">θ</span>:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\theta} = \max(X_1, ..., X_n)}" title="Click to copy LaTeX">
+                      <span class="hat"><i>θ</i></span> = <span class="math-op">max</span>(<i>X</i><sub>1</sub>, ..., <i>X</i><sub><i>n</i></sub>)
+                 </div>
+            </li>
+            <li>Calculus failed because the maximum occurred at a boundary. This MLE is biased.</li>
+        </ul>
+
+        <p><strong>Example 6.23: Capture-Recapture (Page 272)</strong></p>
+        <ul>
+            <li>Scenario: Capture <span class="math-var">M</span> animals, tag, release. Recapture <span class="math-var">n</span>, find <span class="math-var">X</span> tagged. Estimate total population <span class="math-var">N</span>.</li>
+            <li>Parameter: <span class="math-var">N</span> (integer ≥ <span class="math-var">M</span>, ≥ <span class="math-var">n</span>).</li>
+            <li>Distribution of <span class="math-var">X</span>: Hypergeometric <span class="math-var">h</span>(<span class="math-var">x</span>; <span class="math-var">n</span>, <span class="math-var">M</span>, <span class="math-var">N</span>).</li>
+             <li>Likelihood:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{L(N) = p(x; N) = \frac{\binom{M}{x} \binom{N-M}{n-x}}{\binom{N}{n}}}" title="Click to copy LaTeX">
+                      <span class="math-op">L</span>(<i>N</i>) = <span class="math-op">p</span>(<i>x</i>; <i>N</i>) =
+                      <span class="fraction">
+                          <span class="numerator">
+                              <span class="bracket">(</span><span style="display: inline-block; text-align: center; vertical-align: middle;"><span style="display: block; font-size: 0.8em;"><i>M</i></span><span style="display: block; font-size: 0.8em;"><i>x</i></span></span><span class="bracket">)</span>
+                              <span class="bracket">(</span><span style="display: inline-block; text-align: center; vertical-align: middle;"><span style="display: block; font-size: 0.8em;"><i>N-M</i></span><span style="display: block; font-size: 0.8em;"><i>n-x</i></span></span><span class="bracket">)</span>
+                          </span>
+                          <span class="denominator">
+                               <span class="bracket">(</span><span style="display: inline-block; text-align: center; vertical-align: middle;"><span style="display: block; font-size: 0.8em;"><i>N</i></span><span style="display: block; font-size: 0.8em;"><i>n</i></span></span><span class="bracket">)</span>
+                          </span>
+                      </span>
+                  </div>
+             </li>
+             <li>Goal: Find integer <span class="math-var">N</span> that maximizes <span class="math-op">L</span>(<span class="math-var">N</span>). Calculus is hard (discrete <span class="math-var">N</span>).</li>
+             <li>Alternative: Look at the ratio <span class="math-op">L</span>(<span class="math-var">N</span>) / <span class="math-op">L</span>(<span class="math-var">N</span>−1).
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\frac{L(N)}{L(N-1)} = \frac{(N-M)(N-n)}{N(N-M-n+x)}}" title="Click to copy LaTeX">
+                      <span class="fraction">
+                          <span class="numerator"><span class="math-op">L</span>(<i>N</i>)</span>
+                          <span class="denominator"><span class="math-op">L</span>(<i>N</i>−1)</span>
+                      </span> =
+                      <span class="fraction">
+                          <span class="numerator">(<i>N</i>−<i>M</i>)(<i>N</i>−<i>n</i>)</span>
+                          <span class="denominator"><i>N</i>(<i>N</i>−<i>M</i>−<i>n</i>+<i>x</i>)</span>
+                      </span>
+                  </div>
+             </li>
+             <li>The likelihood increases (ratio > 1) as long as <span class="math-var">N</span> < <span class="math-var">Mn</span>/<span class="math-var">x</span>.</li>
+             <li>Conclusion: <span class="math-op">L</span>(<span class="math-var">N</span>) increases until <span class="math-var">N</span> reaches <span class="math-var">Mn</span>/<span class="math-var">x</span>, then decreases. The maximizing <span class="math-var">N</span> is the largest integer ≤ <span class="math-var">Mn</span>/<span class="math-var">x</span>.</li>
+            <li>MLE for <span class="math-var">N</span>:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{N} = \lfloor \frac{Mn}{x} \rfloor}" title="Click to copy LaTeX">
+                      <span class="hat"><i>N</i></span> = <span class="floor-bracket">⌊</span>
+                      <span class="fraction">
+                          <span class="numerator"><i>Mn</i></span>
+                          <span class="denominator"><i>x</i></span>
+                      </span>
+                      <span class="floor-bracket floor-bracket-right">⌋</span>
+                  </div>
+             </li>
+             <li>Illustration: <span class="math-var">M</span>=200, <span class="math-var">n</span>=100, <span class="math-var">x</span>=11 => <span class="hat"><span class="math-var">N</span></span> = floor(200*100/11) = floor(1818.18) = 1818.</li>
+             <li>Intuition: Equates sample proportion tagged (<span class="math-var">x</span>/<span class="math-var">n</span>) to population proportion tagged (<span class="math-var">M</span>/<span class="math-var">N</span>).</li>
+        </ul>
+
+        <h2>M-Estimators (Page 272)</h2>
+        <p>
+            Mentioned briefly as a robust estimation technique related to MLE. Instead of maximizing
+            <span class="formula-container" style="display:inline-block; padding: 5px 10px; margin: 0 5px;" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\sum_{i=1}^{n}\ln[f(x_i; \theta)]}" title="Click to copy LaTeX">
+                 <span class="sum-symbol-container">
+                    <span class="sum-limits">n</span>
+                    <span class="math-symbol">Σ</span>
+                    <span class="sum-limits">i=1</span>
+                </span>
+                <span class="math-op">ln</span>[<span class="math-var">f</span>(<span class="math-var">x</span><sub><span class="math-var">i</span></sub>; <span class="math-var">θ</span>)]
+            </span>,
+             M-estimators maximize a different objective function
+             <span class="formula-container" style="display:inline-block; padding: 5px 10px; margin: 0 5px;" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\sum_{i=1}^{n}\rho(x_i; \theta)}" title="Click to copy LaTeX">
+                 <span class="sum-symbol-container">
+                    <span class="sum-limits">n</span>
+                    <span class="math-symbol">Σ</span>
+                    <span class="sum-limits">i=1</span>
+                </span>
+                 <span class="math-var">ρ</span>(<span class="math-var">x</span><sub><span class="math-var">i</span></sub>; <span class="math-var">θ</span>)
+            </span>,
+            where <span class="math-var">ρ</span> is chosen for robustness properties, especially when the exact form of <span class="math-var">f</span> is uncertain but symmetry is assumed.
+        </p>
+
+    </main>
+
+    <footer>
+        <!-- Empty Footer matching index style -->
+    </footer>
+
+    <script>
+        // Function to copy LaTeX code
+        function copyFormulaLatex(element) {
+            const latexString = element.getAttribute('data-latex');
+            if (!latexString) {
+                console.error('No LaTeX data found for this element.');
+                return;
+            }
+            // Remove the color wrapper before copying to clipboard
+            const latexToCopy = latexString.replace(/^\\color{white}{(.*)}$/, '$1');
+
+            navigator.clipboard.writeText(latexToCopy).then(() => {
+                element.classList.add('copied');
+                const originalTitle = element.title;
+                element.title = 'Copied!';
+                setTimeout(() => {
+                    element.classList.remove('copied');
+                    element.title = originalTitle; // Restore original title
+                 }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy LaTeX: ', err);
+                alert('Failed to copy text. Check console (F12) for details.');
+            });
+        }
+    </script>
+
+</body></html>
