@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 8: Hypothesis Testing Summary</title>
+
+    <!-- Google Fonts - Roboto Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Keyframes for Animations (FadeIn) */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Fonts & Base Styling (from index theme) */
+        body {
+            font-family: 'Roboto Mono', monospace;
+            color: #e0e0e0; /* Light grey text for readability */
+            line-height: 1.7;
+            padding: 25px;
+            background-color: #1a1a1a; /* Simple dark background */
+            min-height: 100vh;
+        }
+
+        /* Headings (from index theme) */
+        h1, h2 {
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+            margin-bottom: 1.5em; /* Matches index */
+        }
+
+        h1 {
+            font-size: 2.4em; /* Matches index */
+            color: #ffffff; /* White heading */
+            font-weight: 700;
+            padding-bottom: 12px;
+            margin-top: 1.5em; /* Matches index */
+            margin-bottom: 1.5em; /* Matches index */
+            border-bottom: 2px solid #ffffff; /* White border */
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.1s;
+            letter-spacing: -0.5px; /* Matches index */
+        }
+
+        h2 {
+            font-size: 1.6em; /* Matches index */
+            color: #cccccc; /* Lighter grey subheading */
+            font-weight: 500;
+            margin-top: 30px; /* Retain some top margin for sections */
+            margin-bottom: 1.5em; /* Consistent bottom margin */
+            border-bottom: 1px solid #555555; /* Darker border for contrast */
+            padding-bottom: 5px;
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.3s; /* Staggered animation */
+        }
+
+        /* Main Content Area (from index theme) */
+        main {
+            max-width: 800px; /* Matches index */
+            margin: 40px auto; /* Matches index */
+            background-color: rgba(30, 30, 30, 0.85); /* Dark grey, slightly transparent */
+            padding: 35px 45px; /* Matches index */
+            border-radius: 10px; /* Matches index */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7); /* Matches index */
+            backdrop-filter: blur(6px); /* Matches index */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle light border */
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.2s;
+        }
+
+        /* Paragraph and List styling */
+        p {
+            margin-bottom: 1em;
+            color: inherit; /* Ensure uses body color */
+        }
+
+        ul {
+            margin-left: 25px; /* Slightly more indent */
+            list-style: disc; /* Use standard disc bullets */
+            margin-bottom: 1em;
+        }
+         ol {
+            margin-left: 25px;
+            list-style: decimal;
+            margin-bottom: 1em;
+        }
+
+        li {
+            margin-bottom: 8px; /* Slightly more space between list items */
+        }
+
+        strong, .math-var { /* Style for emphasized text and math variables */
+            font-weight: 500; /* Consistent with index headings/links */
+            color: #ffffff; /* Brighter white for emphasis */
+        }
+        .math-var { /* Ensure italics for math variables */
+             font-style: italic;
+             margin: 0 2px; /* Consistent small spacing */
+        }
+        .math-symbol { /* Non-italicized symbols like sum, pi, sqrt */
+            font-style: normal;
+            margin: 0 2px;
+            color: #ffffff;
+        }
+        .math-op { /* For operators like E, V, P, L, ln, max, Phi, B */
+            font-style: normal;
+            margin: 0 2px;
+            color: #ffffff;
+        }
+
+
+        /* Formula Container Styling (Adapting index list item styles) */
+        .formula-container {
+            margin: 15px 0 20px 0; /* Adjusted margins */
+            padding: 15px 20px; /* Adjusted padding */
+            background-color: rgba(45, 45, 45, 0.9); /* Match index list item bg */
+            border-radius: 6px; /* Match index list item radius */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Default subtle border */
+            overflow-x: auto;
+            transition: background-color 0.3s ease, border-color 0.3s ease; /* Add border transition */
+            cursor: pointer;
+            font-size: 1.1em;
+            line-height: 1.5;
+            color: #e0e0e0; /* Text color inside formulas */
+            border-left: 4px solid transparent; /* Add placeholder for hover border like index list */
+            white-space: nowrap; /* Prevent wrapping inside formula */
+        }
+
+        .formula-container:hover {
+            background-color: rgba(60, 60, 60, 0.95); /* Match index list item hover bg */
+            border-left-color: #a6e3a1; /* GREEN hover border like index list */
+            border-color: rgba(166, 227, 161, 0.5); /* Slightly green border on hover */
+        }
+
+        .formula-container.copied {
+            background-color: rgba(166, 227, 161, 0.2); /* Transparent green background on copy */
+            border-color: #a6e3a1; /* Green border on copy */
+            border-left-color: #a6e3a1; /* Ensure left border stays green */
+        }
+
+        /* Style for math elements within formula containers */
+        .formula-container i, .formula-container .math-var { /* General italics within formulas */
+            font-style: italic;
+            margin: 0 1px;
+        }
+        .formula-container .math-op { /* Operators within formulas */
+            font-style: normal;
+            margin: 0 2px;
+        }
+        .formula-container .math-symbol { /* Symbols like sum, pi, sqrt within formulas */
+            font-style: normal;
+            margin: 0 2px;
+            font-size: 1.2em; /* Slightly larger for symbols */
+            vertical-align: middle;
+        }
+         .formula-container .hat { /* Style for hat accent */
+            position: relative;
+            display: inline-block;
+        }
+        .formula-container .hat::after {
+            content: '^';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -0.6em; /* Adjust position of hat */
+            text-align: center;
+            font-size: 0.8em;
+        }
+         .formula-container .tilde { /* Style for tilde accent */
+            position: relative;
+            display: inline-block;
+        }
+        .formula-container .tilde::after {
+            content: '~';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -0.6em; /* Adjust position of tilde */
+            text-align: center;
+            font-size: 0.8em;
+        }
+         .formula-container .bar { /* Style for bar accent */
+            position: relative;
+            display: inline-block;
+            padding-top: 0.1em; /* Add space for the bar */
+        }
+        .formula-container .bar::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -0.1em; /* Adjust position of bar */
+            border-top: 1px solid #e0e0e0;
+        }
+         .formula-container .sum-limits { /* Style for sum limits (visual only) */
+            display: block;
+            font-size: 0.7em;
+            line-height: 1;
+            text-align: center;
+        }
+         .formula-container .sum-symbol-container { /* Container for sum symbol and limits */
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 0.2em;
+         }
+
+        .formula-container sub, .formula-container sup {
+            line-height: 0;
+            font-size: 0.75em;
+            position: relative; /* Help positioning if needed */
+             top: -0.2em; /* Adjust baseline slightly for superscripts */
+        }
+         .formula-container sub {
+            top: 0.2em; /* Adjust baseline slightly for subscripts */
+        }
+        .formula-container .fraction {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            margin: 0 0.2em;
+        }
+        .formula-container .numerator {
+            display: block;
+            border-bottom: 1px solid #cccccc; /* Use light grey for fraction line */
+            padding-bottom: 2px;
+            line-height: 1.1;
+        }
+        .formula-container .denominator {
+            display: block;
+            padding-top: 2px;
+            line-height: 1.1;
+        }
+        .formula-container .bracket { /* Simple brackets */
+             font-size: 1.2em;
+             vertical-align: middle;
+             margin: 0 0.1em;
+        }
+        .formula-container .floor-bracket { /* Floor brackets */
+            font-size: 1.2em;
+            vertical-align: middle;
+            margin: 0 0.1em;
+            border-left: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+            padding: 0 0.1em;
+        }
+         .formula-container .floor-bracket-right {
+            border-left: none;
+            border-right: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+         }
+         .formula-container .sqrt { /* Square root symbol */
+            font-size: 1.2em;
+            vertical-align: middle;
+            margin-right: 0.1em;
+         }
+         .formula-container .sqrt-content { /* Content under square root */
+            border-top: 1px solid #cccccc;
+            padding-top: 0.1em;
+            display: inline-block; /* Keep content together */
+         }
+
+
+        /* Footer Styling (from index) */
+        footer {
+            text-align: center;
+            margin-top: 70px;
+            padding-bottom: 35px;
+            font-size: 0.85em;
+            color: #888888; /* Dim grey for footer */
+             animation: fadeIn 1s ease-out both;
+             animation-delay: 0.7s; /* Delay animation */
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Chapter 8: Tests of Hypotheses Based on a Single Sample</h1>
+    </header>
+
+    <main>
+        <h2>Introduction (Page 310)</h2>
+        <p>
+            In the previous chapter, we learned how to estimate a population parameter (like <span class="math-var">μ</span> or <span class="math-var">p</span>) using either a single number (a <strong>point estimate</strong>) or an interval of plausible values (a <strong>confidence interval</strong>).
+        </p>
+        <p>
+            This chapter focuses on a different aspect of statistical inference called <strong>hypothesis testing</strong>. Instead of estimating the value of a parameter, our goal here is often to decide between two contradictory claims about the parameter.
+        </p>
+        <p>
+            For example, we might want to decide if the true average diameter of a pipe is exactly 0.75 inches or if it's different from 0.75 inches. Or we might want to determine if a new process truly reduces the proportion of defective items below 10%.
+        </p>
+        <p>
+            This chapter will cover:
+        </p>
+        <ul>
+            <li>Basic concepts and terminology of hypothesis testing.</li>
+            <li>Decision procedures (tests) for common scenarios involving a sample from a single population.</li>
+        </ul>
+
+        <h2>Section 8.1: Hypotheses and Test Procedures (Page 311)</h2>
+        <p><strong>Statistical Hypothesis:</strong> A claim or assertion about:</p>
+        <ul>
+            <li>A single parameter (e.g., <span class="math-var">μ</span> = 75, <span class="math-var">p</span> < 0.10, <span class="math-var">σ</span> > 0.001)</li>
+            <li>Several parameters (e.g., <span class="math-var">μ</span><sub>1</sub> − <span class="math-var">μ</span><sub>2</sub> = 0)</li>
+            <li>The form of a probability distribution (e.g., the data follows a normal distribution - covered later).</li>
+        </ul>
+        <p>This chapter focuses on hypotheses about single parameters.</p>
+        <p><strong>Two Contradictory Hypotheses:</strong> Every hypothesis testing problem involves choosing between two opposing claims.</p>
+        <p><strong>Analogy: Criminal Trial:</strong></p>
+        <ul>
+            <li>Claim 1: Accused is innocent.</li>
+            <li>Claim 2: Accused is guilty.</li>
+            <li>The claim of innocence is initially favored ("protected"). Requires strong evidence for guilt.</li>
+        </ul>
+        <p><strong>Statistical Hypotheses Formulation:</strong> Similarly, one claim is initially favored. We require strong evidence from data to abandon it.</p>
+        <p><strong>Definition: Null and Alternative Hypotheses (Page 311)</strong></p>
+        <ul>
+            <li><strong>Null Hypothesis (<span class="math-var">H</span><sub>0</sub>):</strong> The claim initially assumed true. Often represents "no effect," "status quo."</li>
+            <li><strong>Alternative Hypothesis (<span class="math-var">H</span><sub>a</sub>):</strong> The assertion contradicting <span class="math-var">H</span><sub>0</sub>. Often what the researcher wants evidence for.</li>
+        </ul>
+        <p><strong>The Decision Process:</strong></p>
+        <ol>
+            <li>Start assuming <span class="math-var">H</span><sub>0</sub> is true.</li>
+            <li>Collect sample data.</li>
+            <li>Evaluate if data strongly contradicts <span class="math-var">H</span><sub>0</sub>.</li>
+            <li>Decision:
+                <ul>
+                    <li>If evidence is strong against <span class="math-var">H</span><sub>0</sub>, <strong>reject <span class="math-var">H</span><sub>0</sub></strong> (in favor of <span class="math-var">H</span><sub>a</sub>).</li>
+                    <li>If evidence is not strong, <strong>fail to reject <span class="math-var">H</span><sub>0</sub></strong> (<span class="math-var">H</span><sub>0</sub> remains plausible).</li>
+                </ul>
+            </li>
+        </ol>
+        <p><strong>Test of Hypotheses:</strong> A method using sample data to decide whether <span class="math-var">H</span><sub>0</sub> should be rejected.</p>
+        <p><strong>Example: Seeking Evidence for Change (Page 311-312)</strong></p>
+        <ul>
+            <li>Company considers new bearing coating. Current average life is 1000 hours. Want evidence it's better.</li>
+            <li>Let <span class="math-var">μ</span> = true average life with new coating.</li>
+            <li>Null Hypothesis: <span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 1000 (status quo).</li>
+            <li>Alternative Hypothesis: <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> > 1000 (claim needing strong evidence).</li>
+            <li>Only reject <span class="math-var">H</span><sub>0</sub> if data strongly supports <span class="math-var">H</span><sub>a</sub>.</li>
+        </ul>
+        <p><strong><span class="math-var">H</span><sub>0</sub> as an Equality Claim (Page 312):</strong></p>
+        <ul>
+            <li>In this text, <span class="math-var">H</span><sub>0</sub> usually stated as equality (e.g., <span class="math-var">H</span><sub>0</sub>: <span class="math-var">θ</span> = <span class="math-var">θ</span><sub>0</sub>), where <span class="math-var">θ</span><sub>0</sub> is the <strong>null value</strong>.</li>
+            <li>Even if situation suggests inequality (e.g., <span class="math-var">H</span><sub>0</sub>: <span class="math-var">p</span> ≥ 0.10), often simplified to <span class="math-var">H</span><sub>0</sub>: <span class="math-var">p</span> = 0.10 for the test procedure.</li>
+            <li>Rationale: Test designed for the boundary case (<span class="math-var">θ</span> = <span class="math-var">θ</span><sub>0</sub>) is generally valid for the broader inequality.</li>
+        </ul>
+        <p><strong>Forms of the Alternative Hypothesis (<span class="math-var">H</span><sub>a</sub>):</strong> Given <span class="math-var">H</span><sub>0</sub>: <span class="math-var">θ</span> = <span class="math-var">θ</span><sub>0</sub>, <span class="math-var">H</span><sub>a</sub> is typically one of:</p>
+        <ul>
+            <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">θ</span> > <span class="math-var">θ</span><sub>0</sub> (<strong>upper-tailed</strong> test)</li>
+            <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">θ</span> < <span class="math-var">θ</span><sub>0</sub> (<strong>lower-tailed</strong> test)</li>
+            <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">θ</span> ≠ <span class="math-var">θ</span><sub>0</sub> (<strong>two-tailed</strong> test)</li>
+        </ul>
+
+        <p><strong>Test Procedures and P-Values (Page 312)</strong></p>
+        <ul>
+            <li><strong>Test Procedure:</strong> A rule, based on sample data, for deciding whether to reject <span class="math-var">H</span><sub>0</sub>.</li>
+            <li><strong>Core Question:</strong> If <span class="math-var">H</span><sub>0</sub> is true, how likely is it to observe sample results at least as contradictory to <span class="math-var">H</span><sub>0</sub> as what we observed?</li>
+        </ul>
+
+        <p><strong>Example 8.1: Yogurt Taste Test (Page 313)</strong></p>
+        <ul>
+            <li>Goal: See if Brand D can win over Brand C consumers. <span class="math-var">n</span>=100 consumers.</li>
+            <li>Parameter: <span class="math-var">p</span> = proportion preferring C over D.</li>
+            <li>Hypotheses: <span class="math-var">H</span><sub>0</sub>: <span class="math-var">p</span> = 0.5 (no preference) vs. <span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> < 0.5 (majority prefer D).</li>
+            <li>Test Statistic: <span class="math-var">X</span> = number preferring C. If <span class="math-var">H</span><sub>0</sub> true, expect <span class="math-var">X</span> ≈ 50. Small <span class="math-var">X</span> contradicts <span class="math-var">H</span><sub>0</sub>.</li>
+            <li>Observed Data 1: <span class="math-var">x</span> = 37 prefer C.
+                <ul>
+                    <li>Values at least as contradictory: <span class="math-var">X</span> ≤ 37.</li>
+                    <li>Probability (P-value): Assume <span class="math-var">H</span><sub>0</sub> true, <span class="math-var">X</span> ~ Binomial(100, 0.5).
+                        <span class="math-op">P</span>(<span class="math-var">X</span> ≤ 37 | <span class="math-var">p</span>=0.5) = <span class="math-op">B</span>(37; 100, 0.5) = 0.006.
+                    </li>
+                    <li>Interpretation: Very unlikely (0.6% chance) if <span class="math-var">H</span><sub>0</sub> true. Strong evidence against <span class="math-var">H</span><sub>0</sub>. Reject <span class="math-var">H</span><sub>0</sub>.</li>
+                </ul>
+            </li>
+             <li>Observed Data 2: <span class="math-var">x</span> = 45 prefer C.
+                 <ul>
+                    <li>Values at least as contradictory: <span class="math-var">X</span> ≤ 45.</li>
+                    <li>P-value: <span class="math-op">P</span>(<span class="math-var">X</span> ≤ 45 | <span class="math-var">p</span>=0.5) = <span class="math-op">B</span>(45; 100, 0.5) = 0.184.</li>
+                    <li>Interpretation: Not very unlikely (18.4% chance) if <span class="math-var">H</span><sub>0</sub> true. Not strong evidence against <span class="math-var">H</span><sub>0</sub>. Fail to reject <span class="math-var">H</span><sub>0</sub>.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <p><strong>Example 8.2: Freshman Weight Gain (Pages 314-315)</strong></p>
+        <ul>
+             <li>Goal: Test belief that average gain <span class="math-var">μ</span> = 15 lbs.</li>
+             <li>Hypotheses: <span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 15 vs. <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> ≠ 15.</li>
+             <li>Test Statistic (Large Sample, <span class="math-var">n</span> > 40): Assume <span class="math-var">H</span><sub>0</sub> true.
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{Z = \frac{\bar{X} - \mu_0}{S/\sqrt{n}} = \frac{\bar{X} - 15}{S/\sqrt{n}}}" title="Click to copy LaTeX">
+                      <i>Z</i> =
+                      <span class="fraction">
+                         <span class="numerator"><span class="bar"><i>X</i></span> − <i>μ</i><sub>0</sub></span>
+                         <span class="denominator"><i>S</i>/<span class="math-symbol">√</span><i>n</i></span>
+                      </span> =
+                      <span class="fraction">
+                         <span class="numerator"><span class="bar"><i>X</i></span> − 15</span>
+                         <span class="denominator"><i>S</i>/<span class="math-symbol">√</span><i>n</i></span>
+                      </span>
+                 </div>
+                  <span class="math-var">Z</span> is approx. N(0,1) when <span class="math-var">H</span><sub>0</sub> true.
+             </li>
+             <li>Observed Data 1: Suppose <span class="math-var">n</span>=137, <span class="bar"><span class="math-var">x</span></span>=13.7, calculated <span class="math-var">z</span> = -2.80.
+                 <ul>
+                    <li>Values at least as contradictory (two-tailed): <span class="math-var">Z</span> ≤ -2.80 OR <span class="math-var">Z</span> ≥ +2.80.</li>
+                    <li>P-value: Assume <span class="math-var">H</span><sub>0</sub> true, <span class="math-var">Z</span> ~ N(0, 1).
+                        <span class="math-op">P</span>(<span class="math-var">Z</span> ≤ -2.80 or <span class="math-var">Z</span> ≥ +2.80) = 2 * <span class="math-op">P</span>(<span class="math-var">Z</span> ≥ 2.80)
+                        = 2 * [1 - <span class="math-op">Φ</span>(2.80)] = 2 * [1 - 0.9974] = 0.0052.
+                    </li>
+                    <li>Interpretation: Very unlikely (0.52% chance) if <span class="math-var">H</span><sub>0</sub> true. Strong evidence against <span class="math-var">H</span><sub>0</sub>. Reject <span class="math-var">H</span><sub>0</sub>.</li>
+                </ul>
+            </li>
+            <li>Actual Study Data: <span class="math-var">n</span>=137, <span class="bar"><span class="math-var">x</span></span> = 2.42 lbs, <span class="math-var">s</span> = 5.72 lbs. Calculated <span class="math-var">z</span> = -25.7. P-value ≈ 0. Overwhelming evidence against <span class="math-var">H</span><sub>0</sub>.</li>
+        </ul>
+
+        <p><strong>Definitions: Test Statistic, P-value, Significance Level (Page 316)</strong></p>
+        <ul>
+            <li><strong>Test Statistic:</strong> Function of sample data used to decide about <span class="math-var">H</span><sub>0</sub>.</li>
+            <li><strong>P-value:</strong> Probability, assuming <span class="math-var">H</span><sub>0</sub> is true, of obtaining a test statistic value at least as contradictory to <span class="math-var">H</span><sub>0</sub> as the observed value.
+                <ul><li>Smaller P-value ⇒ Stronger evidence against <span class="math-var">H</span><sub>0</sub>.</li></ul>
+            </li>
+            <li><strong>Significance Level (<span class="math-var">α</span>):</strong> Threshold chosen beforehand (e.g., 0.05, 0.01) for decision making.</li>
+            <li><strong>Decision Rule:</strong>
+                <ul>
+                    <li>If P-value ≤ <span class="math-var">α</span>, reject <span class="math-var">H</span><sub>0</sub>.</li>
+                    <li>If P-value > <span class="math-var">α</span>, fail to reject <span class="math-var">H</span><sub>0</sub>.</li>
+                </ul>
+            </li>
+            <li>Common <span class="math-var">α</span> levels: 0.05, 0.01, 0.001, 0.10. Smaller <span class="math-var">α</span> protects <span class="math-var">H</span><sub>0</sub> more.</li>
+        </ul>
+        <p><strong>Important Points about P-value:</strong></p>
+        <ul>
+            <li>It is NOT P(<span class="math-var">H</span><sub>0</sub> is true) or P(<span class="math-var">H</span><sub>0</sub> is false).</li>
+            <li>It is NOT P(making a wrong decision).</li>
+        </ul>
+
+        <p><strong>Example 8.3: Battery Zinc Mass (Page 317)</strong></p>
+        <ul>
+            <li>Goal: Determine if true average zinc mass (<span class="math-var">μ</span>) exceeds 2.0 g.</li>
+            <li>Hypotheses: <span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 2.0 vs. <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> > 2.0.</li>
+            <li>Data: <span class="math-var">n</span> = 51 (large), <span class="bar"><span class="math-var">x</span></span> = 2.06 g, <span class="math-var">s</span> = 0.141 g. α = 0.01.</li>
+            <li>Test Statistic: <span class="math-var">Z</span> = (<span class="bar"><span class="math-var">X</span></span> - 2.0) / (<span class="math-var">S</span>/<span class="math-symbol">√</span>51). Calculated <span class="math-var">z</span> = 3.04.</li>
+            <li>P-value (upper-tailed): P = <span class="math-op">P</span>(<span class="math-var">Z</span> ≥ 3.04 | <span class="math-var">H</span><sub>0</sub> true) = 1 - <span class="math-op">Φ</span>(3.04) = 1 - 0.9988 = 0.0012.</li>
+            <li>Decision: P-value (0.0012) ≤ α (0.01). Reject <span class="math-var">H</span><sub>0</sub>.</li>
+            <li>Conclusion: Compelling evidence (at α=0.01) that true average zinc mass exceeds 2.0 g.</li>
+        </ul>
+
+        <p><strong>Errors in Hypothesis Testing (Page 317)</strong></p>
+        <p>Two possible errors:</p>
+        <ul>
+            <li><strong>Type I Error:</strong> Rejecting <span class="math-var">H</span><sub>0</sub> when <span class="math-var">H</span><sub>0</sub> is true. (Convicting the innocent).</li>
+            <li><strong>Type II Error:</strong> Failing to reject <span class="math-var">H</span><sub>0</sub> when <span class="math-var">H</span><sub>0</sub> is false (i.e., <span class="math-var">H</span><sub>a</sub> is true). (Letting the guilty go free).</li>
+        </ul>
+        <p><strong>Probabilities of Errors: α and β</strong></p>
+        <ul>
+            <li><strong>α (Alpha):</strong> Probability of Type I error. <span class="math-var">α</span> = P(Reject <span class="math-var">H</span><sub>0</sub> | <span class="math-var">H</span><sub>0</sub> true). This is the significance level.</li>
+            <li><strong>β (Beta):</strong> Probability of Type II error. <span class="math-var">β</span> = P(Fail to reject <span class="math-var">H</span><sub>0</sub> | <span class="math-var">H</span><sub>0</sub> false).
+                <ul><li><span class="math-var">β</span> depends on the specific value of the parameter within <span class="math-var">H</span><sub>a</sub>.</li></ul>
+            </li>
+        </ul>
+
+        <p><strong>Example 8.4: Bumper Crashes (Pages 318-319)</strong></p>
+        <ul>
+            <li>Test <span class="math-var">H</span><sub>0</sub>: <span class="math-var">p</span> = 0.25 vs <span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> > 0.25. <span class="math-var">n</span> = 20. Test statistic <span class="math-var">X</span> = number no-damage.</li>
+            <li>Decision Rule (approx. α=0.10): Reject <span class="math-var">H</span><sub>0</sub> if <span class="math-var">X</span> ≥ 8. (Actual α = <span class="math-op">P</span>(<span class="math-var">X</span> ≥ 8 | <span class="math-var">p</span>=0.25) = 0.102).</li>
+            <li>Calculating β: Depends on true <span class="math-var">p'</span> > 0.25. Fail to reject if <span class="math-var">X</span> ≤ 7.
+                <ul>
+                    <li>If <span class="math-var">p'</span> = 0.30: <span class="math-var">β</span>(0.30) = P(<span class="math-var">X</span> ≤ 7 | <span class="math-var">p</span>=0.30) = <span class="math-op">B</span>(7; 20, 0.30) = 0.772 (High).</li>
+                    <li>If <span class="math-var">p'</span> = 0.40: <span class="math-var">β</span>(0.40) = P(<span class="math-var">X</span> ≤ 7 | <span class="math-var">p</span>=0.40) = <span class="math-op">B</span>(7; 20, 0.40) = 0.416.</li>
+                    <li>If <span class="math-var">p'</span> = 0.50: <span class="math-var">β</span>(0.50) = P(<span class="math-var">X</span> ≤ 7 | <span class="math-var">p</span>=0.50) = <span class="math-op">B</span>(7; 20, 0.50) = 0.132.</li>
+                </ul>
+            </li>
+             <li>Observation: β decreases as true <span class="math-var">p'</span> gets further from null <span class="math-var">p</span><sub>0</sub>. High β here due to small <span class="math-var">n</span>.</li>
+        </ul>
+
+        <p><strong>Example 8.5: Paint Drying Time (Pages 319-321)</strong></p>
+        <ul>
+             <li>Test <span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 75 vs <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> < 75. Normal pop, <span class="math-var">σ</span>=9, <span class="math-var">n</span>=25.</li>
+             <li>Test Statistic: <span class="math-var">Z</span> = (<span class="bar"><span class="math-var">X</span></span> - 75) / (9/<span class="math-symbol">√</span>25) = (<span class="bar"><span class="math-var">X</span></span> - 75) / 1.8.</li>
+             <li>Decision Rule (α=0.01): Reject <span class="math-var">H</span><sub>0</sub> if calculated <span class="math-var">z</span> ≤ -2.33. (Equivalent to rejecting if <span class="bar"><span class="math-var">X</span></span> ≤ 70.8). Fail to reject if <span class="bar"><span class="math-var">X</span></span> > 70.8.</li>
+             <li>Calculating α: α = P(<span class="math-var">Z</span> ≤ -2.33 | <span class="math-var">μ</span>=75) = 0.01.</li>
+             <li>Calculating β: Depends on true <span class="math-var">μ'</span> < 75.
+                 <ul>
+                     <li>If <span class="math-var">μ'</span> = 72: <span class="math-var">β</span>(72) = P(Fail <span class="math-var">H</span><sub>0</sub> | <span class="math-var">μ</span>=72) = P(<span class="bar"><span class="math-var">X</span></span> > 70.8 | <span class="math-var">μ</span>=72) = P(<span class="math-var">Z</span> > (70.8-72)/1.8) = P(<span class="math-var">Z</span> > -0.67) = 1 - <span class="math-op">Φ</span>(-0.67) = 0.7486.</li>
+                     <li>If <span class="math-var">μ'</span> = 70: <span class="math-var">β</span>(70) = P(<span class="bar"><span class="math-var">X</span></span> > 70.8 | <span class="math-var">μ</span>=70) = P(<span class="math-var">Z</span> > (70.8-70)/1.8) = P(<span class="math-var">Z</span> > 0.44) = 1 - <span class="math-op">Φ</span>(0.44) = 0.3300.</li>
+                     <li>If <span class="math-var">μ'</span> = 67: <span class="math-var">β</span>(67) = P(<span class="bar"><span class="math-var">X</span></span> > 70.8 | <span class="math-var">μ</span>=67) = P(<span class="math-var">Z</span> > (70.8-67)/1.8) = P(<span class="math-var">Z</span> > 2.11) = 1 - <span class="math-op">Φ</span>(2.11) = 0.0174.</li>
+                 </ul>
+            </li>
+             <li>Observation: β decreases as true <span class="math-var">μ'</span> moves further below null <span class="math-var">μ</span><sub>0</sub>. (See Figure 8.3).</li>
+        </ul>
+
+        <p><strong>Relationship Between α and β (Page 322)</strong></p>
+        <ul>
+            <li><strong>Proposition:</strong> For fixed <span class="math-var">n</span>, decreasing α increases β.</li>
+            <li><strong>Trade-off:</strong> Can't make both arbitrarily small without increasing <span class="math-var">n</span>.</li>
+            <li><strong>Practical Approach:</strong> Choose largest tolerable α (e.g., 0.05) to minimize β. If β still too high, increase <span class="math-var">n</span>.</li>
+        </ul>
+        <p><strong>Proposition: Significance Level α = P(Type I error) (Page 322)</strong></p>
+        <p>The test procedure "Reject <span class="math-var">H</span><sub>0</sub> if P-value ≤ <span class="math-var">α</span>" has P(Type I error) = <span class="math-var">α</span>.</p>
+
+        <p><strong>Some Further Comments on the P-Value (Page 323)</strong></p>
+        <ul>
+            <li><strong>Observed Significance Level (OSL):</strong> P-value is the smallest α at which <span class="math-var">H</span><sub>0</sub> would be rejected.</li>
+            <li><strong>Reporting:</strong> Reporting the P-value is more informative than just Reject/Fail to Reject. Allows readers to use their own α.</li>
+        </ul>
+
+        <h2>Section 8.2: z Tests for Hypotheses about a Population Mean</h2>
+
+        <p><strong>Case 1: Normal Population Distribution with Known σ (Page 327)</strong></p>
+        <ul>
+            <li>Assumptions: Population normal, <span class="math-var">σ</span> known.</li>
+            <li>Hypotheses: <span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = <span class="math-var">μ</span><sub>0</sub> vs. <span class="math-var">H</span><sub>a</sub> (> or < or ≠ <span class="math-var">μ</span><sub>0</sub>).</li>
+            <li>Test Statistic: <span class="math-var">Z</span> = (<span class="bar"><span class="math-var">X</span></span> - <span class="math-var">μ</span><sub>0</sub>) / (<span class="math-var">σ</span>/<span class="math-symbol">√</span><span class="math-var">n</span>). Follows N(0,1) if <span class="math-var">H</span><sub>0</sub> true.</li>
+            <li>P-value Calculation (using calculated <span class="math-var">z</span> from sample <span class="bar"><span class="math-var">x</span></span>):
+                <ul>
+                    <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> > <span class="math-var">μ</span><sub>0</sub>: P = 1 - <span class="math-op">Φ</span>(<span class="math-var">z</span>)</li>
+                    <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> < <span class="math-var">μ</span><sub>0</sub>: P = <span class="math-op">Φ</span>(<span class="math-var">z</span>)</li>
+                    <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> ≠ <span class="math-var">μ</span><sub>0</sub>: P = 2 * [1 - <span class="math-op">Φ</span>(|<span class="math-var">z</span>|)]</li>
+                </ul>
+            </li>
+            <li>Decision: Reject <span class="math-var">H</span><sub>0</sub> if P-value ≤ <span class="math-var">α</span>.</li>
+        </ul>
+        <p><strong>Recommended Steps for Hypothesis Testing (Page 329):</strong></p>
+        <ol>
+             <li>Identify parameter (<span class="math-var">μ</span>).</li>
+             <li>State <span class="math-var">H</span><sub>0</sub> (<span class="math-var">μ</span> = <span class="math-var">μ</span><sub>0</sub>).</li>
+             <li>State <span class="math-var">H</span><sub>a</sub> (> or < or ≠).</li>
+             <li>Give test statistic formula (<span class="math-var">Z</span>).</li>
+             <li>Compute sample quantities and calculate test statistic value (<span class="math-var">z</span>).</li>
+             <li>Determine P-value.</li>
+             <li>Compare P-value to α and state conclusion.</li>
+        </ol>
+
+        <p><strong>Example 8.6: Sprinkler Activation Temperature (Page 329)</strong></p>
+        <ul>
+            <li><span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 130°F vs. <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> ≠ 130°F. Assume normal, <span class="math-var">σ</span>=1.5°F.</li>
+            <li>Data: <span class="math-var">n</span>=9, <span class="bar"><span class="math-var">x</span></span>=131.08°F.</li>
+            <li><span class="math-var">z</span> = (131.08 - 130) / (1.5 / <span class="math-symbol">√</span>9) = 2.16.</li>
+            <li>P-value (two-tailed): P = 2 * [1 - <span class="math-op">Φ</span>(2.16)] = 0.0308.</li>
+            <li>Decision (α = 0.01): P-value (0.0308) > α (0.01). Fail to reject <span class="math-var">H</span><sub>0</sub>.</li>
+            <li>Conclusion: At α=0.01, data does not provide strong evidence that true average differs from 130°F.</li>
+        </ul>
+
+        <p><strong>β and Sample Size Determination (σ known) (Pages 330-331)</strong></p>
+        <ul>
+            <li>Formulas exist for <span class="math-var">β</span> (Type II error prob.) for a specific alternative <span class="math-var">μ'</span>.
+                <ul>
+                    <li>For <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> > <span class="math-var">μ</span><sub>0</sub>:
+                         <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\beta(\mu') = \Phi\left(z_\alpha + \frac{\mu_0 - \mu'}{\sigma/\sqrt{n}}\right)}" title="Click to copy LaTeX">
+                             <i>β</i>(<i>μ'</i>) = Φ<span class="bracket">(</span> <i>z</i><sub><i>α</i></sub> +
+                             <span class="fraction">
+                                 <span class="numerator"><i>μ</i><sub>0</sub> − <i>μ'</i></span>
+                                 <span class="denominator"><i>σ</i>/<span class="math-symbol">√</span><i>n</i></span>
+                             </span> <span class="bracket">)</span>
+                         </div>
+                    </li>
+                    <li>Similar formulas for lower and two-tailed tests.</li>
+                </ul>
+            </li>
+             <li>Formulas exist for <span class="math-var">n</span> needed for specified α and β(μ').
+                 <ul>
+                     <li>One-tailed:
+                          <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{n = \left( \frac{\sigma(z_\alpha + z_\beta)}{\mu_0 - \mu'} \right)^2}" title="Click to copy LaTeX">
+                               <i>n</i> = <span class="bracket">[</span>
+                               <span class="fraction">
+                                   <span class="numerator"><i>σ</i>(<i>z</i><sub><i>α</i></sub> + <i>z</i><sub><i>β</i></sub>)</span>
+                                   <span class="denominator"><i>μ</i><sub>0</sub> − <i>μ'</i></span>
+                               </span>
+                               <span class="bracket">]</span><sup>2</sup>
+                          </div>
+                    </li>
+                     <li>Two-tailed (approx):
+                          <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{n \approx \left( \frac{\sigma(z_{\alpha/2} + z_\beta)}{\mu_0 - \mu'} \right)^2}" title="Click to copy LaTeX">
+                              <i>n</i> ≈ <span class="bracket">[</span>
+                              <span class="fraction">
+                                  <span class="numerator"><i>σ</i>(<i>z</i><sub><i>α</i>/2</sub> + <i>z</i><sub><i>β</i></sub>)</span>
+                                  <span class="denominator"><i>μ</i><sub>0</sub> − <i>μ'</i></span>
+                              </span>
+                              <span class="bracket">]</span><sup>2</sup>
+                          </div>
+                     </li>
+                     <li>(Here <span class="math-var">z</span><sub><span class="math-var">β</span></sub> cuts off area β in upper tail, e.g., <span class="math-var">z</span><sub>.10</sub>=1.28).</li>
+                 </ul>
+            </li>
+        </ul>
+
+        <p><strong>Example 8.7: Tire Tread Life (Page 331)</strong></p>
+        <ul>
+            <li><span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 30000 vs <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> > 30000. Normal, <span class="math-var">σ</span>=1500.</li>
+            <li>Find β if <span class="math-var">μ'</span>=31000, <span class="math-var">n</span>=16, α=0.01 (<span class="math-var">z</span><sub>.01</sub>=2.33).
+                 <span class="math-var">β</span>(31000) = <span class="math-op">Φ</span>(2.33 + (30000 - 31000) / (1500/<span class="math-symbol">√</span>16)) = <span class="math-op">Φ</span>(-0.34) = 0.3669.
+            </li>
+             <li>Find <span class="math-var">n</span> for α=0.01, β(31000)=0.10 (<span class="math-var">z</span><sub>.10</sub>=1.28).
+                 <span class="math-var">n</span> = [ 1500(2.33 + 1.28) / (30000 - 31000) ]² = 29.32. Need <span class="math-var">n</span> = 30.
+             </li>
+        </ul>
+
+        <p><strong>Case 2: Large-Sample Tests (σ Unknown) (Pages 331-332)</strong></p>
+        <ul>
+            <li>Assumptions: <span class="math-var">n</span> large (<span class="math-var">n</span>>40), <span class="math-var">σ</span> unknown. No specific population distribution shape needed.</li>
+            <li>Test Statistic: Replace <span class="math-var">σ</span> with sample <span class="math-var">S</span>.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{Z = \frac{\bar{X} - \mu_0}{S/\sqrt{n}}}" title="Click to copy LaTeX">
+                     <i>Z</i> =
+                     <span class="fraction">
+                        <span class="numerator"><span class="bar"><i>X</i></span> − <i>μ</i><sub>0</sub></span>
+                        <span class="denominator"><i>S</i>/<span class="math-symbol">√</span><i>n</i></span>
+                     </span>
+                </div>
+                 <span class="math-var">Z</span> is approx. N(0,1) if <span class="math-var">H</span><sub>0</sub> true.
+            </li>
+            <li>Procedure: Same as Case 1, using <span class="math-var">S</span> to calculate <span class="math-var">z</span>. Conclusions are approximate.</li>
+        </ul>
+
+        <p><strong>Example 8.8: Dynamic Cone Penetrometer (DCP) (Pages 332-333)</strong></p>
+        <ul>
+            <li><span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 30 vs <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> < 30.</li>
+            <li>Data: <span class="math-var">n</span>=52 (large), <span class="bar"><span class="math-var">x</span></span>=28.76, <span class="math-var">s</span>=12.2647.</li>
+            <li><span class="math-var">z</span> = (28.76 - 30) / (12.2647 / <span class="math-symbol">√</span>52) = -0.73.</li>
+            <li>P-value (lower-tailed): P = <span class="math-op">Φ</span>(-0.73) = 0.2327.</li>
+            <li>Decision (α = 0.05): P-value (0.2327) > α (0.05). Fail to reject <span class="math-var">H</span><sub>0</sub>.</li>
+            <li>Conclusion: Not compelling evidence that true average DCP is less than 30.</li>
+        </ul>
+
+        <h2>Section 8.3: The One-Sample t Test (Page 335)</h2>
+        <p>Applies when <span class="math-var">n</span> is small, <span class="math-var">σ</span> is unknown, but population is assumed normal.</p>
+        <ul>
+            <li>Motivation: Z statistic using S is not N(0,1) for small n.</li>
+            <li>Test Statistic:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{T = \frac{\bar{X} - \mu_0}{S/\sqrt{n}}}" title="Click to copy LaTeX">
+                     <i>T</i> =
+                     <span class="fraction">
+                        <span class="numerator"><span class="bar"><i>X</i></span> − <i>μ</i><sub>0</sub></span>
+                        <span class="denominator"><i>S</i>/<span class="math-symbol">√</span><i>n</i></span>
+                     </span>
+                </div>
+            </li>
+             <li>Distribution when <span class="math-var">H</span><sub>0</sub> is true: <span class="math-var">T</span> follows a <strong>t distribution</strong> with <span class="math-var">n</span>-1 degrees of freedom (df).</li>
+             <li>Procedure: Use t-distribution for P-values.</li>
+             <li>P-value Calculation (using calculated <span class="math-var">t</span> from sample):
+                 <ul>
+                     <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> > <span class="math-var">μ</span><sub>0</sub>: P = P(<span class="math-var">T</span> ≥ <span class="math-var">t</span>) (Area right of <span class="math-var">t</span> under t<sub>n-1</sub> curve)</li>
+                     <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> < <span class="math-var">μ</span><sub>0</sub>: P = P(<span class="math-var">T</span> ≤ <span class="math-var">t</span>) (Area left of <span class="math-var">t</span> under t<sub>n-1</sub> curve)</li>
+                     <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> ≠ <span class="math-var">μ</span><sub>0</sub>: P = 2 * P(<span class="math-var">T</span> ≥ |<span class="math-var">t</span>|) (Twice the area in tail beyond |<span class="math-var">t</span>|)</li>
+                 </ul>
+             </li>
+             <li>Use t-tables (Appendix Table A.8) or software for P-values.</li>
+        </ul>
+
+        <p><strong>Example 8.9: Carbon Nanofiber Failure Stress (Page 337)</strong></p>
+        <ul>
+            <li><span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 500 MPa vs. <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> > 500 MPa. Assume normal pop.</li>
+            <li>Data: <span class="math-var">n</span>=19, <span class="bar"><span class="math-var">x</span></span>=562.68, <span class="math-var">s</span>=180.874.</li>
+            <li><span class="math-var">t</span> = (562.68 - 500) / (180.874 / <span class="math-symbol">√</span>19) = 1.51. df=18.</li>
+            <li>P-value (upper-tailed): P = P(<span class="math-var">T</span> ≥ 1.51 | df=18). From Table A.8, 0.063 < P < 0.075. (Minitab: P=0.074).</li>
+            <li>Decision (α = 0.05): P-value (≈0.074) > α (0.05). Fail to reject <span class="math-var">H</span><sub>0</sub>.</li>
+            <li>Conclusion: Insufficient evidence at α=0.05 to conclude true average stress > 500 MPa.</li>
+        </ul>
+
+        <p><strong>Example 8.10: Time Perception After Smoking Abstinence (Page 338)</strong></p>
+        <ul>
+            <li><span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 45 sec vs. <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> ≠ 45 sec. Assume normal pop.</li>
+            <li>Data: <span class="math-var">n</span>=20, <span class="bar"><span class="math-var">x</span></span>=59.30, <span class="math-var">s</span>=9.84.</li>
+            <li><span class="math-var">t</span> = (59.30 - 45) / (9.84 / <span class="math-symbol">√</span>20) = 6.50. df=19.</li>
+            <li>P-value (two-tailed): P = 2 * P(<span class="math-var">T</span> ≥ 6.50 | df=19) ≈ 0.</li>
+            <li>Decision (α = 0.05): P-value (≈0) ≤ α (0.05). Reject <span class="math-var">H</span><sub>0</sub>.</li>
+            <li>Conclusion: Very strong evidence that true average perceived time differs from 45 sec.</li>
+        </ul>
+
+        <p><strong>β and Sample Size Determination for t-Tests (Pages 338-340)</strong></p>
+        <ul>
+            <li>Calculating β for t-tests is complex (involves non-central t-distribution).</li>
+            <li>Use <strong>Operating Characteristic (OC) Curves</strong> (Appendix Table A.17) or software.
+                <ul><li>OC curves plot β vs. <span class="math-var">d</span> = |<span class="math-var">μ</span><sub>0</sub> - <span class="math-var">μ'</span>| / <span class="math-var">σ</span> (requires estimate of <span class="math-var">σ</span>).</li></ul>
+            </li>
+             <li><strong>Power = 1 - β</strong> (probability of correctly rejecting a false <span class="math-var">H</span><sub>0</sub>). Software often works with power.</li>
+             <li>Can use OC curves or software to find <span class="math-var">n</span> for desired α, β, <span class="math-var">μ'</span>, and estimated <span class="math-var">σ</span>.</li>
+        </ul>
+
+        <p><strong>Example 8.11: Voltage Drop Test Power (Pages 340-341)</strong></p>
+        <ul>
+            <li><span class="math-var">H</span><sub>0</sub>: <span class="math-var">μ</span> = 2.5 vs <span class="math-var">H</span><sub>a</sub>: <span class="math-var">μ</span> > 2.5. α=0.05. Guess <span class="math-var">σ</span>=0.100.</li>
+            <li>Find β if <span class="math-var">μ'</span> = 2.6, <span class="math-var">n</span>=10 (df=9). <span class="math-var">d</span> = |2.5-2.6|/0.1 = 1.0. From OC curve, β ≈ 0.1.</li>
+            <li>Find <span class="math-var">n</span> for β=0.05 at <span class="math-var">μ'</span>=2.6 (<span class="math-var">d</span>=1.0). From OC curve, need df≈14, so <span class="math-var">n</span>=15. (Minitab gives n=13).</li>
+        </ul>
+
+        <p><strong>Variation in P-values (Page 341)</strong></p>
+        <ul>
+            <li>P-value is a random variable.</li>
+            <li>If <span class="math-var">H</span><sub>0</sub> true, P-value distribution is Uniform(0, 1).</li>
+            <li>If <span class="math-var">H</span><sub>0</sub> false, P-value distribution concentrated near 0.</li>
+            <li>P-values near α may not be reproducible.</li>
+        </ul>
+
+        <h2>Section 8.4: Tests Concerning a Population Proportion (Page 346)</h2>
+        <p>Testing hypotheses about population proportion <span class="math-var">p</span>.</p>
+
+        <p><strong>Large-Sample Tests (Page 346)</strong></p>
+        <ul>
+            <li>Assumptions: <span class="math-var">n</span> large (check <span class="math-var">np</span><sub>0</sub> ≥ 10 and <span class="math-var">n</span>(1-<span class="math-var">p</span><sub>0</sub>) ≥ 10).</li>
+            <li>Hypotheses: <span class="math-var">H</span><sub>0</sub>: <span class="math-var">p</span> = <span class="math-var">p</span><sub>0</sub> vs. <span class="math-var">H</span><sub>a</sub> (> or < or ≠ <span class="math-var">p</span><sub>0</sub>).</li>
+            <li>Rationale: <span class="hat"><span class="math-var">p</span></span> ≈ Normal. If <span class="math-var">H</span><sub>0</sub> true, E(<span class="hat"><span class="math-var">p</span></span>)=<span class="math-var">p</span><sub>0</sub>, StdDev = <span class="math-var">σ</span><sub>0</sub> = <span class="math-symbol">√</span>[<span class="math-var">p</span><sub>0</sub>(1-<span class="math-var">p</span><sub>0</sub>)/<span class="math-var">n</span>].</li>
+            <li>Test Statistic: Standardize <span class="hat"><span class="math-var">p</span></span> using null value <span class="math-var">p</span><sub>0</sub> in std dev:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{Z = \frac{\hat{p} - p_0}{\sqrt{p_0(1-p_0)/n}}}" title="Click to copy LaTeX">
+                      <i>Z</i> =
+                      <span class="fraction">
+                         <span class="numerator"><span class="hat"><i>p</i></span> − <i>p</i><sub>0</sub></span>
+                         <span class="denominator"><span class="sqrt">√</span><span class="sqrt-content"><span class="bracket">[</span><i>p</i><sub>0</sub>(1−<i>p</i><sub>0</sub>)/<i>n</i><span class="bracket">]</span></span></span>
+                      </span>
+                 </div>
+                  <span class="math-var">Z</span> is approx. N(0,1) if <span class="math-var">H</span><sub>0</sub> true.
+            </li>
+            <li>P-value Calculation (using calculated <span class="math-var">z</span> from sample <span class="hat"><span class="math-var">p</span></span>):
+                <ul>
+                    <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> > <span class="math-var">p</span><sub>0</sub>: P = 1 - <span class="math-op">Φ</span>(<span class="math-var">z</span>)</li>
+                    <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> < <span class="math-var">p</span><sub>0</sub>: P = <span class="math-op">Φ</span>(<span class="math-var">z</span>)</li>
+                    <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> ≠ <span class="math-var">p</span><sub>0</sub>: P = 2 * [1 - <span class="math-op">Φ</span>(|<span class="math-var">z</span>|)]</li>
+                </ul>
+            </li>
+            <li>Decision: Reject <span class="math-var">H</span><sub>0</sub> if P-value ≤ <span class="math-var">α</span>.</li>
+        </ul>
+
+        <p><strong>Example 8.13: Texting During Exams (Page 348)</strong></p>
+        <ul>
+             <li><span class="math-var">H</span><sub>0</sub>: <span class="math-var">p</span> = 0.05 vs. <span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> > 0.05.</li>
+             <li>Data: <span class="math-var">n</span>=267, <span class="math-var">x</span>=27. <span class="hat"><span class="math-var">p</span></span> = 0.1011. Validity checks ok.</li>
+             <li><span class="math-var">z</span> = (0.1011 - 0.05) / <span class="math-symbol">√</span>[0.05(0.95)/267] = 3.84.</li>
+             <li>P-value (upper-tailed): P = 1 - <span class="math-op">Φ</span>(3.84) ≈ 0.00006.</li>
+             <li>Decision (α = 0.001): P-value (≈0.00006) ≤ α (0.001). Reject <span class="math-var">H</span><sub>0</sub>.</li>
+             <li>Conclusion: Very strong evidence proportion > 5%.</li>
+        </ul>
+
+        <p><strong>β and Sample Size Determination for z Test for p (Pages 348-349)</strong></p>
+        <ul>
+            <li>Formulas exist for <span class="math-var">β</span>(p') (similar to z-test for μ, but more complex standard deviation under <span class="math-var">H</span><sub>a</sub>).</li>
+            <li>Formulas exist for <span class="math-var">n</span> for specified α, β, p₀, p'.
+                <ul>
+                    <li>One-tailed:
+                         <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{n = \left( \frac{z_\alpha\sqrt{p_0(1-p_0)} + z_\beta\sqrt{p'(1-p')}}{p' - p_0} \right)^2}" title="Click to copy LaTeX">
+                             <i>n</i> = <span class="bracket">[</span>
+                             <span class="fraction">
+                                 <span class="numerator"><i>z</i><sub><i>α</i></sub><span class="sqrt">√</span><span class="sqrt-content"><i>p</i><sub>0</sub>(1−<i>p</i><sub>0</sub>)</span> + <i>z</i><sub><i>β</i></sub><span class="sqrt">√</span><span class="sqrt-content"><i>p'</i>(1−<i>p'</i>)</span></span>
+                                 <span class="denominator"><i>p'</i> − <i>p</i><sub>0</sub></span>
+                             </span>
+                             <span class="bracket">]</span><sup>2</sup>
+                         </div>
+                    </li>
+                     <li>Two-tailed (approx):
+                          <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{n \approx \left( \frac{z_{\alpha/2}\sqrt{p_0(1-p_0)} + z_\beta\sqrt{p'(1-p')}}{p' - p_0} \right)^2}" title="Click to copy LaTeX">
+                              <i>n</i> ≈ <span class="bracket">[</span>
+                              <span class="fraction">
+                                  <span class="numerator"><i>z</i><sub><i>α</i>/2</sub><span class="sqrt">√</span><span class="sqrt-content"><i>p</i><sub>0</sub>(1−<i>p</i><sub>0</sub>)</span> + <i>z</i><sub><i>β</i></sub><span class="sqrt">√</span><span class="sqrt-content"><i>p'</i>(1−<i>p'</i>)</span></span>
+                                  <span class="denominator"><i>p'</i> − <i>p</i><sub>0</sub></span>
+                              </span>
+                              <span class="bracket">]</span><sup>2</sup>
+                          </div>
+                     </li>
+                </ul>
+            </li>
+        </ul>
+
+        <p><strong>Example 8.14: Package Delivery Service (Page 349)</strong></p>
+        <ul>
+             <li><span class="math-var">H</span><sub>0</sub>: <span class="math-var">p</span> = 0.9 vs <span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> < 0.9. α=0.01. n=225.</li>
+             <li>Find β if true <span class="math-var">p'</span> = 0.8. Using formula, β(0.8) ≈ 0.0228.</li>
+             <li>Find <span class="math-var">n</span> for α=0.01, β(0.8)=0.01 (<span class="math-var">z</span><sub>.01</sub>=2.33).
+                 <span class="math-var">n</span> = [ (2.33<span class="math-symbol">√</span>0.9(0.1) + 2.33<span class="math-symbol">√</span>0.8(0.2)) / (0.8 - 0.9) ]² ≈ 266.
+             </li>
+        </ul>
+
+        <p><strong>Small-Sample Tests (Page 349)</strong></p>
+        <ul>
+            <li>Use when large-sample conditions fail (<span class="math-var">np</span><sub>0</sub><10 or <span class="math-var">n</span>(1-<span class="math-var">p</span><sub>0</sub>)<10).</li>
+            <li>Use the <strong>Binomial distribution</strong> directly.</li>
+            <li>Test Statistic: <span class="math-var">X</span> = number of successes.</li>
+            <li>P-value Calculation (using Binomial probabilities):
+                 <ul>
+                     <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> > <span class="math-var">p</span><sub>0</sub>: P = P(<span class="math-var">X</span> ≥ <span class="math-var">x</span> | <span class="math-var">p</span>=<span class="math-var">p</span><sub>0</sub>)</li>
+                     <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> < <span class="math-var">p</span><sub>0</sub>: P = P(<span class="math-var">X</span> ≤ <span class="math-var">x</span> | <span class="math-var">p</span>=<span class="math-var">p</span><sub>0</sub>)</li>
+                     <li><span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> ≠ <span class="math-var">p</span><sub>0</sub>: P = 2 * min[ P(<span class="math-var">X</span> ≤ <span class="math-var">x</span>), P(<span class="math-var">X</span> ≥ <span class="math-var">x</span>) ] (calculated at <span class="math-var">p</span>=<span class="math-var">p</span><sub>0</sub>)</li>
+                 </ul>
+            </li>
+            <li>Achieving α: Due to discrete nature, choose rejection rule giving α closest to target without exceeding it.</li>
+        </ul>
+
+        <p><strong>Example 8.15: Plastic Trash Can Warranty (Page 350)</strong></p>
+        <ul>
+            <li><span class="math-var">H</span><sub>0</sub>: <span class="math-var">p</span> = 0.9 vs <span class="math-var">H</span><sub>a</sub>: <span class="math-var">p</span> < 0.9.</li>
+            <li>Data: <span class="math-var">n</span>=20. Test statistic <span class="math-var">X</span> = number surviving.</li>
+            <li>Achieving α ≈ 0.05: From Binomial(20, 0.9) table:
+                P(<span class="math-var">X</span> ≤ 15) = <span class="math-op">B</span>(15; 20, 0.9) = 0.043.
+                P(<span class="math-var">X</span> ≤ 16) = <span class="math-op">B</span>(16; 20, 0.9) = 0.133.
+                Choose rule: Reject <span class="math-var">H</span><sub>0</sub> if <span class="math-var">X</span> ≤ 15 (gives α=0.043).
+            </li>
+             <li>Calculating β: If true <span class="math-var">p'</span> = 0.8. Fail to reject if <span class="math-var">X</span> ≥ 16.
+                 <span class="math-var">β</span>(0.8) = P(<span class="math-var">X</span> ≥ 16 | <span class="math-var">p</span>=0.8) = 1 - <span class="math-op">B</span>(15; 20, 0.8) = 1 - 0.370 = 0.630. (High).
+             </li>
+        </ul>
+
+    </main>
+
+    <footer>
+        <!-- Empty Footer matching index style -->
+    </footer>
+
+    <script>
+        // Function to copy LaTeX code (including the color wrapper)
+        function copyFormulaLatex(element) {
+            const latexString = element.getAttribute('data-latex');
+            if (!latexString) {
+                console.error('No LaTeX data found for this element.');
+                return;
+            }
+            // Copy the latexString directly, including the \color{white}{} wrapper
+            navigator.clipboard.writeText(latexString).then(() => {
+                element.classList.add('copied');
+                const originalTitle = element.title;
+                element.title = 'Copied!';
+                setTimeout(() => {
+                    element.classList.remove('copied');
+                    element.title = originalTitle; // Restore original title
+                 }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy LaTeX: ', err);
+                alert('Failed to copy text. Check console (F12) for details.');
+            });
+        }
+    </script>
+
+</body></html>
