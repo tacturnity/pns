@@ -571,15 +571,15 @@
              </li>
              <li>Probability Statement: <span class="math-op">P</span>( 9.591 < 2<span class="math-var">λ</span><span class="math-symbol">Σ</span><span class="math-var">X</span><sub><span class="math-var">i</span></sub> < 34.170 ) = 0.95.</li>
              <li>Isolating λ: Divide by 2<span class="math-symbol">Σ</span><span class="math-var">X</span><sub><span class="math-var">i</span></sub>.
-                  <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{P\left( \frac{\chi^2_{1-\alpha/2, 2n}}{2\sum X_i} < \lambda < \frac{\chi^2_{\alpha/2, 2n}}{2\sum X_i} \right) = 1 - \alpha}" title="Click to copy LaTeX">
+                  <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{P\left( \frac{\chi^2_{1-\alpha/2, 2n}}{2\sum_{i=1}^{n} X_i} < \lambda < \frac{\chi^2_{\alpha/2, 2n}}{2\sum_{i=1}^{n} X_i} \right) = 1 - \alpha}" title="Click to copy LaTeX">
                       <span class="math-op">P</span><span class="bracket">(</span>
                       <span class="fraction">
                           <span class="numerator"><i>χ</i><sup>2</sup><sub>1−<i>α</i>/2, 2<i>n</i></sub></span>
-                          <span class="denominator">2<span class="sum-symbol-container"><span class="math-symbol" style="font-size:1em;">Σ</span></span><i>X</i><sub><i>i</i></sub></span>
+                          <span class="denominator">2<span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span><i>X</i><sub><i>i</i></sub></span>
                       </span> < <i>λ</i> <
                       <span class="fraction">
                            <span class="numerator"><i>χ</i><sup>2</sup><sub><i>α</i>/2, 2<i>n</i></sub></span>
-                           <span class="denominator">2<span class="sum-symbol-container"><span class="math-symbol" style="font-size:1em;">Σ</span></span><i>X</i><sub><i>i</i></sub></span>
+                           <span class="denominator">2<span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span><i>X</i><sub><i>i</i></sub></span>
                        </span>
                        <span class="bracket">)</span> = 1 − <i>α</i>
                   </div>
@@ -928,17 +928,15 @@
     </footer>
 
     <script>
-        // Function to copy LaTeX code
+        // Function to copy LaTeX code (including the color wrapper)
         function copyFormulaLatex(element) {
             const latexString = element.getAttribute('data-latex');
             if (!latexString) {
                 console.error('No LaTeX data found for this element.');
                 return;
             }
-            // Remove the color wrapper before copying to clipboard
-            const latexToCopy = latexString.replace(/^\\color{white}{(.*)}$/, '$1');
-
-            navigator.clipboard.writeText(latexToCopy).then(() => {
+            // Copy the latexString directly, including the \color{white}{} wrapper
+            navigator.clipboard.writeText(latexString).then(() => {
                 element.classList.add('copied');
                 const originalTitle = element.title;
                 element.title = 'Copied!';
