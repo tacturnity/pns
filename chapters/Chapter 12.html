@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 12: Simple Linear Regression and Correlation Summary</title>
+
+    <!-- Google Fonts - Roboto Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Keyframes for Animations (FadeIn) */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Fonts & Base Styling (from index theme) */
+        body {
+            font-family: 'Roboto Mono', monospace;
+            color: #e0e0e0; /* Light grey text for readability */
+            line-height: 1.7;
+            padding: 25px;
+            background-color: #1a1a1a; /* Simple dark background */
+            min-height: 100vh;
+        }
+
+        /* Headings (from index theme) */
+        h1, h2 {
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+            margin-bottom: 1.5em; /* Matches index */
+        }
+
+        h1 {
+            font-size: 2.4em; /* Matches index */
+            color: #ffffff; /* White heading */
+            font-weight: 700;
+            padding-bottom: 12px;
+            margin-top: 1.5em; /* Matches index */
+            margin-bottom: 1.5em; /* Matches index */
+            border-bottom: 2px solid #ffffff; /* White border */
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.1s;
+            letter-spacing: -0.5px; /* Matches index */
+        }
+
+        h2 {
+            font-size: 1.6em; /* Matches index */
+            color: #cccccc; /* Lighter grey subheading */
+            font-weight: 500;
+            margin-top: 30px; /* Retain some top margin for sections */
+            margin-bottom: 1.5em; /* Consistent bottom margin */
+            border-bottom: 1px solid #555555; /* Darker border for contrast */
+            padding-bottom: 5px;
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.3s; /* Staggered animation */
+        }
+
+        /* Main Content Area (from index theme) */
+        main {
+            max-width: 800px; /* Matches index */
+            margin: 40px auto; /* Matches index */
+            background-color: rgba(30, 30, 30, 0.85); /* Dark grey, slightly transparent */
+            padding: 35px 45px; /* Matches index */
+            border-radius: 10px; /* Matches index */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7); /* Matches index */
+            backdrop-filter: blur(6px); /* Matches index */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle light border */
+            animation: fadeIn 0.8s ease-out both;
+            animation-delay: 0.2s;
+        }
+
+        /* Paragraph and List styling */
+        p {
+            margin-bottom: 1em;
+            color: inherit; /* Ensure uses body color */
+        }
+
+        ul, ol {
+            margin-left: 25px; /* Slightly more indent */
+            list-style: disc; /* Use standard disc bullets */
+            margin-bottom: 1em;
+        }
+        ol {
+            list-style: decimal;
+        }
+
+        li {
+            margin-bottom: 8px; /* Slightly more space between list items */
+        }
+
+        strong, .math-var { /* Style for emphasized text and math variables */
+            font-weight: 500; /* Consistent with index headings/links */
+            color: #ffffff; /* Brighter white for emphasis */
+        }
+        .math-var { /* Ensure italics for math variables */
+             font-style: italic;
+             margin: 0 2px; /* Consistent small spacing */
+        }
+        .math-symbol { /* Non-italicized symbols like sum, pi, sqrt */
+            font-style: normal;
+            margin: 0 2px;
+            color: #ffffff;
+        }
+        .math-op { /* For operators like E, V, P, L, ln, max */
+            font-style: normal;
+            margin: 0 2px;
+            color: #ffffff;
+        }
+
+
+        /* Formula Container Styling (Adapting index list item styles) */
+        .formula-container {
+            margin: 15px 0 20px 0; /* Adjusted margins */
+            padding: 15px 20px; /* Adjusted padding */
+            background-color: rgba(45, 45, 45, 0.9); /* Match index list item bg */
+            border-radius: 6px; /* Match index list item radius */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Default subtle border */
+            overflow-x: auto;
+            transition: background-color 0.3s ease, border-color 0.3s ease; /* Add border transition */
+            cursor: pointer;
+            font-size: 1.1em;
+            line-height: 1.5;
+            color: #e0e0e0; /* Text color inside formulas */
+            border-left: 4px solid transparent; /* Add placeholder for hover border like index list */
+            white-space: nowrap; /* Prevent wrapping inside formula */
+        }
+
+        .formula-container:hover {
+            background-color: rgba(60, 60, 60, 0.95); /* Match index list item hover bg */
+            border-left-color: #a6e3a1; /* GREEN hover border like index list */
+            border-color: rgba(166, 227, 161, 0.5); /* Slightly green border on hover */
+        }
+
+        .formula-container.copied {
+            background-color: rgba(166, 227, 161, 0.2); /* Transparent green background on copy */
+            border-color: #a6e3a1; /* Green border on copy */
+            border-left-color: #a6e3a1; /* Ensure left border stays green */
+        }
+
+        /* Style for math elements within formula containers */
+        .formula-container i, .formula-container .math-var { /* General italics within formulas */
+            font-style: italic;
+            margin: 0 1px;
+        }
+        .formula-container .math-op { /* Operators within formulas */
+            font-style: normal;
+            margin: 0 2px;
+        }
+        .formula-container .math-symbol { /* Symbols like sum, pi, sqrt within formulas */
+            font-style: normal;
+            margin: 0 2px;
+            font-size: 1.2em; /* Slightly larger for symbols */
+            vertical-align: middle;
+        }
+         .formula-container .hat { /* Style for hat accent */
+            position: relative;
+            display: inline-block;
+        }
+        .formula-container .hat::after {
+            content: '^';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -0.6em; /* Adjust position of hat */
+            text-align: center;
+            font-size: 0.8em;
+        }
+         .formula-container .tilde { /* Style for tilde accent */
+            position: relative;
+            display: inline-block;
+        }
+        .formula-container .tilde::after {
+            content: '~';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -0.6em; /* Adjust position of tilde */
+            text-align: center;
+            font-size: 0.8em;
+        }
+         .formula-container .bar { /* Style for bar accent */
+            position: relative;
+            display: inline-block;
+            padding-top: 0.1em; /* Add space for the bar */
+        }
+        .formula-container .bar::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -0.1em; /* Adjust position of bar */
+            border-top: 1px solid #e0e0e0;
+        }
+         .formula-container .sum-limits { /* Style for sum limits (visual only) */
+            display: block;
+            font-size: 0.7em;
+            line-height: 1;
+            text-align: center;
+        }
+         .formula-container .sum-symbol-container { /* Container for sum symbol and limits */
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 0.2em;
+         }
+
+        .formula-container sub, .formula-container sup {
+            line-height: 0;
+            font-size: 0.75em;
+            position: relative; /* Help positioning if needed */
+             top: -0.2em; /* Adjust baseline slightly for superscripts */
+        }
+         .formula-container sub {
+            top: 0.2em; /* Adjust baseline slightly for subscripts */
+        }
+        .formula-container .fraction {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            margin: 0 0.2em;
+        }
+        .formula-container .numerator {
+            display: block;
+            border-bottom: 1px solid #cccccc; /* Use light grey for fraction line */
+            padding-bottom: 2px;
+            line-height: 1.1;
+        }
+        .formula-container .denominator {
+            display: block;
+            padding-top: 2px;
+            line-height: 1.1;
+        }
+        .formula-container .bracket { /* Simple brackets */
+             font-size: 1.2em;
+             vertical-align: middle;
+             margin: 0 0.1em;
+        }
+        .formula-container .floor-bracket { /* Floor brackets */
+            font-size: 1.2em;
+            vertical-align: middle;
+            margin: 0 0.1em;
+            border-left: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+            padding: 0 0.1em;
+        }
+         .formula-container .floor-bracket-right {
+            border-left: none;
+            border-right: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+         }
+         .formula-container .sqrt { /* Square root symbol */
+            font-size: 1.2em;
+            vertical-align: middle;
+            margin-right: 0.1em;
+         }
+         .formula-container .sqrt-content { /* Content under square root */
+            border-top: 1px solid #cccccc;
+            padding-top: 0.1em;
+            display: inline-block; /* Keep content together */
+         }
+
+
+        /* Footer Styling (from index) */
+        footer {
+            text-align: center;
+            margin-top: 70px;
+            padding-bottom: 35px;
+            font-size: 0.85em;
+            color: #888888; /* Dim grey for footer */
+             animation: fadeIn 1s ease-out both;
+             animation-delay: 0.7s; /* Delay animation */
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Chapter 12: Simple Linear Regression and Correlation</h1>
+    </header>
+
+    <main>
+        <h2>Introduction (Page 487)</h2>
+        <p>
+            Previously, we compared parameters between different populations. <strong>Regression analysis</strong> studies the <strong>relationship</strong> between two (or more) variables, aiming to predict one (<span class="math-var">y</span>) from the other (<span class="math-var">x</span>).
+        </p>
+        <ul>
+            <li>
+                <strong>Deterministic Relationships:</strong> <span class="math-var">y</span> is completely determined by <span class="math-var">x</span>.
+                <ul>
+                    <li>Example: Cost <span class="math-var">y</span> = 25 + 0.3<span class="math-var">x</span> (miles).</li>
+                    <li>Example: Distance <span class="math-var">y</span> = <span class="math-var">v</span><sub>0</sub><span class="math-var">t</span> + (1/2)<span class="math-var">at</span>².</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Nondeterministic (Probabilistic) Relationships:</strong> Knowing <span class="math-var">x</span> doesn't perfectly determine <span class="math-var">y</span>, but helps predict it. There's scatter.
+                <ul>
+                    <li>Example: High school GPA (<span class="math-var">x</span>) vs. College GPA (<span class="math-var">y</span>).</li>
+                    <li>Other examples: Age vs. vocabulary; engine size vs. fuel efficiency.</li>
+                </ul>
+            </li>
+        </ul>
+        <p>This chapter focuses on modeling <strong>linear probabilistic relationships</strong>.</p>
+
+        <h2>12.1 The Simple Linear Regression Model (Page 488)</h2>
+        <ul>
+            <li>Deterministic Line: <span class="math-var">y</span> = <span class="math-var">β</span>₀ + <span class="math-var">β</span>₁<span class="math-var">x</span> (<span class="math-var">β</span>₁ = slope, <span class="math-var">β</span>₀ = y-intercept).</li>
+            <li>Probabilistic Model: Accounts for uncertainty in <span class="math-var">y</span> for a given <span class="math-var">x</span>.</li>
+            <li>Variable Roles:
+                <ul>
+                    <li><strong>Independent Variable (<span class="math-var">x</span>):</strong> Predictor, explanatory variable. Treated as fixed/given.</li>
+                    <li><strong>Dependent Variable (<span class="math-var">Y</span>):</strong> Response variable. Random for a fixed <span class="math-var">x</span>. We observe value <span class="math-var">y</span>.</li>
+                </ul>
+            </li>
+            <li>Data: <span class="math-var">n</span> pairs (<span class="math-var">x</span>₁, <span class="math-var">y</span>₁), ..., (<span class="math-var">x</span><sub>n</sub>, <span class="math-var">y</span><sub>n</sub>).</li>
+            <li><strong>Scatterplot:</strong> Plot of (<span class="math-var">x</span>ᵢ, <span class="math-var">y</span>ᵢ) pairs. First step to visualize the relationship.</li>
+        </ul>
+
+        <p><strong>Example 12.1: Ocular Surface Area (OSA) (Page 489)</strong></p>
+        <ul>
+            <li>Data: <span class="math-var">y</span>=OSA vs. <span class="math-var">x</span>=fissure width (<span class="math-var">n</span>=30).</li>
+            <li>Scatterplot (Fig 12.1): Shows positive, roughly linear relationship. Not deterministic (multiple <span class="math-var">y</span>'s for same <span class="math-var">x</span>).</li>
+        </ul>
+
+        <p><strong>Example 12.2: Arsenic Removal (Page 490)</strong></p>
+        <ul>
+            <li>Data: <span class="math-var">y</span>=arsenic removed (%) vs. <span class="math-var">x</span>=pH (<span class="math-var">n</span>=18).</li>
+            <li>Scatterplot (Fig 12.2a): Shows negative, approximately linear relationship.</li>
+            <li>(Fig 12.2b shows how poor axis choice can obscure patterns).</li>
+        </ul>
+
+        <p><strong>A Linear Probabilistic Model (Page 491)</strong></p>
+        <p><strong>Definition: The Simple Linear Regression Model (Page 491)</strong></p>
+        <p>The model equation is:</p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{Y = \beta_0 + \beta_1 x + \epsilon}" title="Click to copy LaTeX">
+            <i>Y</i> = <i>β</i>₀ + <i>β</i>₁ <i>x</i> + <i>ε</i> &nbsp;&nbsp;(Equation 12.1)
+        </div>
+        <p>Where:</p>
+        <ul>
+            <li><span class="math-var">β</span>₀: True intercept parameter.</li>
+            <li><span class="math-var">β</span>₁: True slope parameter.</li>
+            <li><span class="math-var">ε</span>: <strong>Random error term</strong> (deviation).</li>
+        </ul>
+        <p>Assumptions about the error term <span class="math-var">ε</span>:</p>
+        <ol>
+            <li><span class="math-op">E</span>(<span class="math-var">ε</span>) = 0 (Mean error is zero).</li>
+            <li><span class="math-op">V</span>(<span class="math-var">ε</span>) = <span class="math-var">σ</span>² (Variance is constant for all <span class="math-var">x</span> - <strong>homogeneity of variance</strong>).</li>
+            <li><span class="math-var">ε</span> is <strong>normally distributed</strong>.</li>
+            <li>Errors (<span class="math-var">ε</span>₁, ..., <span class="math-var">ε</span><sub>n</sub>) for different observations are <strong>independent</strong>.</li>
+        </ol>
+
+        <p><strong>Implications of the Model Assumptions (Page 492):</strong></p>
+        <ul>
+            <li>Mean of Y for a fixed x:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{E(Y | x) = \beta_0 + \beta_1 x}" title="Click to copy LaTeX">
+                     <span class="math-op">E</span>(<i>Y</i> | <i>x</i>) = <i>β</i>₀ + <i>β</i>₁ <i>x</i>
+                </div>
+                (The mean value of Y lies on the <strong>true regression line</strong>).
+            </li>
+            <li>Variance of Y for a fixed x:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{V(Y | x) = \sigma^2}" title="Click to copy LaTeX">
+                    <span class="math-op">V</span>(<i>Y</i> | <i>x</i>) = <i>σ</i>²
+                </div>
+                (The variance of Y is constant for all <span class="math-var">x</span>).
+            </li>
+            <li>Distribution of Y for a fixed x: <span class="math-var">Y</span> follows a <strong>normal distribution</strong> N(<span class="math-var">β</span>₀ + <span class="math-var">β</span>₁<span class="math-var">x</span>, <span class="math-var">σ</span>²).</li>
+            <li>(See Figure 12.4).</li>
+            <li><span class="math-var">σ</span>² measures inherent variability around the true line. Small <span class="math-var">σ</span>² means points are close to the line; large <span class="math-var">σ</span>² means more scatter. (See Figure 12.9).</li>
+        </ul>
+
+        <p><strong>Example 12.3: Stress vs. Time-to-Failure (Page 493)</strong></p>
+        <ul>
+            <li>Model: <span class="math-var">Y</span> = 65 − 1.2<span class="math-var">x</span> + <span class="math-var">ε</span>, with <span class="math-var">σ</span>=8 (<span class="math-var">σ</span>²=64).</li>
+            <li>For <span class="math-var">x</span>=20, <span class="math-op">E</span>(<span class="math-var">Y</span>|20)=41. <span class="math-var">Y</span>|(x=20) ~ N(41, 64).</li>
+            <li>For <span class="math-var">x</span>=25, <span class="math-op">E</span>(<span class="math-var">Y</span>|25)=35. <span class="math-var">Y</span>|(x=25) ~ N(35, 64).</li>
+            <li>P(<span class="math-var">Y</span> > 50 when <span class="math-var">x</span>=20) = P(<span class="math-var">Z</span> > (50-41)/8) = P(<span class="math-var">Z</span> > 1.13) ≈ 0.1292.</li>
+            <li>P(<span class="math-var">Y</span> > 50 when <span class="math-var">x</span>=25) = P(<span class="math-var">Z</span> > (50-35)/8) = P(<span class="math-var">Z</span> > 1.88) ≈ 0.0301.</li>
+            <li>Comparing Y₁ at x=25 and Y₂ at x=24: P(Y₁ > Y₂) ≈ 0.4562 (significant chance due to variability).</li>
+        </ul>
+
+        <h2>12.2 Estimating Model Parameters (Page 496)</h2>
+        <p>
+            Parameters <span class="math-var">β</span>₀, <span class="math-var">β</span>₁, and <span class="math-var">σ</span>² are unknown. We estimate them from sample data (<span class="math-var">x</span>ᵢ, <span class="math-var">y</span>ᵢ) assuming <span class="math-var">Y</span>ᵢ = <span class="math-var">β</span>₀ + <span class="math-var">β</span>₁<span class="math-var">x</span>ᵢ + <span class="math-var">ε</span>ᵢ.
+        </p>
+        <p>Goal: Find estimates <span class="hat"><span class="math-var">β</span></span>₀ and <span class="hat"><span class="math-var">β</span></span>₁ for the <strong>estimated regression line</strong> <span class="math-var">y</span> = <span class="hat"><span class="math-var">β</span></span>₀ + <span class="hat"><span class="math-var">β</span></span>₁<span class="math-var">x</span> that best fits the data.</p>
+
+        <p><strong>Principle of Least Squares (Page 497)</strong></p>
+        <ul>
+            <li><strong>Vertical Deviation (Residual):</strong> For a candidate line <span class="math-var">y</span> = <span class="math-var">b</span>₀ + <span class="math-var">b</span>₁<span class="math-var">x</span>, the residual for point (<span class="math-var">x</span>ᵢ, <span class="math-var">y</span>ᵢ) is <span class="math-var">y</span>ᵢ − (<span class="math-var">b</span>₀ + <span class="math-var">b</span>₁<span class="math-var">x</span>ᵢ).</li>
+            <li><strong>Sum of Squared Deviations (SSError):</strong> Sum the squares of these residuals:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{f(b_0, b_1) = \sum_{i=1}^{n} [y_i - (b_0 + b_1 x_i)]^2}" title="Click to copy LaTeX">
+                    <span class="math-var">f</span>(<span class="math-var">b</span>₀, <span class="math-var">b</span>₁) =
+                    <span class="sum-symbol-container">
+                        <span class="sum-limits">n</span>
+                        <span class="math-symbol">Σ</span>
+                        <span class="sum-limits">i=1</span>
+                    </span>
+                    <span class="bracket">[</span><i>y</i>ᵢ − (<i>b</i>₀ + <i>b</i>₁<i>x</i>ᵢ)<span class="bracket">]</span>²
+                </div>
+            </li>
+            <li><strong>Least Squares Principle:</strong> Choose <span class="math-var">b</span>₀ and <span class="math-var">b</span>₁ to minimize this sum.</li>
+            <li><strong>Least Squares Estimates (<span class="hat"><span class="math-var">β</span></span>₀, <span class="hat"><span class="math-var">β</span></span>₁):</strong> The values of <span class="math-var">b</span>₀, <span class="math-var">b</span>₁ that achieve the minimum.</li>
+            <li><strong>Estimated Regression Line (Least Squares Line):</strong> <span class="math-var">y</span> = <span class="hat"><span class="math-var">β</span></span>₀ + <span class="hat"><span class="math-var">β</span></span>₁<span class="math-var">x</span>.</li>
+        </ul>
+
+        <p><strong>Finding the Least Squares Estimates (Page 497):</strong></p>
+        <p>Calculus (minimizing <span class="math-var">f</span>(<span class="math-var">b</span>₀, <span class="math-var">b</span>₁)) leads to the <strong>normal equations</strong> which are solved to give:</p>
+        <p><strong>Proposition: Formulas for Least Squares Estimates (Page 498)</strong></p>
+        <p>Define summary statistics:</p>
+        <ul>
+            <li><div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{S_{xx} = \sum_{i=1}^{n} (x_i - \bar{x})^2 = \sum_{i=1}^{n} x_i^2 - \frac{(\sum_{i=1}^{n} x_i)^2}{n}}" title="Click to copy LaTeX">
+                    <i>S</i><sub><i>xx</i></sub> =
+                     <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> (<i>x</i>ᵢ − <span class="bar"><i>x</i></span>)² =
+                     <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> <i>x</i>ᵢ² −
+                     <span class="fraction">
+                        <span class="numerator">(<span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> <i>x</i>ᵢ)²</span>
+                        <span class="denominator"><i>n</i></span>
+                     </span>
+                </div>
+            </li>
+             <li><div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{S_{yy} = \sum_{i=1}^{n} (y_i - \bar{y})^2 = \sum_{i=1}^{n} y_i^2 - \frac{(\sum_{i=1}^{n} y_i)^2}{n}}" title="Click to copy LaTeX">
+                     <i>S</i><sub><i>yy</i></sub> =
+                      <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> (<i>y</i>ᵢ − <span class="bar"><i>y</i></span>)² =
+                      <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> <i>y</i>ᵢ² −
+                      <span class="fraction">
+                         <span class="numerator">(<span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> <i>y</i>ᵢ)²</span>
+                         <span class="denominator"><i>n</i></span>
+                      </span>
+                      &nbsp;&nbsp;(Total Sum of Squares, SST)
+                 </div>
+             </li>
+             <li><div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{S_{xy} = \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y}) = \sum_{i=1}^{n} x_i y_i - \frac{(\sum_{i=1}^{n} x_i)(\sum_{i=1}^{n} y_i)}{n}}" title="Click to copy LaTeX">
+                     <i>S</i><sub><i>xy</i></sub> =
+                      <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> (<i>x</i>ᵢ − <span class="bar"><i>x</i></span>)(<i>y</i>ᵢ − <span class="bar"><i>y</i></span>) =
+                      <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> <i>x</i>ᵢ <i>y</i>ᵢ −
+                      <span class="fraction">
+                         <span class="numerator">(<span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> <i>x</i>ᵢ)(<span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> <i>y</i>ᵢ)</span>
+                         <span class="denominator"><i>n</i></span>
+                      </span>
+                 </div>
+             </li>
+        </ul>
+        <p>The least squares estimate for the slope (<span class="math-var">β</span>₁) is:</p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\beta}_1 = \frac{S_{xy}}{S_{xx}}}" title="Click to copy LaTeX">
+            <span class="hat"><i>β</i></span>₁ =
+            <span class="fraction">
+                <span class="numerator"><i>S</i><sub><i>xy</i></sub></span>
+                <span class="denominator"><i>S</i><sub><i>xx</i></sub></span>
+            </span>
+             &nbsp;&nbsp;(Equation 12.2)
+        </div>
+        <p>The least squares estimate for the intercept (<span class="math-var">β</span>₀) is:</p>
+        <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{\beta}_0 = \frac{\sum y_i - \hat{\beta}_1 \sum x_i}{n} = \bar{y} - \hat{\beta}_1 \bar{x}}" title="Click to copy LaTeX">
+             <span class="hat"><i>β</i></span>₀ =
+             <span class="fraction">
+                 <span class="numerator"><span class="sum-symbol-container"><span class="math-symbol">Σ</span></span><i>y</i>ᵢ − <span class="hat"><i>β</i></span>₁ <span class="sum-symbol-container"><span class="math-symbol">Σ</span></span><i>x</i>ᵢ</span>
+                 <span class="denominator"><i>n</i></span>
+             </span> = <span class="bar"><i>y</i></span> − <span class="hat"><i>β</i></span>₁ <span class="bar"><i>x</i></span>
+              &nbsp;&nbsp;(Equation 12.3)
+        </div>
+        <p>(Calculate <span class="hat"><span class="math-var">β</span></span>₁ first, then <span class="hat"><span class="math-var">β</span></span>₀. Retain precision.)</p>
+
+        <p><strong>Example 12.4: Iodine Value and Cetane Number (Page 498)</strong></p>
+        <ul>
+            <li>Data: <span class="math-var">n</span>=14 pairs (<span class="math-var">x</span>=iodine, <span class="math-var">y</span>=cetane).</li>
+            <li>Summary Stats given. Calculate <span class="math-var">S</span><sub>xx</sub> ≈ 6802.77, <span class="math-var">S</span><sub>xy</sub> ≈ -1424.41 (using text's value).</li>
+            <li>Estimate Slope: <span class="hat"><span class="math-var">β</span></span>₁ = <span class="math-var">S</span><sub>xy</sub> / <span class="math-var">S</span><sub>xx</sub> ≈ -1424.41 / 6802.77 ≈ -0.2094.</li>
+            <li>Estimate Intercept: <span class="bar"><span class="math-var">x</span></span> ≈ 93.39, <span class="bar"><span class="math-var">y</span></span> ≈ 55.66. <span class="hat"><span class="math-var">β</span></span>₀ = <span class="bar"><span class="math-var">y</span></span> - <span class="hat"><span class="math-var">β</span></span>₁<span class="bar"><span class="math-var">x</span></span> ≈ 55.66 - (-0.2094)(93.39) ≈ 75.21.</li>
+            <li>Estimated Regression Line: <span class="hat"><span class="math-var">y</span></span> = 75.21 - 0.2094<span class="math-var">x</span>.</li>
+            <li>Interpretation: Estimated average cetane number decreases by 0.2094 for each 1g increase in iodine value.</li>
+            <li>(See Figure 12.8).</li>
+        </ul>
+
+        <p><strong>Using the Estimated Line (Page 499)</strong></p>
+        <p>The line <span class="hat"><span class="math-var">y</span></span> = <span class="hat"><span class="math-var">β</span></span>₀ + <span class="hat"><span class="math-var">β</span></span>₁<span class="math-var">x</span> is used for:</p>
+        <ul>
+            <li><strong>Point Estimation:</strong> Estimating E(Y | x=x*). Estimate is <span class="hat"><span class="math-var">y</span></span> = <span class="hat"><span class="math-var">β</span></span>₀ + <span class="hat"><span class="math-var">β</span></span>₁<span class="math-var">x</span>*.</li>
+            <li><strong>Point Prediction:</strong> Predicting a single future Y value at x=x*. Prediction is also <span class="hat"><span class="math-var">y</span></span> = <span class="hat"><span class="math-var">β</span></span>₀ + <span class="hat"><span class="math-var">β</span></span>₁<span class="math-var">x</span>*.</li>
+        </ul>
+        <p><strong>Example 12.5: Point Estimate/Prediction (Page 499)</strong></p>
+        <ul>
+            <li>Using <span class="hat"><span class="math-var">y</span></span> = 75.21 - 0.2094<span class="math-var">x</span>. For <span class="math-var">x</span>*=100:</li>
+            <li>Estimate E(Y | x=100): <span class="hat"><span class="math-var">y</span></span> = 75.21 - 0.2094(100) ≈ 54.27.</li>
+            <li>Predict single Y at x=100: Prediction is also 54.27.</li>
+            <li><strong>Extrapolation Warning:</strong> Avoid using the line for <span class="math-var">x</span> values far outside the observed data range.</li>
+        </ul>
+
+        <p><strong>Estimating σ² and σ (Page 500)</strong></p>
+        <p>Estimate variance <span class="math-var">σ</span>² around the true line based on deviations from the estimated line.</p>
+        <p><strong>Definition: Fitted Values and Residuals (Page 500)</strong></p>
+        <ul>
+            <li><strong>Fitted (Predicted) Values (<span class="hat"><span class="math-var">y</span></span>ᵢ):</strong> Values on the estimated line for each <span class="math-var">x</span>ᵢ.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i}" title="Click to copy LaTeX">
+                    <span class="hat"><i>y</i></span>ᵢ = <span class="hat"><i>β</i></span>₀ + <span class="hat"><i>β</i></span>₁ <i>x</i>ᵢ
+                </div>
+            </li>
+            <li><strong>Residuals (<span class="math-var">e</span>ᵢ):</strong> Observed <span class="math-var">y</span>ᵢ minus fitted <span class="hat"><span class="math-var">y</span></span>ᵢ.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{e_i = y_i - \hat{y}_i = y_i - (\hat{\beta}_0 + \hat{\beta}_1 x_i)}" title="Click to copy LaTeX">
+                    <i>e</i>ᵢ = <i>y</i>ᵢ − <span class="hat"><i>y</i></span>ᵢ = <i>y</i>ᵢ − (<span class="hat"><i>β</i></span>₀ + <span class="hat"><i>β</i></span>₁ <i>x</i>ᵢ)
+                </div>
+                 (<span class="math-var">e</span>ᵢ is the vertical distance from point <span class="math-var">i</span> to the estimated line).
+            </li>
+        </ul>
+        <p><strong>Definition: Error Sum of Squares and Estimates of σ² and σ (Page 502)</strong></p>
+        <ul>
+            <li><strong>Error Sum of Squares (SSE):</strong> Sum of squared residuals. Measures unexplained variation.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{SSE = \sum_{i=1}^{n} e_i^2 = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}" title="Click to copy LaTeX">
+                    <span class="math-op">SSE</span> =
+                    <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> <i>e</i>ᵢ² =
+                    <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> (<i>y</i>ᵢ − <span class="hat"><i>y</i></span>ᵢ)²
+                </div>
+            </li>
+             <li><strong>Estimate of σ²:</strong>
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{s^2 = \frac{SSE}{n - 2}}" title="Click to copy LaTeX">
+                     <i>s</i>² = <span class="fraction"><span class="numerator"><span class="math-op">SSE</span></span><span class="denominator"><i>n</i> − 2</span></span>
+                 </div>
+                 (Divisor is <span class="math-var">n</span>−2 degrees of freedom because we estimated 2 parameters, <span class="math-var">β</span>₀ and <span class="math-var">β</span>₁).
+             </li>
+             <li><strong>Estimate of σ:</strong>
+                  <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{s = \sqrt{s^2} = \sqrt{\frac{SSE}{n - 2}}}" title="Click to copy LaTeX">
+                      <i>s</i> = <span class="math-symbol">√</span><i>s</i>² =
+                      <span class="sqrt">√</span><span class="sqrt-content"><span class="bracket">[</span>
+                         <span class="fraction"><span class="numerator"><span class="math-op">SSE</span></span><span class="denominator"><i>n</i> − 2</span></span>
+                      <span class="bracket">]</span></span>
+                 </div>
+                 (<span class="math-var">s</span> is the <strong>standard error of the estimate</strong>, typical size of a residual).
+             </li>
+             <li><strong>Computational Formula for SSE:</strong>
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{SSE = S_{yy} - \hat{\beta}_1 S_{xy}}" title="Click to copy LaTeX">
+                     <span class="math-op">SSE</span> = <i>S</i><sub><i>yy</i></sub> − <span class="hat"><i>β</i></span>₁ <i>S</i><sub><i>xy</i></sub>
+                 </div>
+                 (Watch rounding of <span class="hat"><span class="math-var">β</span></span>₁).
+             </li>
+        </ul>
+
+        <p><strong>Example 12.6/12.7: Sludge Moisture Content (Pages 500-502)</strong></p>
+        <ul>
+            <li>Data: <span class="math-var">y</span>=moisture vs. <span class="math-var">x</span>=filtration rate (<span class="math-var">n</span>=20).</li>
+            <li>Estimated line: <span class="hat"><span class="math-var">y</span></span> = 72.96 + 0.041<span class="math-var">x</span>.</li>
+            <li>SSE from residuals: SSE = Σeᵢ² = 7.968.</li>
+            <li>Estimate of σ²: s² = SSE / (n - 2) = 7.968 / 18 ≈ 0.4427.</li>
+            <li>Estimate of σ: s = √0.4427 ≈ 0.665. (Typical deviation from line ≈ 0.665%).</li>
+        </ul>
+
+        <p><strong>Example 12.8: Attenuation vs. Fracture Strength (Page 503)</strong></p>
+        <ul>
+             <li>Data: n=14 pairs. Calculate Sxx, Sxy, β̂₁, β̂₀.</li>
+             <li>Calculate SSE: Using computational formula (or from residuals). Text gets SSE ≈ 0.2625.</li>
+             <li>Estimate of σ²: s² = SSE / (n - 2) = 0.2625 / 12 ≈ 0.02187.</li>
+             <li>Estimate of σ: s = √0.02187 ≈ 0.1479.</li>
+        </ul>
+
+        <p><strong>The Coefficient of Determination (r²) (Page 503)</strong></p>
+        <p>Measures the proportion of variability in <span class="math-var">y</span> explained by the linear relationship with <span class="math-var">x</span>.</p>
+        <ul>
+            <li><strong>Total Sum of Squares (SST):</strong> Total variability in <span class="math-var">y</span>.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{SST = S_{yy} = \sum_{i=1}^{n} (y_i - \bar{y})^2}" title="Click to copy LaTeX">
+                    <span class="math-op">SST</span> = <i>S</i><sub><i>yy</i></sub> =
+                    <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> (<i>y</i>ᵢ − <span class="bar"><i>y</i></span>)²
+                </div>
+            </li>
+             <li><strong>Error Sum of Squares (SSE):</strong> Unexplained variability (around the line).
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{SSE = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}" title="Click to copy LaTeX">
+                     <span class="math-op">SSE</span> =
+                     <span class="sum-symbol-container"><span class="sum-limits">n</span><span class="math-symbol">Σ</span><span class="sum-limits">i=1</span></span> (<i>y</i>ᵢ − <span class="hat"><i>y</i></span>ᵢ)²
+                 </div>
+             </li>
+            <li><strong>Coefficient of Determination (r²):</strong> Proportion of variation explained by regression.
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{r^2 = 1 - \frac{SSE}{SST}}" title="Click to copy LaTeX">
+                     <i>r</i>² = 1 − <span class="fraction"><span class="numerator"><span class="math-op">SSE</span></span><span class="denominator"><span class="math-op">SST</span></span></span>
+                 </div>
+            </li>
+            <li>Range: 0 ≤ <span class="math-var">r</span>² ≤ 1.</li>
+            <li><span class="math-var">r</span>² ≈ 1: Good fit, model explains most variation.</li>
+            <li><span class="math-var">r</span>² ≈ 0: Poor fit, model explains little variation.</li>
+            <li>Alternative Formula: <span class="math-var">r</span>² = SSR / SST, where SSR = SST - SSE (Regression Sum of Squares).</li>
+        </ul>
+
+        <p><strong>Example 12.9: r² for Iodine/Cetane Data (Page 505)</strong></p>
+        <ul>
+            <li>SST = Syy ≈ 377.174.</li>
+            <li>SSE ≈ 78.920 (calculated via shortcut).</li>
+            <li>r² = 1 - (78.920 / 377.174) ≈ 1 - 0.209 = 0.791.</li>
+            <li>Interpretation: Approx. 79.1% of variation in cetane number is explained by linear regression on iodine value. Strong relationship.</li>
+            <li>(Minitab Output Figure 12.12 confirms R-sq = 79.1%).</li>
+        </ul>
+
+        <h2>12.5 Correlation (Page 527)</h2>
+        <p>
+            <strong>Correlation analysis</strong> measures the <strong>strength and direction</strong> of the <strong>linear</strong> relationship between two variables (<span class="math-var">X</span>, <span class="math-var">Y</span>), treating both as random.
+        </p>
+        <p><strong>The Sample Correlation Coefficient (r) (Page 528)</strong></p>
+        <p>Measures linear relationship in the sample (<span class="math-var">x</span>ᵢ, <span class="math-var">y</span>ᵢ).</p>
+        <ul>
+            <li>Motivation: <span class="math-var">S</span><sub>xy</sub> indicates direction, but magnitude depends on units.</li>
+            <li>Definition: Standardize <span class="math-var">S</span><sub>xy</sub>.
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{r = \frac{S_{xy}}{\sqrt{S_{xx}} \sqrt{S_{yy}}}}" title="Click to copy LaTeX">
+                    <i>r</i> = <span class="fraction">
+                        <span class="numerator"><i>S</i><sub><i>xy</i></sub></span>
+                        <span class="denominator"><span class="math-symbol">√</span><i>S</i><sub><i>xx</i></sub> <span class="math-symbol">√</span><i>S</i><sub><i>yy</i></sub></span>
+                    </span>
+                     &nbsp;&nbsp;(Equation 12.8)
+                </div>
+            </li>
+        </ul>
+        <p><strong>Example 12.15: Corn Yield (x) vs Peanut Yield (y) (Page 528)</strong></p>
+        <ul>
+            <li>Data: <span class="math-var">n</span>=8 pairs. Calculate <span class="math-var">S</span><sub>xx</sub>=5.75, <span class="math-var">S</span><sub>yy</sub>=0.5124, <span class="math-var">S</span><sub>xy</sub>=0.5960.</li>
+            <li>Calculate r: r = 0.5960 / (<span class="math-symbol">√</span>5.75 * <span class="math-symbol">√</span>0.5124) ≈ 0.347.</li>
+        </ul>
+        <p><strong>Properties of r (Page 529)</strong></p>
+        <ul>
+            <li>Symmetric in <span class="math-var">x</span> and <span class="math-var">y</span>.</li>
+            <li>Unitless.</li>
+            <li>Range: −1 ≤ <span class="math-var">r</span> ≤ +1.</li>
+            <li><span class="math-var">r</span> = +1: Perfect positive linear relationship.</li>
+            <li><span class="math-var">r</span> = −1: Perfect negative linear relationship.</li>
+            <li><span class="math-var">r</span>²: Literally the square of <span class="math-var">r</span>. Same as coefficient of determination in regression.</li>
+            <li>Interpretation:
+                <ul>
+                    <li><span class="math-var">r</span> close to ±1: Strong linear relationship.</li>
+                    <li><span class="math-var">r</span> close to 0: Weak linear relationship. (Could still be a non-linear relationship!).</li>
+                </ul>
+            </li>
+             <li>Rule of Thumb for Strength: Weak: |<span class="math-var">r</span>|<0.5; Moderate: 0.5≤|<span class="math-var">r</span>|<0.8; Strong: |<span class="math-var">r</span>|≥0.8.</li>
+             <li>(Example 12.15: r=0.347 is weak positive).</li>
+        </ul>
+
+        <p><strong>Inferences About the Population Correlation Coefficient (ρ) (Page 530)</strong></p>
+        <ul>
+             <li><span class="math-var">r</span> estimates the <strong>population correlation coefficient <span class="math-var">ρ</span></strong> (rho).</li>
+             <li><span class="math-var">ρ</span> = Cov(<span class="math-var">X</span>,<span class="math-var">Y</span>) / (<span class="math-var">σ</span><sub><span class="math-var">X</span></sub> <span class="math-var">σ</span><sub><span class="math-var">Y</span></sub>). Measures linear relationship in the population.</li>
+             <li>Assumption for Inference: Sample is from a <strong>bivariate normal distribution</strong> (stronger than regression assumptions). If true, <span class="math-var">ρ</span>=0 implies independence.</li>
+        </ul>
+        <p><strong>Testing for Absence of Correlation (H₀: ρ = 0) (Page 531)</strong></p>
+        <ul>
+            <li>Checks for any significant linear relationship.</li>
+            <li>Test Statistic: If H₀: <span class="math-var">ρ</span>=0 is true (and bivariate normal):
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{T = \frac{R\sqrt{n - 2}}{\sqrt{1 - R^2}}}" title="Click to copy LaTeX">
+                     <i>T</i> = <span class="fraction">
+                         <span class="numerator"><i>R</i> <span class="math-symbol">√</span><span class="bracket">[</span><i>n</i> − 2<span class="bracket">]</span></span>
+                         <span class="denominator"><span class="math-symbol">√</span><span class="bracket">[</span>1 − <i>R</i>²<span class="bracket">]</span></span>
+                     </span>
+                 </div>
+                 follows a <strong>t distribution</strong> with <span class="math-var">n</span> − 2 degrees of freedom. (<span class="math-var">R</span> is the estimator for <span class="math-var">ρ</span>, we use sample <span class="math-var">r</span>).
+            </li>
+            <li>P-value: Calculate <span class="math-var">t</span> = (<span class="math-var">r</span><span class="math-symbol">√</span>[<span class="math-var">n</span> − 2]) / <span class="math-symbol">√</span>[1 − <span class="math-var">r</span>²]. Use t<sub>n-2</sub> distribution based on H<0xE2><0x82><0x90> (>0, <0, or ≠0).</li>
+            <li>Equivalence: This test is equivalent to the t-test for H₀: <span class="math-var">β</span>₁ = 0 in regression.</li>
+        </ul>
+
+        <p><strong>Example 12.16: Maternal Age and Birth Weight (Page 531)</strong></p>
+        <ul>
+            <li>Data: <span class="math-var">n</span>=10, <span class="math-var">r</span> = 0.884. Test H₀: <span class="math-var">ρ</span>=0 vs H<0xE2><0x82><0x90>: <span class="math-var">ρ</span> > 0.</li>
+            <li>df=8. <span class="math-var">t</span> = (0.884 * <span class="math-symbol">√</span>8) / <span class="math-symbol">√</span>(1 - 0.884²) ≈ 5.34.</li>
+            <li>P-value (upper-tailed, df=8) ≈ 0.0003.</li>
+            <li>Decision: Reject H₀. Strong evidence of positive linear relationship.</li>
+        </ul>
+
+        <p><strong>Example 12.17: Manganese Exposure (Page 532)</strong></p>
+        <ul>
+            <li>Control Sample: <span class="math-var">n</span>=45, <span class="math-var">r</span>=0.29. Test H₀: <span class="math-var">ρ</span>=0 vs H<0xE2><0x82><0x90>: <span class="math-var">ρ</span> ≠ 0. <span class="math-var">t</span>≈1.99. df=43. P-value ≈ 0.052. Fail to reject H₀ at α=0.05.</li>
+            <li>Exposed Sample: <span class="math-var">n</span>=22, <span class="math-var">r</span>=0.83. Test H₀: <span class="math-var">ρ</span>=0 vs H<0xE2><0x82><0x90>: <span class="math-var">ρ</span> ≠ 0. <span class="math-var">t</span>≈6.7. df=20. P-value ≈ 0. Reject H₀.</li>
+        </ul>
+
+        <p><strong>Other Inferences Concerning ρ (ρ₀ ≠ 0) (Page 532)</strong></p>
+        <p>Use <strong>Fisher's transformation</strong> for H₀: <span class="math-var">ρ</span> = <span class="math-var">ρ</span>₀ (≠0) or for CI for <span class="math-var">ρ</span>.</p>
+        <ul>
+             <li>Transformation:
+                 <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{V = \frac{1}{2} \ln\left( \frac{1 + R}{1 - R} \right)}" title="Click to copy LaTeX">
+                      <i>V</i> = <span class="fraction"><span class="numerator">1</span><span class="denominator">2</span></span>
+                      <span class="math-op">ln</span><span class="bracket">(</span>
+                      <span class="fraction">
+                          <span class="numerator">1 + <i>R</i></span>
+                          <span class="denominator">1 − <i>R</i></span>
+                      </span>
+                      <span class="bracket">)</span>
+                       &nbsp;&nbsp;(Equation 12.9)
+                 </div>
+                 (<span class="math-var">R</span> is estimator for <span class="math-var">ρ</span>).
+            </li>
+            <li>Distribution: <span class="math-var">V</span> is approx. Normal with:
+                 <ul>
+                     <li>Mean: <span class="math-var">μ</span><sub><span class="math-var">V</span></sub> = (1/2) ln[ (1 + <span class="math-var">ρ</span>) / (1 - <span class="math-var">ρ</span>) ]</li>
+                     <li>Variance: <span class="math-var">σ</span>²<sub><span class="math-var">V</span></sub> = 1 / (<span class="math-var">n</span> − 3)</li>
+                 </ul>
+            </li>
+        </ul>
+        <p><strong>Test for H₀: ρ = ρ₀ (ρ₀ ≠ 0) (Page 533)</strong></p>
+        <ul>
+            <li>Calculate <span class="math-var">v</span> from sample <span class="math-var">r</span>. Calculate <span class="math-var">μ</span><sub><span class="math-var">V</span>,0</sub> using <span class="math-var">ρ</span>₀.</li>
+            <li>Test Statistic:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{Z = \frac{v - \mu_{V,0}}{1 / \sqrt{n - 3}}}" title="Click to copy LaTeX">
+                    <i>Z</i> = <span class="fraction">
+                        <span class="numerator"><i>v</i> − <i>μ</i><sub><i>V</i>,0</sub></span>
+                        <span class="denominator">1 / <span class="math-symbol">√</span><span class="bracket">[</span><i>n</i> − 3<span class="bracket">]</span></span>
+                    </span>
+                </div>
+            </li>
+             <li>P-value: Use standard normal distribution based on H<0xE2><0x82><0x90>.</li>
+        </ul>
+
+        <p><strong>Confidence Interval for ρ (Page 534)</strong></p>
+        <ol>
+            <li>Calculate <span class="math-var">v</span> = (1/2)ln[(1+<span class="math-var">r</span>)/(1-<span class="math-var">r</span>)].</li>
+            <li>Find 100(1-<span class="math-var">α</span>)% CI for <span class="math-var">μ</span><sub><span class="math-var">V</span></sub>:
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{v \pm z_{\alpha/2} \frac{1}{\sqrt{n - 3}}}" title="Click to copy LaTeX">
+                     <i>v</i> ± <i>z</i><sub><i>α</i>/2</sub> <span class="fraction">
+                         <span class="numerator">1</span>
+                         <span class="denominator"><span class="math-symbol">√</span><span class="bracket">[</span><i>n</i> − 3<span class="bracket">]</span></span>
+                     </span>
+                 </div>
+                 Let the limits be (<span class="math-var">c</span>₁, <span class="math-var">c</span>₂).
+            </li>
+            <li>Transform limits back to <span class="math-var">ρ</span> scale: CI for <span class="math-var">ρ</span> is
+                <div class="formula-container" onclick="copyFormulaLatex(this)" data-latex="\color{white}{\left( \frac{e^{2c_1} - 1}{e^{2c_1} + 1}, \frac{e^{2c_2} - 1}{e^{2c_2} + 1} \right)}" title="Click to copy LaTeX">
+                    <span class="bracket">(</span>
+                    <span class="fraction">
+                        <span class="numerator"><span class="math-op">e</span><sup>2<i>c</i>₁</sup> − 1</span>
+                        <span class="denominator"><span class="math-op">e</span><sup>2<i>c</i>₁</sup> + 1</span>
+                    </span> ,
+                    <span class="fraction">
+                        <span class="numerator"><span class="math-op">e</span><sup>2<i>c</i>₂</sup> − 1</span>
+                        <span class="denominator"><span class="math-op">e</span><sup>2<i>c</i>₂</sup> + 1</span>
+                    </span>
+                    <span class="bracket">)</span>
+                </div>
+            </li>
+        </ol>
+
+        <p><strong>Example 12.18: Cube Strength (x) vs Cylinder Strength (y) (Page 533)</strong></p>
+        <ul>
+            <li>Data: n=19, r=0.761. Test H₀: ρ=0.5 vs H<0xE2><0x82><0x90>: ρ > 0.5.</li>
+            <li>Calculate v ≈ 0.999. μ<0xE1><0xB5><0x83>,₀ ≈ 0.549. σ<0xE1><0xB5><0x83> = 1/√16 = 0.25.</li>
+            <li>Z = (0.999 - 0.549) / 0.25 = 1.80.</li>
+            <li>P-value (upper-tailed) = 1 - Φ(1.80) ≈ 0.0359.</li>
+            <li>Decision: Reject H₀ at α=0.05. Moderate evidence ρ > 0.5.</li>
+        </ul>
+
+        <p><strong>Example 12.19: Height (x) vs Wingspan (y) (Page 534)</strong></p>
+        <ul>
+            <li>Data: n=16, r=0.9422. Find 95% CI for ρ.</li>
+            <li>Calculate v ≈ 1.757.</li>
+            <li>95% CI for μ<0xE1><0xB5><0x83>: 1.757 ± 1.96 * (1/√13) ≈ 1.757 ± 0.544 ≈ (1.213, 2.301). Let (c₁, c₂) = (1.213, 2.301).</li>
+            <li>Transform back: Lower limit for ρ ≈ (e^(2*1.213) - 1)/(e^(2*1.213) + 1) ≈ 0.838. Upper limit for ρ ≈ (e^(2*2.301) - 1)/(e^(2*2.301) + 1) ≈ 0.980.</li>
+            <li>95% CI for ρ is (0.838, 0.980). Suggests strong linear association.</li>
+        </ul>
+
+
+    </main>
+
+    <footer>
+        <!-- Empty Footer matching index style -->
+    </footer>
+
+    <script>
+        // Function to copy LaTeX code (including the color wrapper)
+        function copyFormulaLatex(element) {
+            const latexString = element.getAttribute('data-latex');
+            if (!latexString) {
+                console.error('No LaTeX data found for this element.');
+                return;
+            }
+            // Copy the latexString directly, including the \color{white}{} wrapper
+            navigator.clipboard.writeText(latexString).then(() => {
+                element.classList.add('copied');
+                const originalTitle = element.title;
+                element.title = 'Copied!';
+                setTimeout(() => {
+                    element.classList.remove('copied');
+                    element.title = originalTitle; // Restore original title
+                 }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy LaTeX: ', err);
+                alert('Failed to copy text. Check console (F12) for details.');
+            });
+        }
+    </script>
+
+</body></html>
