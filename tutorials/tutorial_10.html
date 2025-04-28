@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" style="--base-font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - 10 (Monospace & Smoother Anim)</title> <!-- Updated Title -->
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+          options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'], ignoreHtmlClass: 'tex2jax_ignore', processHtmlClass: 'tex2jax_process' },
+          svg: { fontCache: 'global' },
+          startup: { ready: () => { console.log('MathJax ready.'); MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax initial typeset complete.')); } }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* --- START OF MODIFIED CSS --- */
+        :root {
+            --accent-color: #F08080;
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #555;
+            --header-bg: #2f2f2f;
+            --header-hover-bg: #3f3f3f;
+            --content-bg: #282828;
+            --solution-text-bg: #252525;
+            --base-font-size: 16px;
+            --anim-duration: 0.7s;        /* Main container duration (inspired by example) */
+            --content-fade-duration: 0.5s;/* Content fade duration (inspired by example) */
+            --collapse-delay: 0.1s;        /* Delay before max-height collapse STARTS (set in JS) */
+            /* MODIFIED: Easing inspired by Thermodynamics example */
+            --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
+            /* Star Colors (Unchanged) */
+            --color-stars-red: #f1948a;
+            --color-stars-yellow: #f7dc6f;
+            --color-stars-green: #58d68d;
+            --color-stars-grey: #777;
+
+            /* ADDED: Monospace Font Stack */
+            --monospace-font-stack: 'SF Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-color);
+            /* Base font remains sans-serif for general UI */
+            font-family: system-ui, sans-serif;
+            line-height: 1.7;
+            margin: 0; padding: 20px; font-size: var(--base-font-size);
+            transition: font-size 0.2s ease-in-out; padding-bottom: 60px;
+            overflow-x: hidden;
+        }
+        h1 {
+            color: var(--accent-color); text-align: center;
+            border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
+            margin-bottom: 30px; font-size: 2.5em;
+            /* Keep heading font */
+            font-family: system-ui, sans-serif;
+        }
+        .accordion { max-width: 900px; margin: 20px auto; }
+        .accordion-item {
+            border: 1px solid var(--border-color); border-radius: 8px;
+            overflow: hidden; margin-bottom: 25px; background-color: var(--content-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease; /* Added subtle hover effect */
+        }
+         .accordion-item:hover {
+            border-color: #777;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .accordion-header {
+            background-color: var(--header-bg); padding: 18px 25px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            /* Use new easing */
+            transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
+            border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
+        }
+        .accordion-item[data-state="collapsed"] .accordion-header { border-bottom-color: transparent; }
+        .accordion-header:hover { background-color: var(--header-hover-bg); }
+        .accordion-header h2 { margin: 0; font-size: 1.2em; color: var(--text-color); font-family: system-ui, sans-serif; } /* Keep heading font */
+
+        /* Content Area - Base State */
+        .accordion-content {
+            padding: 0 25px; max-height: 0; overflow: hidden;
+            /* Use new easing and duration */
+            transition: max-height var(--anim-duration) var(--anim-easing),
+                        padding-top var(--anim-duration) var(--anim-easing),
+                        padding-bottom var(--anim-duration) var(--anim-easing);
+            box-sizing: border-box; position: relative; z-index: 1;
+        }
+        /* Content Area - Active State */
+        .accordion-content.active { padding-top: 20px; }
+
+        /* Inner Content Wrapper - Animations */
+        .content-inner {
+            opacity: 0;
+            transform: translateY(15px); /* Keep subtle slide */
+            /* Use new fade duration and easing */
+            transition: opacity var(--content-fade-duration) var(--anim-easing) 0s,
+                        transform var(--content-fade-duration) var(--anim-easing) 0s;
+            will-change: opacity, transform;
+            padding-bottom: 25px;
+        }
+        /* Override transition for OPENING (when .active is added) */
+        .accordion-content.active .content-inner {
+            opacity: 1;
+            transform: translateY(0);
+            /* Keep delay based on main container animation */
+            transition-delay: calc(var(--anim-duration) * 0.3);
+            /* Use new independent fade duration */
+            transition-duration: var(--content-fade-duration);
+        }
+
+        /* Content Blocks */
+        .question-block, .final-answer-block, .ratings-block, .solution-block {
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);
+        }
+        .content-inner > div:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .ratings-block { margin-bottom: 25px !important; padding-bottom: 20px !important; }
+
+        /* Block Headers */
+        .question-block strong, .final-answer-block strong, .solution-block strong {
+            color: var(--accent-color); display: block; margin-bottom: 8px;
+            font-size: 1.1em; font-family: system-ui, sans-serif; /* Keep header font */
+        }
+
+        /* --- MODIFIED: Apply Monospace Font --- */
+        .question-block p,
+        .final-answer-block p {
+            font-family: var(--monospace-font-stack);
+            font-size: inherit; /* Inherit size from body/slider */
+            margin: 5px 0 1em 0; /* Adjust margin slightly */
+        }
+        .solution-text {
+            background-color: var(--solution-text-bg); padding: 15px; border-radius: 5px;
+            border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
+            /* Uses monospace stack defined in :root */
+            font-family: var(--monospace-font-stack);
+        }
+         /* Ensure lists within solution also use monospace */
+        .solution-text p, .solution-text li {
+            margin-bottom: 1em;
+            font-family: inherit; /* Inherit from .solution-text */
+        }
+        .solution-text *:last-child { margin-bottom: 0; }
+        .solution-text ul, .solution-text ol { padding-left: 25px; margin: 0.5em 0 1em 0; }
+         /* Keep specific strong styling for solution steps */
+        .solution-text > strong {
+            color: var(--text-color); font-size: 1.05em; margin: 15px 0 10px 0;
+            display: block; font-family: system-ui, sans-serif; /* Keep distinct step heading */
+        }
+        .solution-text > strong:first-of-type { margin-top: 0; }
+        /* --- END Monospace Font --- */
+
+        /* Star Ratings (Unchanged styling) */
+        .stars { font-size: 1.3em; letter-spacing: 3px; display: inline-block; font-family: initial; }
+        .star-filled.green { color: var(--color-stars-green); }
+        .star-filled.yellow { color: var(--color-stars-yellow); }
+        .star-filled.red { color: var(--color-stars-red); }
+        .star-empty { color: var(--color-stars-grey); }
+        .rating-label { font-weight: bold; color: #bdbdbd; display: inline-block; min-width: 140px; vertical-align: middle; font-family: system-ui, sans-serif;} /* Keep label font */
+        .ratings-block .stars { vertical-align: middle; }
+
+        /* Utility & MathJax/Slider (Unchanged styling) */
+        .hidden { display: none; }
+        mjx-container { font-size: 1.05em; text-align: left !important; overflow-x: auto; overflow-y: hidden; padding: 2px 0; font-family: 'Latin Modern Math', 'STIX Two Math', serif; }
+        .font-control { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--header-bg); padding: 10px 20px; box-sizing: border-box; display: flex; align-items: center; border-top: 1px solid var(--border-color); z-index: 10; }
+        #fontSizeSlider { flex-grow: 1; cursor: pointer; margin: 0 15px; accent-color: var(--accent-color); min-width: 100px; height: 8px; }
+        #fontSizeValue { min-width: 50px; text-align: right; font-weight: bold; color: var(--text-color); font-size: 12px !important; font-family: system-ui, sans-serif; } /* Keep label font */
+        /* --- END OF MODIFIED CSS --- */
+    </style>
+</head>
+<body>
+
+    <h1>Tutorial - 10</h1>
+
+    <div class="accordion">
+        <!-- Question 1 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>1. Rural vs Urban/Suburban Voters</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Suppose the proportion of rural voters in a certain state who favor a particular gubernatorial candidate is $0.45$ and the proportion of suburban and urban voters favoring the candidate is $0.60$. If a sample of 200 rural voters and 300 urban and suburban voters is obtained, what is the approximate probability that at least 250 of these voters favor this candidate?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The approximate probability that at least 250 of these voters favor the candidate is $0.9686$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $X_1$ be the number of rural voters in the sample who favor the candidate.<br>
+                            Let $X_2$ be the number of urban and suburban voters in the sample who favor the candidate.</p>
+                            <p>We are given:
+                            Sample size of rural voters, $n_1 = 200$.
+                            Proportion of rural voters favoring the candidate, $p_1 = 0.45$.
+                            Sample size of urban and suburban voters, $n_2 = 300$.
+                            Proportion of urban and suburban voters favoring the candidate, $p_2 = 0.60$.</p>
+                            <p>$X_1$ follows a binomial distribution $B(n_1, p_1)$, so $X_1 \sim B(200, 0.45)$.<br>
+                            $X_2$ follows a binomial distribution $B(n_2, p_2)$, so $X_2 \sim B(300, 0.60)$.</p>
+                            <p>We want to find the probability that the total number of voters favoring the candidate, $X = X_1 + X_2$, is at least 250. That is, $P(X \ge 250)$.</p>
+                            <p>Since $n_1$ and $n_2$ are large, we can use the Normal approximation to the Binomial distribution.</p>
+                            <strong>For $X_1$:</strong>
+                            <p>Mean: $\mu_1 = n_1 p_1 = 200 \times 0.45 = 90$.<br>
+                            Variance: $\sigma_1^2 = n_1 p_1 (1 - p_1) = 200 \times 0.45 \times (1 - 0.45) = 200 \times 0.45 \times 0.55 = 49.5$.<br>
+                            Check condition: $n_1 p_1 = 90 > 5$ and $n_1(1 - p_1) = 110 > 5$. Approximation is valid.<br>
+                            So, $X_1 \approx N(90, 49.5)$.</p>
+                            <strong>For $X_2$:</strong>
+                             <p>Mean: $\mu_2 = n_2 p_2 = 300 \times 0.60 = 180$.<br>
+                            Variance: $\sigma_2^2 = n_2 p_2 (1 - p_2) = 300 \times 0.60 \times (1 - 0.60) = 300 \times 0.60 \times 0.40 = 72$.<br>
+                            Check condition: $n_2 p_2 = 180 > 5$ and $n_2(1 - p_2) = 120 > 5$. Approximation is valid.<br>
+                             So, $X_2 \approx N(180, 72)$.</p>
+                            <strong>For the Sum $X = X_1 + X_2$:</strong>
+                             <p>$X = X_1 + X_2$. Since $X_1$ and $X_2$ are independent, the sum $X$ is also approximately normally distributed.<br>
+                            Mean of $X$: $\mu_X = \mu_1 + \mu_2 = 90 + 180 = 270$.<br>
+                             Variance of $X$: $\sigma_X^2 = \sigma_1^2 + \sigma_2^2 = 49.5 + 72 = 121.5$.<br>
+                            Standard deviation of $X$: $\sigma_X = \sqrt{121.5} \approx 11.023$.<br>
+                            So, $X \approx N(270, 121.5)$.</p>
+                            <strong>Probability Calculation:</strong>
+                            <p>We want to find $P(X \ge 250)$. We use the continuity correction by calculating $P(X \ge 249.5)$.</p>
+                            <p>Standardize the value 249.5:
+                            $Z = \frac{X - \mu_X}{\sigma_X} = \frac{249.5 - 270}{\sqrt{121.5}}$<br>
+                            $Z = \frac{-20.5}{11.023} \approx -1.8597$.</p>
+                            <p>So, $P(X \ge 249.5) = P(Z \ge -1.8597)$.</p>
+                             <p>Using the standard normal cumulative distribution function $\Phi(z) = P(Z \le z)$:
+                            $P(Z \ge -1.8597) = 1 - P(Z < -1.8597) = 1 - \Phi(-1.8597)$.</p>
+                             <p>Using a Z-table or calculator, $\Phi(-1.86) \approx 0.0314$.
+                            $P(X \ge 250) \approx 1 - 0.0314 = 0.9686$.</p>
+                             <p>The approximate probability that at least 250 of these voters favor the candidate is 0.9686.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                 <h2>2. Double Exponential Distribution Estimation</h2>
+                <span class="difficulty-rating"></span>
+             </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                     <div class="question-block hidden">
+                         <strong>Question:</strong>
+                         <p>Consider the double exponential distribution given by the density function
+                         $f(x) = \frac{\lambda}{2} e^{-\lambda|x|}, -\infty < x < +\infty$.</p>
+                         <p>Find the point estimate of $\lambda$ using<br>
+                         (a) Method of Moments<br>
+                         (b) Method of Maximum Likelihood Estimation.</p>
+                     </div>
+                     <div class="ratings-block hidden">
+                         <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                         <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                         <p>(a) Method of Moments (using first absolute moment): $\hat{\lambda}_{MoM} = \frac{n}{\sum_{i=1}^n |X_i|}$.<br>
+                         (b) Maximum Likelihood Estimate: $\hat{\lambda}_{MLE} = \frac{n}{\sum_{i=1}^n |X_i|}$.</p>
+                     </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                         <div class="solution-text">
+                            <strong>(a) Method of Moments (MoM)</strong>
+                            <p>The Method of Moments involves equating theoretical moments of the distribution to the corresponding sample moments.</p>
+                            <strong>First theoretical moment (Mean):</strong>
+                             <p>$E[X] = \int_{-\infty}^\infty x f(x) dx = \int_{-\infty}^\infty x \frac{\lambda}{2} e^{-\lambda |x|} dx$.</p>
+                             <p>The integrand $g(x) = x \frac{\lambda}{2} e^{-\lambda |x|}$ is an odd function ($g(-x) = -g(x)$). The integral of an odd function over $(-\infty, \infty)$ is 0. So, $E[X] = 0$.
+                             Equating this to the first sample moment $\bar{X} = \frac{1}{n} \sum X_i$ gives $0 = \bar{X}$. This equation does not provide an estimator for $\lambda$.</p>
+                             <strong>Second theoretical moment:</strong>
+                            <p>$E[X^2] = \int_{-\infty}^\infty x^2 f(x) dx = \int_{-\infty}^\infty x^2 \frac{\lambda}{2} e^{-\lambda |x|} dx$.</p>
+                            <p>The integrand $h(x) = x^2 \frac{\lambda}{2} e^{-\lambda |x|}$ is an even function ($h(-x) = h(x)$).
+                            $E[X^2] = 2 \int_{0}^\infty x^2 \frac{\lambda}{2} e^{-\lambda x} dx = \lambda \int_{0}^\infty x^2 e^{-\lambda x} dx$.</p>
+                             <p>Using the Gamma integral form $\int_{0}^\infty t^{\alpha-1} e^{-\beta t} dt = \frac{\Gamma(\alpha)}{\beta^\alpha}$:
+                             Here $\alpha - 1 = 2 \implies \alpha = 3$, and $\beta = \lambda$.
+                             $\int_{0}^\infty x^2 e^{-\lambda x} dx = \frac{\Gamma(3)}{\lambda^3} = \frac{2!}{\lambda^3} = \frac{2}{\lambda^3}$.</p>
+                            <p>So, $E[X^2] = \lambda \times \frac{2}{\lambda^3} = \frac{2}{\lambda^2}$.</p>
+                            <p>The second sample moment is $M_2 = \frac{1}{n} \sum_{i=1}^n X_i^2$.
+                            Equating theoretical and sample moments: $E[X^2] = M_2 \implies \frac{2}{\lambda^2} = \frac{1}{n} \sum_{i=1}^n X_i^2$.</p>
+                             <p>Solving for $\lambda$: $\lambda^2 = \frac{2n}{\sum X_i^2} \implies \hat{\lambda}_{MoM1} = \sqrt{\frac{2n}{\sum X_i^2}}$ (since $\lambda > 0$).</p>
+                             <strong>First absolute moment:</strong>
+                             <p>Alternatively, we can use the first absolute moment:<br>
+                             $E[|X|] = \int_{-\infty}^\infty |x| f(x) dx = \int_{-\infty}^\infty |x| \frac{\lambda}{2} e^{-\lambda |x|} dx$.</p>
+                             <p>The integrand $k(x) = |x| \frac{\lambda}{2} e^{-\lambda |x|}$ is an even function.
+                             $E[|X|] = 2 \int_{0}^\infty x \frac{\lambda}{2} e^{-\lambda x} dx = \lambda \int_{0}^\infty x e^{-\lambda x} dx$.</p>
+                            <p>Using the Gamma integral with $\alpha=2, \beta=\lambda$:
+                            $\int_{0}^\infty x e^{-\lambda x} dx = \frac{\Gamma(2)}{\lambda^2} = \frac{1!}{\lambda^2} = \frac{1}{\lambda^2}$.</p>
+                            <p>So, $E[|X|] = \lambda \times \frac{1}{\lambda^2} = \frac{1}{\lambda}$.</p>
+                             <p>The corresponding sample moment is $\frac{1}{n} \sum_{i=1}^n |X_i|$.
+                            Equating: $\frac{1}{\lambda} = \frac{1}{n} \sum_{i=1}^n |X_i|$.</p>
+                            <p>Solving for $\lambda$: $\hat{\lambda}_{MoM2} = \frac{n}{\sum_{i=1}^n |X_i|}$.</p>
+                             <p>Both $\hat{\lambda}_{MoM_1}$ and $\hat{\lambda}_{MoM_2}$ are valid MoM estimators. Often, the estimator derived from the lowest possible order moment is preferred. We will report the second one, $\hat{\lambda}_{MoM_2}$.</p>
+                            <strong>MoM estimate:</strong> $\hat{\lambda}_{MoM} = \frac{n}{\sum_{i=1}^n |X_i|}$.
+
+                             <strong>(b) Method of Maximum Likelihood Estimation (MLE)</strong>
+                             <p>Given a random sample $x_1, x_2, ..., x_n$, the likelihood function is:
+                             $L(\lambda) = \prod_{i=1}^n f(x_i; \lambda) = \prod_{i=1}^n \frac{\lambda}{2} e^{-\lambda |x_i|} = \left(\frac{\lambda}{2}\right)^n e^{-\lambda \sum_{i=1}^n |x_i|}$.</p>
+                            <p>The log-likelihood function is:
+                            $\ln L(\lambda) = \ln\left[\left(\frac{\lambda}{2}\right)^n e^{-\lambda \sum |x_i|}\right] = n \ln\left(\frac{\lambda}{2}\right) - \lambda \sum_{i=1}^n |x_i|$<br>
+                            $\ln L(\lambda) = n (\ln \lambda - \ln 2) - \lambda \sum_{i=1}^n |x_i|$.</p>
+                             <p>To find the maximum, differentiate with respect to $\lambda$ and set the derivative to zero:
+                            $\frac{d (\ln L)}{d\lambda} = n \left(\frac{1}{\lambda}\right) - \sum_{i=1}^n |x_i|$.</p>
+                            <p>Set the derivative to 0:
+                            $\frac{n}{\lambda} - \sum_{i=1}^n |x_i| = 0$<br>
+                             $\frac{n}{\lambda} = \sum_{i=1}^n |x_i|$<br>
+                             $\hat{\lambda}_{MLE} = \frac{n}{\sum_{i=1}^n |x_i|}$.</p>
+                            <p>Check the second derivative:
+                            $\frac{d^2 (\ln L)}{d\lambda^2} = \frac{d}{d\lambda} \left(n \lambda^{-1} - \sum |x_i|\right) = -n \lambda^{-2} = -\frac{n}{\lambda^2}$.
+                             Since $n > 0$ and $\lambda > 0$, the second derivative is negative, confirming a maximum.</p>
+                             <strong>MLE estimate:</strong> $\hat{\lambda}_{MLE} = \frac{n}{\sum_{i=1}^n |X_i|}$.
+                         </div>
+                     </div>
+                 </div>
+             </div>
+        </div>
+
+         <!-- Question 3 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>3. Shear Strength Estimation</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+             <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                         <strong>Question:</strong>
+                         <p>The shear strength of each of the ten test spot welds is determined, yielding the following data (psi): 392, 376, 401, 367, 389, 362, 409, 415, 358, 375. ($n=10$).</p>
+                         <p>(a) Assuming that shear strength is normally distributed, estimate the true average shear strength and standard deviation of shear strength using the method of maximum likelihood.</p>
+                         <p>(b) Again assuming a normal distribution, estimate the strength value below which 95% of all welds will have their strengths.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                     <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                         <p>(a) MLE estimates: $\hat{\mu}_{MLE} = 384.4$ psi, $\hat{\sigma}_{MLE} \approx 18.86$ psi.</p>
+                        <p>(b) The estimated strength value below which 95% of all welds will have their strengths is approximately $415.42$ psi.</p>
+                     </div>
+                    <div class="solution-block hidden">
+                         <strong>Full Solution:</strong>
+                         <div class="solution-text">
+                             <p>The data consists of $n=10$ observations: $x_1, ..., x_{10}$.<br>
+                            Data: 392, 376, 401, 367, 389, 362, 409, 415, 358, 375.</p>
+                             <strong>(a) MLE for $\mu$ and $\sigma$</strong>
+                            <p>For a normal distribution $N(\mu, \sigma^2)$, the Maximum Likelihood Estimators (MLEs) for the mean $\mu$ and the variance $\sigma^2$ are given by:<br>
+                             $\hat{\mu}_{MLE} = \bar{x} = \frac{1}{n} \sum_{i=1}^n x_i$ <br>
+                             $\hat{\sigma}^2_{MLE} = \frac{1}{n} \sum_{i=1}^n (x_i - \bar{x})^2$<br>
+                             The MLE for the standard deviation $\sigma$ is $\hat{\sigma}_{MLE} = \sqrt{\hat{\sigma}^2_{MLE}}$.</p>
+                             <strong>Calculate the sample mean $\bar{x}$:</strong>
+                            <p>$\sum x_i = 392+376+401+367+389+362+409+415+358+375 = 3844$. <br>
+                             $\hat{\mu}_{MLE} = \bar{x} = \frac{3844}{10} = 384.4$ psi.</p>
+                             <strong>Calculate the MLE for the variance $\hat{\sigma}^2_{MLE}$:</strong>
+                             <p>We need $\sum (x_i - \bar{x})^2$. This can be calculated as $\sum x_i^2 - n \bar{x}^2$.<br>
+                             $\sum x_i^2 = 392^2 + 376^2 + 401^2 + 367^2 + 389^2 + 362^2 + 409^2 + 415^2 + 358^2 + 375^2$<br>
+                             $= 153664 + 141376 + 160801 + 134689 + 151321 + 131044 + 167281 + 172225 + 128164 + 140625 = 1481190$.</p>
+                             <p>$\sum (x_i - \bar{x})^2 = 1481190 - 10 \times (384.4)^2 = 1481190 - 10 \times 147763.36$<br>
+                             $= 1481190 - 1477633.6 = 3556.4$.</p>
+                            <p>$\hat{\sigma}^2_{MLE} = \frac{3556.4}{10} = 355.64$.</p>
+                            <p>The MLE for the standard deviation is:<br>
+                            $\hat{\sigma}_{MLE} = \sqrt{355.64} \approx 18.8584$ psi.</p>
+                             <p>The MLE estimates are $\hat{\mu} = 384.4$ psi and $\hat{\sigma} \approx 18.86$ psi (rounded).</p>
+
+                             <strong>(b) Estimate the strength value below which 95% of all welds will have their strengths.</strong>
+                             <p>We are looking for the 95th percentile $x_{0.95}$ such that $P(X \le x_{0.95}) = 0.95$.<br>
+                             Assuming $X \sim N(\mu, \sigma^2)$, standardize: $P\left( Z \le \frac{x_{0.95} - \mu}{\sigma} \right) = 0.95$.</p>
+                             <p>From standard normal table, $z_{0.95} \approx 1.645$.</p>
+                            <p>So, $x_{0.95} = \mu + z_{0.95} \sigma$.</p>
+                             <p>Using MLE estimates (invariance property):<br>
+                            $\hat{x}_{0.95} = \hat{\mu}_{MLE} + z_{0.95} \hat{\sigma}_{MLE}$<br>
+                             $\hat{x}_{0.95} = 384.4 + 1.645 \times 18.8584$<br>
+                            $\hat{x}_{0.95} \approx 384.4 + 31.022 \approx 415.42$ psi.</p>
+                            <p>The estimated strength value is approximately 415.42 psi.</p>
+                        </div>
+                     </div>
+                </div>
+            </div>
+         </div>
+
+         <!-- Question 4 -->
+         <div class="accordion-item" data-state="collapsed">
+             <div class="accordion-header">
+                <h2>4. Confidence Interval for Stray-Load Loss</h2>
+                <span class="difficulty-rating"></span>
+             </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                         <strong>Question:</strong>
+                         <p>A Confidence Interval is desired for the true average stray-load loss $\mu$ (watts) for a certain type of induction motor when the line current is held at 10 amps for a speed of 1500 rpm. Assume that stray-load loss $X$ is normally distributed $N(\mu, \sigma^2)$ with $\sigma = 3.0$.</p>
+                         <p>(a) Compute a 95% CI for $\mu$ when $n=25$ and $\bar{x}=58.3$.</p>
+                         <p>(b) Compute a 99% CI for $\mu$ when $n=100$ and $\bar{x}=58.3$.</p>
+                         <p>(c) How large must $n$ be if the width of the 99% interval for $\mu$ is to be 1.0?</p>
+                     </div>
+                    <div class="ratings-block hidden">
+                         <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                         <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                     </div>
+                    <div class="final-answer-block hidden">
+                         <strong>Final Answer:</strong>
+                        <p>(a) The 95% CI is $(57.124, 59.476)$ watts.</p>
+                        <p>(b) The 99% CI is $(57.5272, 59.0728)$ watts.</p>
+                        <p>(c) Required sample size $n = 239$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                         <div class="solution-text">
+                             <p>Assume $X \sim N(\mu, \sigma^2)$ with known $\sigma = 3.0$.</p>
+                             <strong>(a) 95% CI for $\mu$ with $n=25, \bar{x}=58.3$</strong>
+                             <p>Formula: $\bar{x} \pm z_{\alpha/2} \frac{\sigma}{\sqrt{n}}$.<br>
+                             For 95% CI, $\alpha = 0.05 \implies \alpha/2 = 0.025$. $z_{0.025} = 1.96$.</p>
+                             <p>Margin of Error $E = 1.96 \times \frac{3.0}{\sqrt{25}} = 1.96 \times \frac{3.0}{5} = 1.176$.</p>
+                            <p>CI: $58.3 \pm 1.176 \implies (57.124, 59.476)$ watts.</p>
+
+                            <strong>(b) 99% CI for $\mu$ with $n=100, \bar{x}=58.3$</strong>
+                             <p>For 99% CI, $\alpha = 0.01 \implies \alpha/2 = 0.005$. $z_{0.005} \approx 2.576$.</p>
+                            <p>Margin of Error $E = 2.576 \times \frac{3.0}{\sqrt{100}} = 2.576 \times \frac{3.0}{10} = 0.7728$.</p>
+                            <p>CI: $58.3 \pm 0.7728 \implies (57.5272, 59.0728)$ watts.</p>
+
+                             <strong>(c) Sample size $n$ for a 99% CI width of 1.0</strong>
+                             <p>Width $W = 2 \times E = 2 \times z_{\alpha/2} \frac{\sigma}{\sqrt{n}}$.<br>
+                             We want $W = 1.0$. Use $z_{0.005} = 2.576$ and $\sigma=3.0$.</p>
+                             <p>$1.0 = 2 \times 2.576 \times \frac{3.0}{\sqrt{n}} = \frac{15.456}{\sqrt{n}}$</p>
+                            <p>$\sqrt{n} = 15.456 \implies n = (15.456)^2 \approx 238.89$.</p>
+                            <p>Since $n$ must be an integer, round up: $n = 239$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- end accordion -->
+
+    <!-- Font Size Slider -->
+    <div class="font-control">
+        <input type="range" id="fontSizeSlider" min="10" max="50" value="16" step="1">
+        <span id="fontSizeValue">16px</span>
+    </div>
+
+    <!-- NO CHANGES TO JAVASCRIPT NEEDED FOR FONT/ANIMATION -->
+    <script>
+        // --- Data for Ratings ---
+        const questionsData = [
+            { lengthRating: 3, complexityRating: 3 }, // Q1
+            { lengthRating: 4, complexityRating: 3 }, // Q2
+            { lengthRating: 3, complexityRating: 2 }, // Q3
+            { lengthRating: 3, complexityRating: 2 }  // Q4
+        ];
+
+        // --- Utility Functions (Unchanged) ---
+        function generateStars(rating) { const roundedRating = Math.max(1, Math.min(5, Math.round(rating))); let colorClass; if (roundedRating <= 2) { colorClass = 'green'; } else if (roundedRating === 3) { colorClass = 'yellow'; } else { colorClass = 'red'; } let starsHTML = '<span class="stars">'; for (let i = 1; i <= 5; i++) { starsHTML += `<span class="star-${i <= roundedRating ? 'filled ' + colorClass : 'empty'}">${i <= roundedRating ? '★' : '☆'}</span>`; } starsHTML += '</span>'; return starsHTML; }
+        function calculateDifficulty(lengthRating, complexityRating) { const avg = (lengthRating + complexityRating) / 2; return Math.max(1, Math.min(5, Math.round(avg))); }
+        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
+        const mathJaxLoadedPromise = new Promise((resolve) => { if (window.MathJax && window.MathJax.startup) { window.MathJax.startup.promise.then(resolve); } else { window.addEventListener('MathJaxLoaded', resolve, {once: true}); } }); if (document.readyState === "complete" || document.readyState === "interactive") { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); } else { window.addEventListener('load', () => { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); }); }
+        function typesetMath(elements = [document.body]) { console.log("Attempting to typeset math in:", elements); mathJaxLoadedPromise.then(() => { console.log("MathJax confirmed ready, calling typesetPromise."); return MathJax.typesetPromise(elements); }).then(() => { console.log("MathJax typesetting complete for:", elements); }).catch(err => console.error('MathJax Typesetting Error:', err)); }
+
+        // --- Accordion Update Function (Unchanged) ---
+         function updateAccordion(contentElement, makeActive) {
+            if (!contentElement) return;
+            const innerContent = contentElement.querySelector('.content-inner');
+            const collapseDelay = 100; // Keep 0.1s delay before closing collapse starts
+
+             if (makeActive) {
+                 // EXPANDING
+                 contentElement.classList.add('active');
+                 typesetMath([innerContent]);
+                 requestAnimationFrame(() => {
+                    const currentTransition = contentElement.style.transition;
+                     contentElement.style.transition = 'none';
+                    const scrollHeight = innerContent.offsetHeight;
+                    const style = window.getComputedStyle(contentElement);
+                    const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                     contentElement.style.maxHeight = totalHeight + "px";
+                    console.log(`Expanding: Calculated totalHeight = ${totalHeight}px`);
+                     requestAnimationFrame(() => { contentElement.style.transition = currentTransition; });
+                });
+            } else {
+                 // CLOSING
+                contentElement.classList.remove('active'); // Starts inner content fade out immediately (0.5s duration)
+                console.log('Closing: Removed .active class, starting fade/pad collapse.');
+                 setTimeout(() => {
+                    contentElement.style.maxHeight = '0px'; // Start container collapse after delay (0.7s duration)
+                     console.log(`Closing: Delayed setting max-height=0 by ${collapseDelay}ms`);
+                 }, collapseDelay);
+            }
+         }
+
+        // --- Event Listeners and Setup (Unchanged) ---
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log("DOM Ready - Monospace & Smoother Anim");
+            const accordionItems = document.querySelectorAll('.accordion-item');
+             const slider = document.getElementById('fontSizeSlider');
+            const sizeValueSpan = document.getElementById('fontSizeValue');
+
+            // --- Font Size Slider ---
+             const handleFontSizeChange = debounce(() => {
+                 console.log("Handling font size change..."); typesetMath();
+                 accordionItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    if (content.classList.contains('active') && parseFloat(content.style.maxHeight) > 0) {
+                         console.log("Adjusting height for open item:", item);
+                        const currentTransition = content.style.transition; content.style.transition = 'none';
+                        content.style.maxHeight = 'none';
+                        requestAnimationFrame(() => {
+                            const innerContent = content.querySelector('.content-inner'); const scrollHeight = innerContent.offsetHeight;
+                            const style = window.getComputedStyle(content); const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                            content.style.maxHeight = totalHeight + 'px';
+                            requestAnimationFrame(() => { content.style.transition = currentTransition; });
+                            console.log("Font Change - Adjusted height to:", totalHeight);
+                        });
+                     }
+                 });
+             }, 250);
+             slider.addEventListener('input', () => { const newSize = slider.value; document.documentElement.style.setProperty('--base-font-size', newSize + 'px'); sizeValueSpan.textContent = newSize + 'px'; handleFontSizeChange(); });
+
+            // --- Accordion Logic ---
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header'); const content = item.querySelector('.accordion-content'); const innerContent = content.querySelector('.content-inner');
+                const difficultyRatingSpan = header.querySelector('.difficulty-rating'); const lengthRatingSpan = content.querySelector('.length-rating'); const complexityRatingSpan = content.querySelector('.complexity-rating'); const { lengthRating, complexityRating } = questionsData[index]; difficultyRatingSpan.innerHTML = generateStars(calculateDifficulty(lengthRating, complexityRating)); if (lengthRatingSpan) lengthRatingSpan.innerHTML = generateStars(lengthRating); if (complexityRatingSpan) complexityRatingSpan.innerHTML = generateStars(complexityRating);
+                 const questionBlock = innerContent.querySelector('.question-block'); const ratingsBlock = innerContent.querySelector('.ratings-block'); const finalAnswerBlock = innerContent.querySelector('.final-answer-block'); const solutionBlock = innerContent.querySelector('.solution-block'); [questionBlock, ratingsBlock, finalAnswerBlock, solutionBlock].forEach(el => el?.classList.add('hidden'));
+                 item.addEventListener('click', (event) => {
+                     if (innerContent.contains(event.target)) { console.log("Clicked inside inner content, ignoring toggle."); return; }
+                     const currentState = item.getAttribute('data-state'); let nextState;
+                     switch (currentState) { case 'collapsed': nextState = 'state1'; break; case 'state1': nextState = 'state2'; break; case 'state2': nextState = 'collapsed'; break; default: nextState = 'collapsed'; }
+                     item.setAttribute('data-state', nextState); console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
+                    const showQ = nextState !== 'collapsed'; const showR = nextState !== 'collapsed'; const showA = nextState === 'state1'; const showS = nextState === 'state2';
+                    questionBlock?.classList.toggle('hidden', !showQ); ratingsBlock?.classList.toggle('hidden', !showR); finalAnswerBlock?.classList.toggle('hidden', !showA); solutionBlock?.classList.toggle('hidden', !showS);
+                     updateAccordion(content, nextState !== 'collapsed');
+                });
+             });
+
+            // Initial Font Size & Log
+            const initialSize = slider.value; document.documentElement.style.setProperty('--base-font-size', initialSize + 'px'); sizeValueSpan.textContent = initialSize + 'px'; console.log("Initial setup complete.");
+            typesetMath();
+
+        }); // End DOMContentLoaded
+
+    </script>
+
+</body>
+</html>

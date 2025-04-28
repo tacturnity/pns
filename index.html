@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chapter Summaries Menu</title>
+    <title>Chapter & Tutorial Summaries Menu</title>
 
     <!-- Google Fonts - Roboto Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,7 +45,7 @@
         h1, h2 {
             font-family: 'Roboto Mono', monospace;
             text-align: center;
-            margin-bottom: 1.5em;
+            margin-bottom: 1.5em; /* Default bottom margin */
         }
 
         h1 {
@@ -54,7 +54,7 @@
             font-weight: 700;
             padding-bottom: 12px;
             margin-top: 1.5em;
-            margin-bottom: 1.5em;
+            margin-bottom: 1.5em; /* Keep spacing below H1 */
             border-bottom: 2px solid #ffffff; /* White border */
             animation: fadeIn 0.8s ease-out both;
             animation-delay: 0.1s;
@@ -65,10 +65,16 @@
             font-size: 1.6em;
             color: #cccccc; /* Lighter grey subheading */
             font-weight: 500;
-            margin-bottom: 1.8em;
+            margin-top: 2.5em; /* Add more space ABOVE H2 */
+            margin-bottom: 1.8em; /* Keep space below H2 */
             animation: fadeIn 0.8s ease-out both;
             animation-delay: 0.3s;
         }
+
+        h2:first-of-type {
+            margin-top: 0; /* Remove extra top margin for the first H2 */
+        }
+
 
         /* Main Content Area */
         main {
@@ -84,13 +90,15 @@
             animation-delay: 0.2s;
         }
 
-        /* Chapter List Styling */
-        #chapter-list {
+        /* List Styling (Applies to both #chapter-list and #tutorial-list) */
+        #chapter-list,
+        #tutorial-list {
             list-style: none;
             padding-left: 0;
         }
 
-        #chapter-list li {
+        #chapter-list li,
+        #tutorial-list li {
             background-color: rgba(45, 45, 45, 0.9); /* Slightly darker item background */
             margin-bottom: 14px;
             border-radius: 6px;
@@ -100,18 +108,21 @@
         }
 
         /* Staggered Animation Class (Applied via JS) */
-        #chapter-list li.loaded {
+        #chapter-list li.loaded,
+        #tutorial-list li.loaded {
              animation: popIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
-        #chapter-list li:hover {
+        #chapter-list li:hover,
+        #tutorial-list li:hover {
             background-color: rgba(60, 60, 60, 0.95); /* Lighter grey on hover */
             transform: translateY(-3px);
             border-left-color: #a6e3a1; /* Keep green accent on hover border */
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
         }
 
-        #chapter-list a {
+        #chapter-list a,
+        #tutorial-list a {
             display: block;
             padding: 15px 25px;
             text-decoration: none;
@@ -122,14 +133,16 @@
             letter-spacing: 0.5px;
         }
 
-        #chapter-list li:hover a {
+        #chapter-list li:hover a,
+        #tutorial-list li:hover a {
             color: #a6e3a1; /* Green text on hover */
             transform: translateX(4px); /* Nudge text */
         }
 
-        /* Loading/Error Message Styling */
-        #loading-message,
+        /* Loading/Error Message Styling (Using classes now) */
+        .loading-message,
         .error-message {
+            opacity: 1; /* Ensure visible immediately */
             color: #a0a0a0; /* Muted grey text */
             font-style: italic;
             text-align: center;
@@ -138,7 +151,7 @@
             border-radius: 6px;
             border-left: none !important;
             animation: fadeIn 0.6s ease-out both;
-            animation-delay: 0.5s;
+            animation-delay: 0.5s; /* Delay initial appearance slightly */
         }
 
         .error-message {
@@ -164,14 +177,22 @@
 <body>
 
     <header>
-        <h1>Chapter Summaries</h1>
+        <h1>Chapter & Tutorial Summaries</h1> <!-- Updated H1 -->
     </header>
 
     <main>
+        <!-- Chapters Section -->
         <h2>Available Chapters</h2>
         <ul id="chapter-list">
-            <!-- Chapter links will be dynamically inserted here by JavaScript -->
-            <li id="loading-message">Loading chapters...</li>
+            <!-- Chapter links will be dynamically inserted here -->
+            <li class="loading-message">Loading chapters...</li>
+        </ul>
+
+        <!-- Tutorials Section -->
+        <h2>Available Tutorials</h2>
+        <ul id="tutorial-list">
+            <!-- Tutorial links will be dynamically inserted here -->
+            <li class="loading-message">Loading tutorials...</li>
         </ul>
     </main>
 
@@ -179,100 +200,142 @@
         <!-- Content removed -->
     </footer>
 
-    <!-- Embedded JavaScript Logic (No changes needed here) -->
+    <!-- Embedded JavaScript Logic (Refactored) -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const chapterList = document.getElementById('chapter-list');
-            const loadingMessage = document.getElementById('loading-message');
 
             // --- CONFIGURATION ---
             const githubUsername = 'tacturnity';
             const githubRepoName = 'pns';
+
+            // Chapter specific config
             const chaptersApiPath = 'chapters'; // The FOLDER *containing* the chapter HTML files
-            const relativeLinkPath = 'chapters'; // Path used for constructing the <a href="..."> links
+            const chaptersRelativeLinkPath = 'chapters'; // Path used for constructing the <a href="..."> links
+
+            // Tutorial specific config
+            const tutorialsApiPath = 'tutorials'; // The FOLDER *containing* the tutorial HTML files
+            const tutorialsRelativeLinkPath = 'tutorials'; // Path used for constructing the <a href="..."> links
             // ---------------------
 
-            const encodedPath = chaptersApiPath.split('/').map(encodeURIComponent).join('/');
-            const apiUrl = `https://api.github.com/repos/${githubUsername}/${githubRepoName}/contents/${encodedPath}`;
 
-            console.log(`Fetching chapter list from: ${apiUrl}`);
+            /**
+             * Fetches files from a GitHub repository path and populates a list element.
+             * @param {string} listElementId - The ID of the UL element to populate.
+             * @param {string} apiPath - The path within the repo to fetch (e.g., 'chapters', 'tutorials').
+             * @param {string} relativeLinkPath - The base path for constructing the href links.
+             * @param {string} sectionTitle - A descriptive title for the section (e.g., 'Chapters', 'Tutorials') used in messages.
+             */
+            function fetchAndPopulateList(listElementId, apiPath, relativeLinkPath, sectionTitle) {
+                const listElement = document.getElementById(listElementId);
+                const loadingMessage = listElement.querySelector('.loading-message'); // Find loading message within this list
 
-            fetch(apiUrl)
-                .then(response => {
-                    if (!response.ok) {
-                         return response.json().catch(() => null).then(errorData => {
-                             let errorMsg = `GitHub API error: ${response.status} ${response.statusText}`;
-                             if(errorData && errorData.message) {
-                                 if (response.status === 404 && errorData.message.toLowerCase().includes("not found")) {
-                                    errorMsg = `GitHub API error: 404 Not Found.`;
-                                    errorMsg += ` Could not find the folder '${chaptersApiPath}' in the repository '${githubUsername}/${githubRepoName}'. Please ensure the path is correct and the repository is public.`;
-                                 } else { errorMsg += ` - ${errorData.message}`; }
-                             } else if (response.status === 404) { errorMsg += ` (Is the API path '${chaptersApiPath}' correct relative to the repo root? Is the repository public?)`; }
-                             if (response.status === 403) { errorMsg += ` (API rate limit exceeded or private repository access issue?)`; }
-                             throw new Error(errorMsg);
-                         });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (loadingMessage) chapterList.removeChild(loadingMessage);
+                if (!listElement) {
+                    console.error(`Element with ID '${listElementId}' not found.`);
+                    return;
+                }
 
-                    if (!Array.isArray(data)) {
-                        console.error("Received data is not an array:", data);
-                         if (typeof data === 'object' && data !== null && data.message && data.message.includes("This repository is empty")) {
-                             throw new Error(`The repository '${githubUsername}/${githubRepoName}' appears to be empty.`);
-                         } else if (typeof data === 'object' && data !== null && data.message) {
-                              throw new Error(`GitHub API returned an object instead of an array: ${data.message}. Check if '${chaptersApiPath}' is a file instead of a directory.`);
-                         }
-                         throw new Error('Invalid data format received from GitHub API. Expected an array of files/directories.');
-                    }
+                const encodedPath = apiPath.split('/').map(encodeURIComponent).join('/');
+                const apiUrl = `https://api.github.com/repos/${githubUsername}/${githubRepoName}/contents/${encodedPath}`;
 
-                    const htmlFiles = data.filter(item => item.type === 'file' && item.name.toLowerCase().endsWith('.html') );
+                console.log(`Fetching ${sectionTitle} list from: ${apiUrl}`);
 
-                    if (htmlFiles.length === 0) {
-                        const li = document.createElement('li');
-                        const directoriesFound = data.some(item => item.type === 'dir');
-                        if (directoriesFound) {
-                            li.textContent = `No HTML files found directly inside the '${chaptersApiPath}' directory. HTML files must be in this folder, not subfolders.`;
-                        } else if (data.length === 0) {
-                             li.textContent = `The '${chaptersApiPath}' directory is empty.`;
-                        } else {
-                             li.textContent = `No HTML files found in the '${chaptersApiPath}' directory.`;
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().catch(() => null).then(errorData => {
+                                let errorMsg = `GitHub API error (${sectionTitle}): ${response.status} ${response.statusText}`;
+                                if (errorData && errorData.message) {
+                                    if (response.status === 404 && errorData.message.toLowerCase().includes("not found")) {
+                                        errorMsg = `GitHub API error (${sectionTitle}): 404 Not Found.`;
+                                        errorMsg += ` Could not find the folder '${apiPath}' in the repository '${githubUsername}/${githubRepoName}'. Please ensure the path is correct and the repository is public.`;
+                                    } else { errorMsg += ` - ${errorData.message}`; }
+                                } else if (response.status === 404) { errorMsg += ` (Is the API path '${apiPath}' correct relative to the repo root? Is the repository public?)`; }
+                                if (response.status === 403) { errorMsg += ` (API rate limit exceeded or private repository access issue?)`; }
+                                throw new Error(errorMsg);
+                            });
                         }
-                        li.classList.add('error-message');
-                        chapterList.appendChild(li);
-                        return;
-                    }
-
-                    htmlFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-
-                    htmlFiles.forEach((file, index) => {
-                        const listItem = document.createElement('li');
-                        const link = document.createElement('a');
-                        let title = file.name.replace(/\.html$/i, '').replace(/[-_]/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
-                        const chapterMatch = title.match(/^Chapter\s*(\d+)/i);
-                        if (chapterMatch) {
-                           // title = `Chapter ${String(chapterMatch[1]).padStart(2,'0')}${title.substring(chapterMatch[0].length)}`;
-                        } else {
-                             title = title.replace(/^(\d+)\s*/, 'Chapter $1 ');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (loadingMessage && loadingMessage.parentNode === listElement) {
+                             listElement.removeChild(loadingMessage);
                         }
-                        link.href = `${relativeLinkPath}/${encodeURIComponent(file.name)}`;
-                        link.textContent = title;
-                        listItem.appendChild(link);
-                        chapterList.appendChild(listItem);
 
-                        listItem.style.animationDelay = `${index * 0.07}s`;
-                        listItem.classList.add('loaded');
+                        if (!Array.isArray(data)) {
+                            console.error(`Received data for ${sectionTitle} is not an array:`, data);
+                            if (typeof data === 'object' && data !== null && data.message && data.message.includes("This repository is empty")) {
+                                throw new Error(`The repository '${githubUsername}/${githubRepoName}' appears to be empty.`);
+                            } else if (typeof data === 'object' && data !== null && data.message) {
+                                throw new Error(`GitHub API returned an object instead of an array for ${sectionTitle}: ${data.message}. Check if '${apiPath}' is a file instead of a directory.`);
+                            }
+                            throw new Error(`Invalid data format received from GitHub API for ${sectionTitle}. Expected an array of files/directories.`);
+                        }
+
+                        const htmlFiles = data.filter(item => item.type === 'file' && item.name.toLowerCase().endsWith('.html'));
+
+                        if (htmlFiles.length === 0) {
+                            const li = document.createElement('li');
+                            const directoriesFound = data.some(item => item.type === 'dir');
+                            if (directoriesFound) {
+                                li.textContent = `No HTML files found directly inside the '${apiPath}' directory. HTML files must be in this folder, not subfolders.`;
+                            } else if (data.length === 0) {
+                                li.textContent = `The '${apiPath}' directory is empty.`;
+                            } else {
+                                li.textContent = `No HTML files found in the '${apiPath}' directory.`;
+                            }
+                            li.classList.add('error-message');
+                            listElement.appendChild(li);
+                            return;
+                        }
+
+                        // Sort files numerically then alphabetically
+                        htmlFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
+                        htmlFiles.forEach((file, index) => {
+                            const listItem = document.createElement('li');
+                            const link = document.createElement('a');
+
+                            // Generate Title (Improved logic)
+                            let title = file.name.replace(/\.html$/i, '') // Remove .html
+                                                .replace(/[-_]/g, ' ')      // Replace hyphens/underscores with spaces
+                                                .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize words
+
+                            // Specific formatting attempt for "Chapter X" or "Tutorial Y" (adjust if needed)
+                            if (title.match(/^(Chapter|Tutorial)\s*(\d+)/i)) {
+                                // Already formatted well, do nothing extra for now
+                            } else if (title.match(/^(\d+)\s*/)) {
+                                title = title.replace(/^(\d+)\s*/, `${sectionTitle.slice(0,-1)} $1 `); // e.g., "10 Intro" -> "Tutorial 10 Intro"
+                            } else {
+                                // Keep the capitalized title if no number prefix found
+                            }
+
+                            link.href = `${relativeLinkPath}/${encodeURIComponent(file.name)}`;
+                            link.textContent = title;
+                            listItem.appendChild(link);
+                            listElement.appendChild(listItem);
+
+                            // Apply staggered animation
+                            listItem.style.animationDelay = `${index * 0.07}s`; // Stagger within this list
+                            listItem.classList.add('loaded');
+                        });
+                    })
+                    .catch(error => {
+                        console.error(`Error loading ${sectionTitle}:`, error);
+                        if (loadingMessage && loadingMessage.parentNode === listElement) {
+                            listElement.removeChild(loadingMessage);
+                        }
+                        const errorItem = document.createElement('li');
+                        // Display the specific error message thrown or caught
+                        errorItem.textContent = error.message || `Failed to load ${sectionTitle} list. Check console for details.`;
+                        errorItem.classList.add('error-message');
+                        listElement.appendChild(errorItem);
                     });
-                })
-                .catch(error => {
-                    console.error('Error loading chapters:', error);
-                    if (loadingMessage && loadingMessage.parentNode === chapterList) { chapterList.removeChild(loadingMessage); }
-                    const errorItem = document.createElement('li');
-                    errorItem.textContent = `Error loading chapter list: ${error.message}`;
-                    errorItem.classList.add('error-message');
-                    chapterList.appendChild(errorItem);
-                });
+            }
+
+            // --- Initiate Fetching for Both Sections ---
+            fetchAndPopulateList('chapter-list', chaptersApiPath, chaptersRelativeLinkPath, 'Chapters');
+            fetchAndPopulateList('tutorial-list', tutorialsApiPath, tutorialsRelativeLinkPath, 'Tutorials');
+
         });
     </script>
 
