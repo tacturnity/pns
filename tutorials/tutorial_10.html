@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutorial - 10 (Monospace & Smoother Anim)</title> <!-- Updated Title -->
+    <title>Tutorial - 10 (Full Monospace)</title> <!-- Updated Title -->
     <!-- MathJax Configuration -->
     <script>
         MathJax = {
@@ -27,10 +27,9 @@
             --content-bg: #282828;
             --solution-text-bg: #252525;
             --base-font-size: 16px;
-            --anim-duration: 0.7s;        /* Main container duration (inspired by example) */
-            --content-fade-duration: 0.5s;/* Content fade duration (inspired by example) */
-            --collapse-delay: 0.1s;        /* Delay before max-height collapse STARTS (set in JS) */
-            /* MODIFIED: Easing inspired by Thermodynamics example */
+            --anim-duration: 0.7s;
+            --content-fade-duration: 0.5s;
+            --collapse-delay: 0.1s;
             --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
 
             /* Star Colors (Unchanged) */
@@ -39,14 +38,14 @@
             --color-stars-green: #58d68d;
             --color-stars-grey: #777;
 
-            /* ADDED: Monospace Font Stack */
+            /* Monospace Font Stack */
             --monospace-font-stack: 'SF Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
         }
 
         body {
             background-color: var(--bg-color); color: var(--text-color);
-            /* Base font remains sans-serif for general UI */
-            font-family: system-ui, sans-serif;
+            /* MODIFIED: Set body default to monospace */
+            font-family: var(--monospace-font-stack);
             line-height: 1.7;
             margin: 0; padding: 20px; font-size: var(--base-font-size);
             transition: font-size 0.2s ease-in-out; padding-bottom: 60px;
@@ -56,15 +55,14 @@
             color: var(--accent-color); text-align: center;
             border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
             margin-bottom: 30px; font-size: 2.5em;
-            /* Keep heading font */
-            font-family: system-ui, sans-serif;
+            /* Inherits monospace from body */
         }
         .accordion { max-width: 900px; margin: 20px auto; }
         .accordion-item {
             border: 1px solid var(--border-color); border-radius: 8px;
             overflow: hidden; margin-bottom: 25px; background-color: var(--content-bg);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: box-shadow 0.3s ease, border-color 0.3s ease; /* Added subtle hover effect */
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
         }
          .accordion-item:hover {
             border-color: #777;
@@ -73,102 +71,116 @@
         .accordion-header {
             background-color: var(--header-bg); padding: 18px 25px; cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
-            /* Use new easing */
             transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
             border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
         }
         .accordion-item[data-state="collapsed"] .accordion-header { border-bottom-color: transparent; }
         .accordion-header:hover { background-color: var(--header-hover-bg); }
-        .accordion-header h2 { margin: 0; font-size: 1.2em; color: var(--text-color); font-family: system-ui, sans-serif; } /* Keep heading font */
+        .accordion-header h2 {
+            margin: 0; font-size: 1.2em; color: var(--text-color);
+            /* Inherits monospace from body */
+         }
 
-        /* Content Area - Base State */
+        /* Content Area */
         .accordion-content {
             padding: 0 25px; max-height: 0; overflow: hidden;
-            /* Use new easing and duration */
             transition: max-height var(--anim-duration) var(--anim-easing),
                         padding-top var(--anim-duration) var(--anim-easing),
                         padding-bottom var(--anim-duration) var(--anim-easing);
             box-sizing: border-box; position: relative; z-index: 1;
         }
-        /* Content Area - Active State */
         .accordion-content.active { padding-top: 20px; }
 
-        /* Inner Content Wrapper - Animations */
+        /* Inner Content Wrapper Animations */
         .content-inner {
             opacity: 0;
-            transform: translateY(15px); /* Keep subtle slide */
-            /* Use new fade duration and easing */
+            transform: translateY(15px);
             transition: opacity var(--content-fade-duration) var(--anim-easing) 0s,
                         transform var(--content-fade-duration) var(--anim-easing) 0s;
             will-change: opacity, transform;
             padding-bottom: 25px;
         }
-        /* Override transition for OPENING (when .active is added) */
         .accordion-content.active .content-inner {
             opacity: 1;
             transform: translateY(0);
-            /* Keep delay based on main container animation */
             transition-delay: calc(var(--anim-duration) * 0.3);
-            /* Use new independent fade duration */
             transition-duration: var(--content-fade-duration);
         }
 
-        /* Content Blocks */
+        /* Content Blocks Structure */
         .question-block, .final-answer-block, .ratings-block, .solution-block {
             margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);
         }
         .content-inner > div:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .ratings-block { margin-bottom: 25px !important; padding-bottom: 20px !important; }
 
-        /* Block Headers */
+        /* --- MODIFIED: All Text Uses Monospace (Inherited) --- */
+        /* Block Headers (strong tags) */
         .question-block strong, .final-answer-block strong, .solution-block strong {
             color: var(--accent-color); display: block; margin-bottom: 8px;
-            font-size: 1.1em; font-family: system-ui, sans-serif; /* Keep header font */
+            font-size: 1.1em;
+            /* Inherits monospace from body */
         }
-
-        /* --- MODIFIED: Apply Monospace Font --- */
+        /* Paragraphs in question/answer blocks */
         .question-block p,
         .final-answer-block p {
-            font-family: var(--monospace-font-stack);
-            font-size: inherit; /* Inherit size from body/slider */
-            margin: 5px 0 1em 0; /* Adjust margin slightly */
+            /* Inherits monospace from body */
+            font-size: inherit;
+            margin: 5px 0 1em 0;
         }
+        /* Solution Text Container */
         .solution-text {
             background-color: var(--solution-text-bg); padding: 15px; border-radius: 5px;
             border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
-            /* Uses monospace stack defined in :root */
+            /* Inherits monospace from body (or explicitly set, same effect) */
             font-family: var(--monospace-font-stack);
         }
-         /* Ensure lists within solution also use monospace */
+         /* Solution Text Content (paragraphs, list items) */
         .solution-text p, .solution-text li {
             margin-bottom: 1em;
-            font-family: inherit; /* Inherit from .solution-text */
+            /* Inherits monospace from .solution-text -> body */
+            font-family: inherit;
         }
         .solution-text *:last-child { margin-bottom: 0; }
         .solution-text ul, .solution-text ol { padding-left: 25px; margin: 0.5em 0 1em 0; }
-         /* Keep specific strong styling for solution steps */
+         /* Solution Step Headers (strong tags inside solution) */
         .solution-text > strong {
             color: var(--text-color); font-size: 1.05em; margin: 15px 0 10px 0;
-            display: block; font-family: system-ui, sans-serif; /* Keep distinct step heading */
+            display: block;
+             /* Inherits monospace from body */
         }
         .solution-text > strong:first-of-type { margin-top: 0; }
-        /* --- END Monospace Font --- */
 
-        /* Star Ratings (Unchanged styling) */
-        .stars { font-size: 1.3em; letter-spacing: 3px; display: inline-block; font-family: initial; }
+        /* Star Ratings */
+        .stars { font-size: 1.3em; letter-spacing: 3px; display: inline-block;
+                 font-family: initial; /* Keep default font for star glyphs */
+               }
         .star-filled.green { color: var(--color-stars-green); }
         .star-filled.yellow { color: var(--color-stars-yellow); }
         .star-filled.red { color: var(--color-stars-red); }
         .star-empty { color: var(--color-stars-grey); }
-        .rating-label { font-weight: bold; color: #bdbdbd; display: inline-block; min-width: 140px; vertical-align: middle; font-family: system-ui, sans-serif;} /* Keep label font */
+        .rating-label {
+            font-weight: bold; color: #bdbdbd; display: inline-block;
+            min-width: 140px; vertical-align: middle;
+            /* Inherits monospace from body */
+        }
         .ratings-block .stars { vertical-align: middle; }
 
-        /* Utility & MathJax/Slider (Unchanged styling) */
+        /* Utility & MathJax/Slider */
         .hidden { display: none; }
-        mjx-container { font-size: 1.05em; text-align: left !important; overflow-x: auto; overflow-y: hidden; padding: 2px 0; font-family: 'Latin Modern Math', 'STIX Two Math', serif; }
+        mjx-container {
+            font-size: 1.05em; text-align: left !important;
+            overflow-x: auto; overflow-y: hidden; padding: 2px 0;
+            /* Keep specific math fonts for MathJax */
+            font-family: 'Latin Modern Math', 'STIX Two Math', serif;
+        }
         .font-control { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--header-bg); padding: 10px 20px; box-sizing: border-box; display: flex; align-items: center; border-top: 1px solid var(--border-color); z-index: 10; }
         #fontSizeSlider { flex-grow: 1; cursor: pointer; margin: 0 15px; accent-color: var(--accent-color); min-width: 100px; height: 8px; }
-        #fontSizeValue { min-width: 50px; text-align: right; font-weight: bold; color: var(--text-color); font-size: 12px !important; font-family: system-ui, sans-serif; } /* Keep label font */
+        #fontSizeValue {
+            min-width: 50px; text-align: right; font-weight: bold;
+            color: var(--text-color); font-size: 12px !important;
+            /* Inherits monospace from body */
+        }
         /* --- END OF MODIFIED CSS --- */
     </style>
 </head>
@@ -498,7 +510,7 @@
 
         // --- Event Listeners and Setup (Unchanged) ---
         document.addEventListener('DOMContentLoaded', () => {
-             console.log("DOM Ready - Monospace & Smoother Anim");
+             console.log("DOM Ready - Full Monospace");
             const accordionItems = document.querySelectorAll('.accordion-item');
              const slider = document.getElementById('fontSizeSlider');
             const sizeValueSpan = document.getElementById('fontSizeValue');
