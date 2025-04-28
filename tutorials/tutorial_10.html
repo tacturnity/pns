@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutorial - 10 (Full Monospace)</title> <!-- Updated Title -->
+    <title>Tutorial - 10 (Final Polish)</title> <!-- Updated Title -->
     <!-- MathJax Configuration -->
     <script>
         MathJax = {
@@ -16,7 +16,7 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
     <style>
-        /* --- START OF MODIFIED CSS --- */
+        /* --- START OF FINAL CSS --- */
         :root {
             --accent-color: #F08080;
             --bg-color: #1e1e1e;
@@ -26,13 +26,14 @@
             --header-hover-bg: #3f3f3f;
             --content-bg: #282828;
             --solution-text-bg: #252525;
+            --slider-track-color: #444; /* Dark track for slider */
             --base-font-size: 16px;
             --anim-duration: 0.7s;
             --content-fade-duration: 0.5s;
             --collapse-delay: 0.1s;
             --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
 
-            /* Star Colors (Unchanged) */
+            /* Star Colors */
             --color-stars-red: #f1948a;
             --color-stars-yellow: #f7dc6f;
             --color-stars-green: #58d68d;
@@ -44,18 +45,18 @@
 
         body {
             background-color: var(--bg-color); color: var(--text-color);
-            /* MODIFIED: Set body default to monospace */
-            font-family: var(--monospace-font-stack);
+            font-family: var(--monospace-font-stack); /* Default to monospace */
             line-height: 1.7;
             margin: 0; padding: 20px; font-size: var(--base-font-size);
-            transition: font-size 0.2s ease-in-out; padding-bottom: 60px;
+            transition: font-size 0.2s ease-in-out;
+            padding-bottom: 80px; /* Space for slider */
             overflow-x: hidden;
         }
         h1 {
             color: var(--accent-color); text-align: center;
             border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
             margin-bottom: 30px; font-size: 2.5em;
-            /* Inherits monospace from body */
+            /* Inherits monospace */
         }
         .accordion { max-width: 900px; margin: 20px auto; }
         .accordion-item {
@@ -69,7 +70,8 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
         .accordion-header {
-            background-color: var(--header-bg); padding: 18px 25px; cursor: pointer;
+            background-color: var(--header-bg);
+            padding: 18px 25px; cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
             transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
             border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
@@ -78,10 +80,10 @@
         .accordion-header:hover { background-color: var(--header-hover-bg); }
         .accordion-header h2 {
             margin: 0; font-size: 1.2em; color: var(--text-color);
-            /* Inherits monospace from body */
+            /* Inherits monospace */
          }
 
-        /* Content Area */
+        /* Content Area & Animations */
         .accordion-content {
             padding: 0 25px; max-height: 0; overflow: hidden;
             transition: max-height var(--anim-duration) var(--anim-easing),
@@ -90,8 +92,6 @@
             box-sizing: border-box; position: relative; z-index: 1;
         }
         .accordion-content.active { padding-top: 20px; }
-
-        /* Inner Content Wrapper Animations */
         .content-inner {
             opacity: 0;
             transform: translateY(15px);
@@ -107,47 +107,39 @@
             transition-duration: var(--content-fade-duration);
         }
 
-        /* Content Blocks Structure */
+        /* Content Blocks Structure & Styling */
         .question-block, .final-answer-block, .ratings-block, .solution-block {
             margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);
         }
         .content-inner > div:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .ratings-block { margin-bottom: 25px !important; padding-bottom: 20px !important; }
 
-        /* --- MODIFIED: All Text Uses Monospace (Inherited) --- */
-        /* Block Headers (strong tags) */
         .question-block strong, .final-answer-block strong, .solution-block strong {
             color: var(--accent-color); display: block; margin-bottom: 8px;
             font-size: 1.1em;
-            /* Inherits monospace from body */
+            /* Inherits monospace */
         }
-        /* Paragraphs in question/answer blocks */
         .question-block p,
         .final-answer-block p {
-            /* Inherits monospace from body */
             font-size: inherit;
             margin: 5px 0 1em 0;
+            /* Inherits monospace */
         }
-        /* Solution Text Container */
         .solution-text {
             background-color: var(--solution-text-bg); padding: 15px; border-radius: 5px;
             border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
-            /* Inherits monospace from body (or explicitly set, same effect) */
-            font-family: var(--monospace-font-stack);
+            font-family: var(--monospace-font-stack); /* Explicitly set, inherits anyway */
         }
-         /* Solution Text Content (paragraphs, list items) */
         .solution-text p, .solution-text li {
             margin-bottom: 1em;
-            /* Inherits monospace from .solution-text -> body */
-            font-family: inherit;
+            font-family: inherit; /* Inherit monospace */
         }
         .solution-text *:last-child { margin-bottom: 0; }
         .solution-text ul, .solution-text ol { padding-left: 25px; margin: 0.5em 0 1em 0; }
-         /* Solution Step Headers (strong tags inside solution) */
         .solution-text > strong {
             color: var(--text-color); font-size: 1.05em; margin: 15px 0 10px 0;
             display: block;
-             /* Inherits monospace from body */
+            /* Inherits monospace */
         }
         .solution-text > strong:first-of-type { margin-top: 0; }
 
@@ -162,11 +154,11 @@
         .rating-label {
             font-weight: bold; color: #bdbdbd; display: inline-block;
             min-width: 140px; vertical-align: middle;
-            /* Inherits monospace from body */
+            /* Inherits monospace */
         }
         .ratings-block .stars { vertical-align: middle; }
 
-        /* Utility & MathJax/Slider */
+        /* Utility & MathJax */
         .hidden { display: none; }
         mjx-container {
             font-size: 1.05em; text-align: left !important;
@@ -174,14 +166,78 @@
             /* Keep specific math fonts for MathJax */
             font-family: 'Latin Modern Math', 'STIX Two Math', serif;
         }
-        .font-control { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--header-bg); padding: 10px 20px; box-sizing: border-box; display: flex; align-items: center; border-top: 1px solid var(--border-color); z-index: 10; }
-        #fontSizeSlider { flex-grow: 1; cursor: pointer; margin: 0 15px; accent-color: var(--accent-color); min-width: 100px; height: 8px; }
+
+        /* Font Control - Minimalistic */
+        .font-control {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: transparent; /* No background */
+            padding: 0px 20px 15px 20px; /* Spacing */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            border-top: none; /* No border */
+            z-index: 10;
+        }
+        #fontSizeSlider {
+            flex-grow: 1;
+            cursor: pointer;
+            margin: 0 15px;
+            accent-color: var(--accent-color); /* Styles thumb in modern browsers */
+            min-width: 100px;
+            height: 6px; /* Track height */
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* Track Styling */
+        #fontSizeSlider::-webkit-slider-runnable-track {
+            height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        #fontSizeSlider::-moz-range-track {
+             height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        /* Thumb Styling */
+        #fontSizeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default */
+            appearance: none;
+            margin-top: -5px; /* Vertically center (16px thumb on 6px track) */
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%; /* Make it round */
+            cursor: pointer;
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+        #fontSizeSlider::-moz-range-thumb {
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* Remove Firefox border */
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+         /* Optional: Slight scale effect on interaction */
+         #fontSizeSlider:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+         #fontSizeSlider:active::-moz-range-thumb {
+            transform: scale(1.1);
+         }
+
         #fontSizeValue {
             min-width: 50px; text-align: right; font-weight: bold;
             color: var(--text-color); font-size: 12px !important;
-            /* Inherits monospace from body */
+            /* Inherits monospace */
         }
-        /* --- END OF MODIFIED CSS --- */
+        /* --- END OF FINAL CSS --- */
     </style>
 </head>
 <body>
@@ -460,7 +516,7 @@
         <span id="fontSizeValue">16px</span>
     </div>
 
-    <!-- NO CHANGES TO JAVASCRIPT NEEDED FOR FONT/ANIMATION -->
+    <!-- JavaScript (Unchanged from previous versions) -->
     <script>
         // --- Data for Ratings ---
         const questionsData = [
@@ -470,91 +526,163 @@
             { lengthRating: 3, complexityRating: 2 }  // Q4
         ];
 
-        // --- Utility Functions (Unchanged) ---
+        // --- Utility Functions ---
         function generateStars(rating) { const roundedRating = Math.max(1, Math.min(5, Math.round(rating))); let colorClass; if (roundedRating <= 2) { colorClass = 'green'; } else if (roundedRating === 3) { colorClass = 'yellow'; } else { colorClass = 'red'; } let starsHTML = '<span class="stars">'; for (let i = 1; i <= 5; i++) { starsHTML += `<span class="star-${i <= roundedRating ? 'filled ' + colorClass : 'empty'}">${i <= roundedRating ? '★' : '☆'}</span>`; } starsHTML += '</span>'; return starsHTML; }
         function calculateDifficulty(lengthRating, complexityRating) { const avg = (lengthRating + complexityRating) / 2; return Math.max(1, Math.min(5, Math.round(avg))); }
         function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
         const mathJaxLoadedPromise = new Promise((resolve) => { if (window.MathJax && window.MathJax.startup) { window.MathJax.startup.promise.then(resolve); } else { window.addEventListener('MathJaxLoaded', resolve, {once: true}); } }); if (document.readyState === "complete" || document.readyState === "interactive") { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); } else { window.addEventListener('load', () => { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); }); }
         function typesetMath(elements = [document.body]) { console.log("Attempting to typeset math in:", elements); mathJaxLoadedPromise.then(() => { console.log("MathJax confirmed ready, calling typesetPromise."); return MathJax.typesetPromise(elements); }).then(() => { console.log("MathJax typesetting complete for:", elements); }).catch(err => console.error('MathJax Typesetting Error:', err)); }
 
-        // --- Accordion Update Function (Unchanged) ---
+        // --- Accordion Update Function ---
          function updateAccordion(contentElement, makeActive) {
             if (!contentElement) return;
             const innerContent = contentElement.querySelector('.content-inner');
-            const collapseDelay = 100; // Keep 0.1s delay before closing collapse starts
+            const collapseDelay = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--collapse-delay') || '0.1') * 1000; // Read from CSS var
 
              if (makeActive) {
                  // EXPANDING
                  contentElement.classList.add('active');
                  typesetMath([innerContent]);
-                 requestAnimationFrame(() => {
+                 requestAnimationFrame(() => { // Ensure DOM update before measurement
                     const currentTransition = contentElement.style.transition;
-                     contentElement.style.transition = 'none';
+                     contentElement.style.transition = 'none'; // Temporarily disable transitions for height calculation
                     const scrollHeight = innerContent.offsetHeight;
                     const style = window.getComputedStyle(contentElement);
                     const totalHeight = scrollHeight + parseFloat(style.paddingTop);
-                     contentElement.style.maxHeight = totalHeight + "px";
+                     contentElement.style.maxHeight = totalHeight + "px"; // Set target height
                     console.log(`Expanding: Calculated totalHeight = ${totalHeight}px`);
-                     requestAnimationFrame(() => { contentElement.style.transition = currentTransition; });
+                     requestAnimationFrame(() => { // Re-enable transitions after height is set
+                         contentElement.style.transition = currentTransition;
+                     });
                 });
             } else {
                  // CLOSING
-                contentElement.classList.remove('active'); // Starts inner content fade out immediately (0.5s duration)
+                contentElement.classList.remove('active'); // Starts inner content fade out immediately
                 console.log('Closing: Removed .active class, starting fade/pad collapse.');
                  setTimeout(() => {
-                    contentElement.style.maxHeight = '0px'; // Start container collapse after delay (0.7s duration)
+                    contentElement.style.maxHeight = '0px'; // Start container collapse after delay
                      console.log(`Closing: Delayed setting max-height=0 by ${collapseDelay}ms`);
                  }, collapseDelay);
             }
          }
 
-        // --- Event Listeners and Setup (Unchanged) ---
+        // --- Event Listeners and Setup ---
         document.addEventListener('DOMContentLoaded', () => {
-             console.log("DOM Ready - Full Monospace");
+             console.log("DOM Ready - Final Polish");
             const accordionItems = document.querySelectorAll('.accordion-item');
              const slider = document.getElementById('fontSizeSlider');
             const sizeValueSpan = document.getElementById('fontSizeValue');
 
             // --- Font Size Slider ---
              const handleFontSizeChange = debounce(() => {
-                 console.log("Handling font size change..."); typesetMath();
+                 console.log("Handling font size change..."); typesetMath(); // Retypeset on resize
+                 // Adjust height of any open accordion items after font size change
                  accordionItems.forEach(item => {
                     const content = item.querySelector('.accordion-content');
                     if (content.classList.contains('active') && parseFloat(content.style.maxHeight) > 0) {
                          console.log("Adjusting height for open item:", item);
-                        const currentTransition = content.style.transition; content.style.transition = 'none';
-                        content.style.maxHeight = 'none';
-                        requestAnimationFrame(() => {
-                            const innerContent = content.querySelector('.content-inner'); const scrollHeight = innerContent.offsetHeight;
-                            const style = window.getComputedStyle(content); const totalHeight = scrollHeight + parseFloat(style.paddingTop);
-                            content.style.maxHeight = totalHeight + 'px';
-                            requestAnimationFrame(() => { content.style.transition = currentTransition; });
+                         // Temporarily disable transitions to avoid jumpy resize
+                        const currentTransition = content.style.transition;
+                        content.style.transition = 'none';
+                        content.style.maxHeight = 'none'; // Allow content to reflow naturally
+
+                        requestAnimationFrame(() => { // Measure after reflow
+                            const innerContent = content.querySelector('.content-inner');
+                            const scrollHeight = innerContent.offsetHeight;
+                            const style = window.getComputedStyle(content);
+                            const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                            content.style.maxHeight = totalHeight + 'px'; // Apply new calculated height
+
+                            requestAnimationFrame(() => { // Restore transitions
+                                content.style.transition = currentTransition;
+                            });
                             console.log("Font Change - Adjusted height to:", totalHeight);
                         });
                      }
                  });
-             }, 250);
-             slider.addEventListener('input', () => { const newSize = slider.value; document.documentElement.style.setProperty('--base-font-size', newSize + 'px'); sizeValueSpan.textContent = newSize + 'px'; handleFontSizeChange(); });
+             }, 250); // Debounce typesetting/height adjustment
+
+             slider.addEventListener('input', () => {
+                 const newSize = slider.value;
+                 document.documentElement.style.setProperty('--base-font-size', newSize + 'px');
+                 sizeValueSpan.textContent = newSize + 'px';
+                 handleFontSizeChange(); // Call debounced handler
+             });
 
             // --- Accordion Logic ---
             accordionItems.forEach((item, index) => {
-                const header = item.querySelector('.accordion-header'); const content = item.querySelector('.accordion-content'); const innerContent = content.querySelector('.content-inner');
-                const difficultyRatingSpan = header.querySelector('.difficulty-rating'); const lengthRatingSpan = content.querySelector('.length-rating'); const complexityRatingSpan = content.querySelector('.complexity-rating'); const { lengthRating, complexityRating } = questionsData[index]; difficultyRatingSpan.innerHTML = generateStars(calculateDifficulty(lengthRating, complexityRating)); if (lengthRatingSpan) lengthRatingSpan.innerHTML = generateStars(lengthRating); if (complexityRatingSpan) complexityRatingSpan.innerHTML = generateStars(complexityRating);
-                 const questionBlock = innerContent.querySelector('.question-block'); const ratingsBlock = innerContent.querySelector('.ratings-block'); const finalAnswerBlock = innerContent.querySelector('.final-answer-block'); const solutionBlock = innerContent.querySelector('.solution-block'); [questionBlock, ratingsBlock, finalAnswerBlock, solutionBlock].forEach(el => el?.classList.add('hidden'));
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const innerContent = content.querySelector('.content-inner');
+
+                // Ratings setup
+                const difficultyRatingSpan = header.querySelector('.difficulty-rating');
+                const lengthRatingSpan = content.querySelector('.length-rating');
+                const complexityRatingSpan = content.querySelector('.complexity-rating');
+                // Ensure index is within bounds of questionsData
+                if (index < questionsData.length) {
+                    const { lengthRating, complexityRating } = questionsData[index];
+                    difficultyRatingSpan.innerHTML = generateStars(calculateDifficulty(lengthRating, complexityRating));
+                    if (lengthRatingSpan) lengthRatingSpan.innerHTML = generateStars(lengthRating);
+                    if (complexityRatingSpan) complexityRatingSpan.innerHTML = generateStars(complexityRating);
+                } else {
+                    console.warn(`No data found for question index ${index}`);
+                }
+
+                 // Cache blocks & hide initially
+                 const questionBlock = innerContent.querySelector('.question-block');
+                 const ratingsBlock = innerContent.querySelector('.ratings-block');
+                 const finalAnswerBlock = innerContent.querySelector('.final-answer-block');
+                 const solutionBlock = innerContent.querySelector('.solution-block');
+                 [questionBlock, ratingsBlock, finalAnswerBlock, solutionBlock].forEach(el => {
+                     if (el) el.classList.add('hidden');
+                 });
+
+                 // Click Listener for state transitions
                  item.addEventListener('click', (event) => {
-                     if (innerContent.contains(event.target)) { console.log("Clicked inside inner content, ignoring toggle."); return; }
-                     const currentState = item.getAttribute('data-state'); let nextState;
-                     switch (currentState) { case 'collapsed': nextState = 'state1'; break; case 'state1': nextState = 'state2'; break; case 'state2': nextState = 'collapsed'; break; default: nextState = 'collapsed'; }
-                     item.setAttribute('data-state', nextState); console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
-                    const showQ = nextState !== 'collapsed'; const showR = nextState !== 'collapsed'; const showA = nextState === 'state1'; const showS = nextState === 'state2';
-                    questionBlock?.classList.toggle('hidden', !showQ); ratingsBlock?.classList.toggle('hidden', !showR); finalAnswerBlock?.classList.toggle('hidden', !showA); solutionBlock?.classList.toggle('hidden', !showS);
+                     // Prevent toggle if click is inside the content area (e.g., selecting text)
+                     if (innerContent.contains(event.target)) {
+                         console.log("Clicked inside inner content, ignoring toggle.");
+                         return;
+                     }
+
+                     const currentState = item.getAttribute('data-state');
+                     let nextState;
+
+                     // State machine: collapsed -> state1 (Q+R+A) -> state2 (Q+R+S) -> collapsed
+                     switch (currentState) {
+                         case 'collapsed': nextState = 'state1'; break;
+                         case 'state1':    nextState = 'state2'; break;
+                         case 'state2':    nextState = 'collapsed'; break;
+                         default:          nextState = 'collapsed'; // Fallback
+                     }
+
+                     item.setAttribute('data-state', nextState);
+                     console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
+
+                     // Determine visibility based on the new state
+                     const showQ = nextState !== 'collapsed'; // Question visible in state1 & state2
+                     const showR = nextState !== 'collapsed'; // Ratings visible in state1 & state2
+                     const showA = nextState === 'state1';    // Answer only in state1
+                     const showS = nextState === 'state2';    // Solution only in state2
+
+                     // Toggle visibility classes
+                     if (questionBlock) questionBlock.classList.toggle('hidden', !showQ);
+                     if (ratingsBlock) ratingsBlock.classList.toggle('hidden', !showR);
+                     if (finalAnswerBlock) finalAnswerBlock.classList.toggle('hidden', !showA);
+                     if (solutionBlock) solutionBlock.classList.toggle('hidden', !showS);
+
+                     // Update Accordion Animation/Height
                      updateAccordion(content, nextState !== 'collapsed');
                 });
              });
 
             // Initial Font Size & Log
-            const initialSize = slider.value; document.documentElement.style.setProperty('--base-font-size', initialSize + 'px'); sizeValueSpan.textContent = initialSize + 'px'; console.log("Initial setup complete.");
-            typesetMath();
+            const initialSize = slider.value;
+            document.documentElement.style.setProperty('--base-font-size', initialSize + 'px');
+            sizeValueSpan.textContent = initialSize + 'px';
+            console.log("Initial setup complete.");
+            typesetMath(); // Initial typeset after DOM ready
 
         }); // End DOMContentLoaded
 
