@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en" style="--base-font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - 11 + 12</title> <!-- Updated Title -->
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+          options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'], ignoreHtmlClass: 'tex2jax_ignore', processHtmlClass: 'tex2jax_process' },
+          svg: { fontCache: 'global' },
+          startup: { ready: () => { console.log('MathJax ready.'); MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax initial typeset complete.')); } }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* --- START OF FINAL CSS --- */
+        :root {
+            --accent-color: #F08080;
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #555;
+            --header-bg: #2f2f2f;
+            --header-hover-bg: #3f3f3f;
+            --content-bg: #282828;
+            --solution-text-bg: #252525;
+            --slider-track-color: #444; /* Dark track for slider */
+            --base-font-size: 16px;
+            --anim-duration: 0.7s;
+            --content-fade-duration: 0.5s;
+            --collapse-delay: 0.1s;
+            --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
+            /* Star Colors */
+            --color-stars-red: #f1948a;
+            --color-stars-yellow: #f7dc6f;
+            --color-stars-green: #58d68d;
+            --color-stars-grey: #777;
+
+            /* Monospace Font Stack */
+            --monospace-font-stack: 'SF Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: var(--monospace-font-stack); /* Default to monospace */
+            line-height: 1.7;
+            margin: 0; padding: 20px; font-size: var(--base-font-size);
+            transition: font-size 0.2s ease-in-out;
+            padding-bottom: 80px; /* Space for slider */
+            overflow-x: hidden;
+        }
+        h1 {
+            color: var(--accent-color); text-align: center;
+            border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
+            margin-bottom: 30px; font-size: 2.5em;
+            /* Inherits monospace */
+        }
+        .accordion { max-width: 900px; margin: 20px auto; }
+        .accordion-item {
+            border: 1px solid var(--border-color); border-radius: 8px;
+            overflow: hidden; margin-bottom: 25px; background-color: var(--content-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+         .accordion-item:hover {
+            border-color: #777;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .accordion-header {
+            background-color: var(--header-bg);
+            padding: 18px 25px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
+            border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
+        }
+        .accordion-item[data-state="collapsed"] .accordion-header { border-bottom-color: transparent; }
+        .accordion-header:hover { background-color: var(--header-hover-bg); }
+        .accordion-header h2 {
+            margin: 0; font-size: 1.2em; color: var(--text-color);
+            /* Inherits monospace */
+         }
+
+        /* Content Area & Animations */
+        .accordion-content {
+            padding: 0 25px; max-height: 0; overflow: hidden;
+            transition: max-height var(--anim-duration) var(--anim-easing),
+                        padding-top var(--anim-duration) var(--anim-easing),
+                        padding-bottom var(--anim-duration) var(--anim-easing);
+            box-sizing: border-box; position: relative; z-index: 1;
+        }
+        .accordion-content.active { padding-top: 20px; }
+        .content-inner {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity var(--content-fade-duration) var(--anim-easing) 0s,
+                        transform var(--content-fade-duration) var(--anim-easing) 0s;
+            will-change: opacity, transform;
+            padding-bottom: 25px;
+        }
+        .accordion-content.active .content-inner {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: calc(var(--anim-duration) * 0.3);
+            transition-duration: var(--content-fade-duration);
+        }
+
+        /* Content Blocks Structure & Styling */
+        .question-block, .final-answer-block, .ratings-block, .solution-block {
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);
+        }
+        .content-inner > div:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .ratings-block { margin-bottom: 25px !important; padding-bottom: 20px !important; }
+
+        .question-block strong, .final-answer-block strong, .solution-block strong {
+            color: var(--accent-color); display: block; margin-bottom: 8px;
+            font-size: 1.1em;
+            /* Inherits monospace */
+        }
+        .question-block p,
+        .final-answer-block p {
+            font-size: inherit;
+            margin: 5px 0 1em 0;
+            /* Inherits monospace */
+        }
+        .solution-text {
+            background-color: var(--solution-text-bg); padding: 15px; border-radius: 5px;
+            border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
+            font-family: var(--monospace-font-stack); /* Explicitly set, inherits anyway */
+        }
+        .solution-text p, .solution-text li {
+            margin-bottom: 1em;
+            font-family: inherit; /* Inherit monospace */
+        }
+        .solution-text *:last-child { margin-bottom: 0; }
+        .solution-text ul, .solution-text ol { padding-left: 25px; margin: 0.5em 0 1em 0; }
+        .solution-text > strong {
+            color: var(--text-color); font-size: 1.05em; margin: 15px 0 10px 0;
+            display: block;
+            /* Inherits monospace */
+        }
+        .solution-text > strong:first-of-type { margin-top: 0; }
+
+        /* Star Ratings */
+        .stars { font-size: 1.3em; letter-spacing: 3px; display: inline-block;
+                 font-family: initial; /* Keep default font for star glyphs */
+               }
+        .star-filled.green { color: var(--color-stars-green); }
+        .star-filled.yellow { color: var(--color-stars-yellow); }
+        .star-filled.red { color: var(--color-stars-red); }
+        .star-empty { color: var(--color-stars-grey); }
+        .rating-label {
+            font-weight: bold; color: #bdbdbd; display: inline-block;
+            min-width: 140px; vertical-align: middle;
+            /* Inherits monospace */
+        }
+        .ratings-block .stars { vertical-align: middle; }
+
+        /* Utility & MathJax */
+        .hidden { display: none; }
+        mjx-container {
+            font-size: 1.05em; text-align: left !important;
+            overflow-x: auto; overflow-y: hidden; padding: 2px 0;
+            /* Keep specific math fonts for MathJax */
+            font-family: 'Latin Modern Math', 'STIX Two Math', serif;
+        }
+
+        /* Font Control - Minimalistic */
+        .font-control {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: transparent; /* No background */
+            padding: 0px 20px 15px 20px; /* Spacing */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            border-top: none; /* No border */
+            z-index: 10;
+        }
+        #fontSizeSlider {
+            flex-grow: 1;
+            cursor: pointer;
+            margin: 0 15px;
+            accent-color: var(--accent-color); /* Styles thumb in modern browsers */
+            min-width: 100px;
+            height: 6px; /* Track height */
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* Track Styling */
+        #fontSizeSlider::-webkit-slider-runnable-track {
+            height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        #fontSizeSlider::-moz-range-track {
+             height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        /* Thumb Styling */
+        #fontSizeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default */
+            appearance: none;
+            margin-top: -5px; /* Vertically center (16px thumb on 6px track) */
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%; /* Make it round */
+            cursor: pointer;
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+        #fontSizeSlider::-moz-range-thumb {
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* Remove Firefox border */
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+         /* Optional: Slight scale effect on interaction */
+         #fontSizeSlider:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+         #fontSizeSlider:active::-moz-range-thumb {
+            transform: scale(1.1);
+         }
+
+        #fontSizeValue {
+            min-width: 50px; text-align: right; font-weight: bold;
+            color: var(--text-color); font-size: 12px !important;
+            /* Inherits monospace */
+        }
+        /* --- END OF FINAL CSS --- */
+    </style>
+</head>
+<body>
+
+    <h1>Tutorial - 11 + 12</h1>
+
+    <div class="accordion">
+
+        <!-- CI Question 1 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>CI 1. Compressive Strength Interval</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>The article “Distributions of Compressive Strength Obtained from Various Diameter Cores" (ACI Materials J., 2012: 597-606) described a study in which compressive strengths were determined for concrete specimens of various types, core diameters, and length-to-diameter ratios. For one particular type, diameter, and l/d ratio, the 18 tested specimens resulted in a sample mean compressive strength of 64.41 MPa and a sample standard deviation of 10.32 MPa. Normality of the compressive strength distribution was judged to be quite plausible.<br>Calculate a confidence interval with confidence level 98 % for the true average compressive strength under these circumstances.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The 98% confidence interval for the true average compressive strength is approximately $(58.17, 70.65)$ MPa.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>We are given:<br>
+                            Sample size, $n = 18$.<br>
+                            Sample mean, $\bar{x} = 64.41$ MPa.<br>
+                            Sample standard deviation, $s = 10.32$ MPa.<br>
+                            Confidence level, $1-\alpha = 0.98$.</p>
+                            <p>Since the population standard deviation $\sigma$ is unknown and the sample size is relatively small ($n=18$), but the population distribution is assumed normal, we use the t-distribution to calculate the confidence interval.<br>
+                            The formula for the confidence interval is: $\bar{x} \pm t_{\alpha/2, n-1} \frac{s}{\sqrt{n}}$</p>
+                            <p>First, determine the significance level $\alpha$:<br>
+                            $\alpha = 1 - 0.98 = 0.02$.<br>
+                            So, $\alpha/2 = 0.01$.</p>
+                            <p>Next, find the degrees of freedom (df):<br>
+                            $df = n - 1 = 18 - 1 = 17$.</p>
+                            <p>We need to find the critical value $t_{\alpha/2, df} = t_{0.01, 17}$ from the t-distribution table or calculator.<br>
+                            Using a t-table for $df=17$ and upper tail probability 0.01, we find $t_{0.01, 17} = 2.567$.</p>
+                            <p>Now, calculate the standard error of the mean:<br>
+                            $SE = \frac{s}{\sqrt{n}} = \frac{10.32}{\sqrt{18}} = \frac{10.32}{4.2426} \approx 2.4325$ MPa.</p>
+                            <p>Calculate the margin of error (E):<br>
+                            $E = t_{\alpha/2, n-1} \times SE = 2.567 \times 2.4325 \approx 6.2446$ MPa.</p>
+                            <p>Finally, construct the confidence interval:<br>
+                            $\bar{x} \pm E = 64.41 \pm 6.2446$<br>
+                            Lower limit = $64.41 - 6.2446 = 58.1654$<br>
+                            Upper limit = $64.41 + 6.2446 = 70.6546$</p>
+                            <p>The 98% confidence interval for the true average compressive strength is approximately $(58.17, 70.65)$ MPa.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CI Question 2 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>CI 2. Natural Frequency Interval Adjustment</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A journal article reports that a sample of size 5 was used as a basis for calculating a 95% CI for the true average natural frequency (Hz) of delaminated beams of a certain type. The resulting interval was (229.764, 233.504). You decide that a confidence level of 99% is more appropriate than the 95% level used. What are the limits of the 99% interval? [Hint: Use the center of the interval and its width to determine x and s.]</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The limits of the 99% confidence interval are approximately $(228.532, 234.736)$ Hz.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>We are given:<br>
+                            Sample size, $n = 5$.<br>
+                            The 95% confidence interval is $(229.764, 233.504)$.</p>
+                            <p>Since $n=5$ is small and $\sigma$ is presumably unknown, the interval was based on the t-distribution.
+                            The form of the CI is $\bar{x} \pm E_{95}$.</p>
+                            <strong>Step 1: Find the sample mean $\bar{x}$.</strong>
+                            <p>$\bar{x} = \frac{\text{Upper limit} + \text{Lower limit}}{2} = \frac{233.504 + 229.764}{2} = \frac{463.268}{2} = 231.634$ Hz.</p>
+                            <strong>Step 2: Find the margin of error $E_{95}$ for the 95% CI.</strong>
+                            <p>$E_{95} = \frac{\text{Upper limit} - \text{Lower limit}}{2} = \frac{233.504 - 229.764}{2} = \frac{3.740}{2} = 1.870$.</p>
+                            <strong>Step 3: Find the sample standard deviation $s$.</strong>
+                            <p>$E_{95} = t_{\alpha/2, n-1} \frac{s}{\sqrt{n}}$.<br>
+                            For 95% CI, $\alpha/2 = 0.025$. Degrees of freedom $df = n - 1 = 4$.<br>
+                            From the t-table, $t_{0.025, 4} = 2.776$.<br>
+                            $1.870 = 2.776 \times \frac{s}{\sqrt{5}}$.<br>
+                            $s = \frac{1.870 \times \sqrt{5}}{2.776} \approx \frac{1.870 \times 2.236}{2.776} \approx 1.5064$.</p>
+                            <strong>Step 4: Calculate the 99% confidence interval.</strong>
+                            <p>For 99% CI, $\alpha/2 = 0.005$. $df = 4$.<br>
+                            From the t-table, $t_{0.005, 4} = 4.604$.<br>
+                            $E_{99} = t_{0.005, 4} \frac{s}{\sqrt{n}} = 4.604 \times \frac{1.5064}{\sqrt{5}} \approx 4.604 \times 0.6737 \approx 3.1017$.<br>
+                            The 99% CI is $\bar{x} \pm E_{99} = 231.634 \pm 3.1017$.<br>
+                            Lower limit = $231.634 - 3.1017 = 228.5323$<br>
+                            Upper limit = $231.634 + 3.1017 = 234.7357$</p>
+                            <p>The limits of the 99% confidence interval are approximately $(228.532, 234.736)$ Hz.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CI Question 3 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>CI 3. Athlete EILO Condition</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Unexplained respiratory symptoms reported by athletes are often incorrectly considered secondary to exercise-induced asthma. The article “High Prevalence of Exercise-Induced Laryngeal Obstruction in Athletes” (Medicine and Science in Sports and Exercise, 2013: 2030-2035) suggested that many such cases could instead be explained by obstruction of the larynx. In a sample of 88 athletes referred for an asthma workup, 31 were found to have the EILO condition.<br>(a) Calculate and interpret a confidence interval using a 95% confidence level for the true proportion of all athletes found to have the EILO condition under these circumstances.<br>(b) What sample size is required if the desired width of the 95% CI is to be at most .04, irrespective of the sample results?<br>(c) Does the upper limit of the interval in (a) specify a 95% upper confidence bound for the proportion being estimated? Explain.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) The 95% CI for the true proportion is approximately $(0.253, 0.452)$. We are 95% confident the true proportion is between 25.3% and 45.2%.<br>
+                        (b) Required sample size $n = 2402$.<br>
+                        (c) No. The upper limit of the two-sided 95% CI corresponds to a 97.5% upper confidence bound.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $p$ be the true proportion with EILO condition.<br>
+                            Given: $n = 88$, $x = 31$.</p>
+                            <strong>(a) 95% CI for p:</strong>
+                            <p>Sample proportion $\hat{p} = \frac{x}{n} = \frac{31}{88} \approx 0.3523$.<br>
+                            Check conditions: $n\hat{p} = 31 \ge 10$, $n(1-\hat{p}) = 57 \ge 10$. Conditions met.<br>
+                            Formula: $\hat{p} \pm z_{\alpha/2} \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$.<br>
+                            For 95% CI, $z_{\alpha/2} = z_{0.025} = 1.96$.<br>
+                            $SE_{\hat{p}} = \sqrt{\frac{0.3523(1-0.3523)}{88}} \approx 0.05092$.<br>
+                            $E = z_{\alpha/2} \times SE_{\hat{p}} = 1.96 \times 0.05092 \approx 0.0998$.<br>
+                            CI: $0.3523 \pm 0.0998 \implies (0.2525, 0.4521)$.<br>
+                            The 95% CI is approximately $(0.253, 0.452)$.</p>
+                            <p><strong>Interpretation:</strong> We are 95% confident that the true proportion of athletes referred for an asthma workup who actually have the EILO condition lies between 0.253 and 0.452.</p>
+                            <strong>(b) Sample size for width $\le 0.04$:</strong>
+                            <p>$W = 2 z_{\alpha/2} \sqrt{\frac{p(1-p)}{n}} \le 0.04$. Use $p=0.5$ for maximum size.<br>
+                            $2 \times 1.96 \sqrt{\frac{0.5(0.5)}{n}} \le 0.04$<br>
+                            $3.92 \sqrt{\frac{0.25}{n}} \le 0.04$<br>
+                            $\sqrt{\frac{0.25}{n}} \le \frac{0.04}{3.92} \approx 0.010204$<br>
+                            $\frac{0.25}{n} \le (0.010204)^2 \approx 0.00010412$<br>
+                            $n \ge \frac{0.25}{0.00010412} \approx 2401.07$.<br>
+                            Round up: $n = 2402$.</p>
+                            <strong>(c) Upper limit vs. Upper bound:</strong>
+                            <p>No. The upper limit of the interval in (a) uses $z_{\alpha/2} = z_{0.025} = 1.96$. A 95% upper confidence bound uses $z_{\alpha} = z_{0.05} = 1.645$. Since $z_{0.025} > z_{0.05}$, the interval's upper limit is higher than the 95% upper confidence bound. It is the upper limit of a 97.5% upper confidence bound.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CI Question 4 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>CI 4. Face Mask Lens Pop-out Bound</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>It is important that face masks used by firefighters be able to withstand high temperatures because firefighters commonly work in temperatures of 200-500°F. In a test of one type of mask, 11 of 55 masks had lenses pop out at 250°. Construct a 90% upper confidence bound for the true proportion of masks of this type whose lenses would pop out at 250°.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The 90% upper confidence bound for the true proportion is approximately 0.269.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $p$ be the true proportion of masks whose lenses pop out.<br>
+                            Given: $n = 55$, $x = 11$.</p>
+                            <p>Sample proportion $\hat{p} = \frac{x}{n} = \frac{11}{55} = 0.20$.<br>
+                            Check conditions: $n\hat{p} = 11 \ge 10$, $n(1-\hat{p}) = 44 \ge 10$. Conditions met.</p>
+                            <p>Formula for upper confidence bound: $\hat{p} + z_{\alpha} \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$.<br>
+                            For 90% confidence, $1-\alpha = 0.90 \implies \alpha = 0.10$.<br>
+                            Critical value $z_{\alpha} = z_{0.10} = 1.282$.</p>
+                            <p>$SE_{\hat{p}} = \sqrt{\frac{0.20(1-0.20)}{55}} = \sqrt{\frac{0.16}{55}} \approx 0.05394$.</p>
+                            <p>Upper Bound = $\hat{p} + z_{0.10} \times SE_{\hat{p}} = 0.20 + 1.282 \times 0.05394$<br>
+                            Upper Bound $\approx 0.20 + 0.06915 = 0.26915$.</p>
+                            <p>The 90% upper confidence bound is approximately 0.269. We are 90% confident that the true proportion is at most 0.269.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CI Question 5 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>CI 5. Book Binding Strength Sample Size</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A manufacturer of college textbooks is interested in estimating the strength of the bindings produced by a particular binding machine. Strength can be measured by recording the force required to pull the pages from the binding. If this force is measured in pounds, how many books should be tested to estimate the average force required to break the binding to within .1 lb with 95% confidence? Assume that s is known to be 0.8.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>246 books should be tested.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>We want to find the sample size $n$.<br>
+                            Given: Margin of error $E = 0.1$ lb.<br>
+                            Confidence level $1-\alpha = 0.95$.<br>
+                            Standard deviation $\sigma = 0.8$ lb (given as known).</p>
+                            <p>Since $\sigma$ is known, use Z-distribution. Formula for $n$:
+                            $n = \left( \frac{z_{\alpha/2} \sigma}{E} \right)^2$.</p>
+                            <p>For 95% confidence, $\alpha = 0.05 \implies \alpha/2 = 0.025$.<br>
+                            $z_{0.025} = 1.96$.</p>
+                            <p>Substitute values:
+                            $n = \left( \frac{1.96 \times 0.8}{0.1} \right)^2 = \left( \frac{1.568}{0.1} \right)^2 = (15.68)^2 = 245.8624$.</p>
+                            <p>Round up: $n = 246$.</p>
+                            <p>Therefore, 246 books should be tested.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hyp Question 1 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>Hyp 1. Lens Thickness Test</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A sample of 50 lenses used in eyeglasses yields a sample mean thickness of 3.05 mm and a sample standard deviation of .34 mm. The desired true average thickness of such lenses is 3.20 mm. Does the data strongly suggest that the true average thickness of such lenses is something other than what is desired? Test using $\alpha = .05$.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>Yes, reject $H_0$. At the 5% significance level, the data strongly suggests the true average thickness is different from 3.20 mm (it appears lower).</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Test if $\mu$ is different from $\mu_0 = 3.20$ mm.</p>
+                            <strong>1. Hypotheses:</strong>
+                            <p>$H_0: \mu = 3.20$<br>
+                            $H_a: \mu \neq 3.20$ (Two-tailed)</p>
+                            <strong>2. Significance Level:</strong>
+                            <p>$\alpha = 0.05$.</p>
+                            <strong>3. Test Statistic:</strong>
+                            <p>Given: $n = 50$, $\bar{x} = 3.05$, $s = 0.34$. $\sigma$ unknown, $n \ge 30$. Use t-test (or Z-approx).<br>
+                            $t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}}$. $df = n - 1 = 49$.</p>
+                            <strong>4. Calculation:</strong>
+                            <p>$t = \frac{3.05 - 3.20}{0.34 / \sqrt{50}} = \frac{-0.15}{0.34 / 7.071} \approx \frac{-0.15}{0.04806} \approx -3.121$.</p>
+                            <strong>5. Critical Region / P-value:</strong>
+                            <p>Critical Value Approach: Reject $H_0$ if $|t| > t_{\alpha/2, df} = t_{0.025, 49}$. $t_{0.025, 49} \approx 2.010$.<br>
+                            P-value Approach: $P = 2 \times P(T_{49} \ge |-3.121|) = 2 \times P(T_{49} \ge 3.121)$. $P \approx 0.003$.</p>
+                            <strong>6. Decision:</strong>
+                            <p>Critical Value: $|-3.121| = 3.121 > 2.010$. Reject $H_0$.<br>
+                            P-value: $P \approx 0.003 < \alpha = 0.05$. Reject $H_0$.</p>
+                            <strong>7. Conclusion:</strong>
+                            <p>At the 5% significance level, there is strong evidence to suggest that the true average thickness of the lenses is different from the desired 3.20 mm.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hyp Question 2 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>Hyp 2. Cable TV Company Preference</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Two different companies have applied to provide cable television service in a certain region. Let p denote the proportion of all potential subscribers who favor the first company over the second. Consider testing $H_0 : p = .5$ versus $H_a : p \neq 0.5$ based on a random sample of 25 individuals. Let X denote the number in the sample who favor the first company and x represent the observed value of X.<br>
+                        (a) Which of the following rejection regions is most appropriate? $R_1 = \{x : x \le 7 \text{ or } x \ge 18\}$, $R_2 = \{x : x \le 8\}$, $R_3 = \{x : x \ge 17\}$<br>
+                        (b) In the context of this problem situation, describe what the type I and type II errors are.<br>
+                        (c) What is the probability distribution of the test statistic X when $H_0$ is true? Use it to compute the probability of a type I error.<br>
+                        (d) Compute the probability of a type II error for the selected region when $p = 0.3$.<br>
+                        (e) Using the selected region, what would you conclude if 6 of the 25 queried favored company 1?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) $R_1$ is most appropriate for the two-tailed test.<br>
+                        (b) Type I: Conclude preference exists when it's 50/50. Type II: Conclude 50/50 when preference exists.<br>
+                        (c) $X \sim Bin(25, 0.5)$. $\alpha = P(\text{Type I error}) \approx 0.0432$.<br>
+                        (d) $\beta = P(\text{Type II error} | p=0.3) \approx 0.4882$.<br>
+                        (e) Since $x=6$ is in $R_1$ ($6 \le 7$), reject $H_0$. Conclude preference differs from 0.5.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Given: $n=25$. Hypotheses: $H_0: p = 0.5$ vs $H_a: p \neq 0.5$. Test statistic $X$.</p>
+                            <strong>(a) Appropriate Rejection Region:</strong>
+                            <p>$H_a$ is two-tailed, requiring rejection for low or high values of $X$. $R_1 = \{x : x \le 7 \text{ or } x \ge 18\}$ is the only two-tailed region listed. $R_1$ is most appropriate.</p>
+                            <strong>(b) Type I and Type II Errors:</strong>
+                            <ul>
+                               <li>Type I Error: Reject $H_0$ when $p=0.5$. Conclude there is a preference when support is actually 50/50.</li>
+                               <li>Type II Error: Fail to reject $H_0$ when $p \neq 0.5$. Conclude support is 50/50 when there actually is a preference.</li>
+                            </ul>
+                            <strong>(c) Distribution under $H_0$ and $\alpha$:</strong>
+                            <p>If $H_0$ is true, $p=0.5$. $X \sim Bin(n=25, p=0.5)$.<br>
+                            $\alpha = P(X \in R_1 | p=0.5) = P(X \le 7 | p=0.5) + P(X \ge 18 | p=0.5)$.<br>
+                            Due to symmetry of $Bin(25, 0.5)$, $P(X \ge 18) = P(X \le 25-18) = P(X \le 7)$.<br>
+                            So, $\alpha = 2 \times P(X \le 7 | p=0.5)$.<br>
+                            Using a Binomial calculator for $B(25, 0.5)$, $P(X \le 7) \approx 0.0216$.<br>
+                            $\alpha \approx 2 \times 0.0216 = 0.0432$.</p>
+                            <strong>(d) Probability of Type II Error ($\beta$) when $p=0.3$:</strong>
+                            <p>$\beta = P(\text{Fail to reject } H_0 | p=0.3) = P(X \notin R_1 | p=0.3) = P(8 \le X \le 17 | p=0.3)$.<br>
+                            Now $X \sim Bin(25, 0.3)$.<br>
+                            $\beta = P(X \le 17 | p=0.3) - P(X \le 7 | p=0.3)$.<br>
+                            Using a Binomial calculator for $B(25, 0.3)$: $P(X \le 17) \approx 1.0000$, $P(X \le 7) \approx 0.5118$.<br>
+                            $\beta \approx 1.0000 - 0.5118 = 0.4882$.</p>
+                            <strong>(e) Conclusion if $x=6$:</strong>
+                            <p>The observed value $x=6$ falls in the rejection region $R_1$ because $6 \le 7$.<br>
+                            Decision: Reject $H_0$.<br>
+                            Conclusion: At the $\alpha \approx 0.043$ level, there is sufficient evidence to conclude that the proportion favoring the first company differs from 0.5.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hyp Question 3 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>Hyp 3. Wire Tensile Strength (Roller vs Spinner)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>One method for straightening wire before coiling it to make a spring is called “roller straightening." The article "The Effect of Roller and Spinner Wire Straightening on Coiling Performance and Wire Properties" (Springs, 1987: 27-28) reports on the tensile properties of wire. Suppose a sample of 16 wires is selected and each is tested to determine tensile strength (N/mm² ). The resulting sample mean and standard deviation are 2160 and 30, respectively.<br>
+                        (a) The mean tensile strength for springs made using spinner straightening is 2150 N/mm². What hypotheses should be tested to determine whether the mean tensile strength for the roller method exceeds 2150?<br>
+                        (b) Assuming that the tensile strength distribution is approximately normal, what test statistic would you use to test the hypotheses in part (a)?<br>
+                        (c) What is the value of the test statistic for this data?<br>
+                        (d) For a level .05 test, find the critical region and derive a conclusion based on the value of the statistic?<br>
+                        (e) What is the P-value for the value of the test statistic computed?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) $H_0: \mu = 2150$ (or $\mu \le 2150$), $H_a: \mu > 2150$.<br>
+                        (b) t-test statistic: $t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}}$.<br>
+                        (c) $t \approx 1.333$.<br>
+                        (d) Critical region: $t > 1.753$. Since $1.333 \ngtr 1.753$, fail to reject $H_0$.<br>
+                        (e) P-value $\approx 0.101$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $\mu$ be the true mean tensile strength for roller method.<br>
+                            Given: $n=16$, $\bar{x}=2160$, $s=30$. Spinner mean $\mu_0 = 2150$.</p>
+                            <strong>(a) Hypotheses:</strong>
+                            <p>Test if roller mean exceeds 2150.<br>
+                            $H_0: \mu = 2150$ (or $\mu \le 2150$)<br>
+                            $H_a: \mu > 2150$ (Upper-tailed)</p>
+                            <strong>(b) Test Statistic:</strong>
+                            <p>Normal distribution assumed, $\sigma$ unknown, $n=16$ small. Use t-test.<br>
+                            $t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}}$, $df = n-1 = 15$.</p>
+                            <strong>(c) Value of Test Statistic:</strong>
+                            <p>$t = \frac{2160 - 2150}{30 / \sqrt{16}} = \frac{10}{30 / 4} = \frac{10}{7.5} \approx 1.333$.</p>
+                            <strong>(d) Critical Region & Conclusion ($\alpha=0.05$):</strong>
+                            <p>Upper-tailed test, $\alpha=0.05$, $df=15$.<br>
+                            Critical value $t_{0.05, 15} = 1.753$.<br>
+                            Critical region: $t > 1.753$.<br>
+                            Since $t \approx 1.333$ is not in the critical region, fail to reject $H_0$.<br>
+                            Conclusion: At $\alpha=0.05$, insufficient evidence to conclude roller method mean strength exceeds 2150.</p>
+                            <strong>(e) P-value:</strong>
+                            <p>$P = P(T_{15} \ge 1.333)$.<br>
+                            From t-table, $t_{0.10, 15}=1.341$. Since $1.333 < 1.341$, $P > 0.10$.<br>
+                            Using calculator: $P \approx 0.101$.<br>
+                            Since $P > 0.05$, fail to reject $H_0$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hyp Question 4 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>Hyp 4. Coal Dust Soil Heat Flux</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>The article “Orchard Floor Management Utilizing Soil-Applied Coal Dust for Frost Protection" (Agri. and Forest Meteorology, 1988: 71–82) reports the following values for soil heat flux of eight plots covered with coal dust.<br>
+                        34.7 35.4 34.7 37.7 32.5 28.0 18.4 24.9<br>
+                        The mean soil heat flux for plots covered only with grass is 29.0. Assuming that the heat-flux distribution is approximately normal, does the data suggest that the coal dust is effective in increasing the mean heat flux over that for grass? Test the appropriate hypotheses using $\alpha = 0.05$.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>Fail to reject $H_0$. At the 5% significance level, there is not sufficient evidence to suggest that coal dust increases the mean soil heat flux compared to grass.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $\mu$ = mean heat flux for coal dust. Compare to $\mu_0 = 29.0$ (grass).</p>
+                            <strong>1. Hypotheses:</strong>
+                            <p>$H_0: \mu = 29.0$ (or $\mu \le 29.0$)<br>
+                            $H_a: \mu > 29.0$ (Upper-tailed)</p>
+                            <strong>2. Significance Level:</strong>
+                            <p>$\alpha = 0.05$.</p>
+                            <strong>3. Sample Stats & Test Statistic:</strong>
+                            <p>Data: 34.7, 35.4, 34.7, 37.7, 32.5, 28.0, 18.4, 24.9. $n=8$.<br>
+                            $\bar{x} = \frac{246.3}{8} = 30.7875$.<br>
+                            $s^2 = \frac{7881.45 - (246.3)^2/8}{7} \approx 42.64125 \implies s \approx 6.530$.<br>
+                            Normal assumed, $\sigma$ unknown, $n$ small. Use t-test.<br>
+                            $t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}}$. $df = n-1 = 7$.</p>
+                            <strong>4. Calculation:</strong>
+                            <p>$t = \frac{30.7875 - 29.0}{6.530 / \sqrt{8}} \approx \frac{1.7875}{2.310} \approx 0.7738$.</p>
+                            <strong>5. Critical Region / P-value:</strong>
+                            <p>Critical Value: $t_{\alpha, df} = t_{0.05, 7} = 1.895$. Reject if $t > 1.895$.<br>
+                            P-value: $P = P(T_7 \ge 0.7738)$. $0.20 < P < 0.25$. (Calculator: $P \approx 0.232$).</p>
+                            <strong>6. Decision:</strong>
+                            <p>Critical Value: $0.7738 \ngtr 1.895$. Fail to reject $H_0$.<br>
+                            P-value: $P \approx 0.232 > \alpha = 0.05$. Fail to reject $H_0$.</p>
+                            <strong>7. Conclusion:</strong>
+                            <p>At $\alpha=0.05$, insufficient evidence to conclude coal dust increases mean heat flux over grass.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hyp Question 5 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>Hyp 5. Ceramic Insulator Strength (Type II Error)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>The true average breaking strength of ceramic insulators of a certain type is supposed to be at least 10 psi. They will be used for a particular application unless sample data indicates conclusively that this specification has not been met. A test of hypotheses using $\alpha = 0.01$ is to be based on a random sample of ten insulators. Assume that the breaking-strength distribution is normal with unknown standard deviation.<br>If the true standard deviation is .80, how likely is it that insulators will be judged satisfactory when true average breaking strength is actually only 9.5? Only 9.0?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The likelihood of judging satisfactory (failing to reject $H_0$) when $\mu=9.5$ is $\beta(9.5) \approx 0.637$.<br>The likelihood of judging satisfactory when $\mu=9.0$ is $\beta(9.0) \approx 0.052$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Test if $\mu < 10$. Insulators satisfactory if $H_0$ is not rejected.</p>
+                            <strong>1. Hypotheses:</strong>
+                            <p>$H_0: \mu = 10$ (or $\mu \ge 10$)<br>
+                            $H_a: \mu < 10$ (Lower-tailed)</p>
+                            <strong>2. Significance Level & Sample Size:</strong>
+                            <p>$\alpha = 0.01$, $n = 10$.</p>
+                            <strong>3. Test Framework & Rejection Rule:</strong>
+                            <p>We need $\beta = P(\text{Fail to reject } H_0 | \mu = \mu_{true})$.<br>
+                            For $\beta$ calculation, use given $\sigma=0.80$ (Z-test).<br>
+                            Reject $H_0$ if $Z < -z_{\alpha} = -z_{0.01} = -2.326$.<br>
+                            $Z = \frac{\bar{X} - 10}{0.80/\sqrt{10}}$.</p>
+                            <strong>4. Critical Value for $\bar{X}$:</strong>
+                            <p>Reject if $\frac{\bar{X} - 10}{0.80/3.1623} < -2.326 \implies \frac{\bar{X} - 10}{0.253} < -2.326 \implies \bar{X} < 9.4114$.<br>
+                            Fail to reject $H_0$ (judge satisfactory) if $\bar{X} \ge 9.4114$.</p>
+                            <strong>5. Calculate $\beta$ when $\mu = 9.5$:</strong>
+                            <p>Want $P(\bar{X} \ge 9.4114 | \mu=9.5, \sigma=0.8)$.<br>
+                            Standardize: $Z = \frac{9.4114 - 9.5}{0.80/\sqrt{10}} \approx \frac{-0.0886}{0.253} \approx -0.350$.<br>
+                            $\beta(9.5) = P(Z \ge -0.350) = 1 - \Phi(-0.350) = 1 - 0.3632 = 0.6368$.</p>
+                            <strong>6. Calculate $\beta$ when $\mu = 9.0$:</strong>
+                            <p>Want $P(\bar{X} \ge 9.4114 | \mu=9.0, \sigma=0.8)$.<br>
+                            Standardize: $Z = \frac{9.4114 - 9.0}{0.80/\sqrt{10}} \approx \frac{0.4114}{0.253} \approx 1.626$.<br>
+                            $\beta(9.0) = P(Z \ge 1.626) = 1 - \Phi(1.626) \approx 1 - 0.9480 = 0.0520$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hyp Question 6 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>Hyp 6. Prisoner Chromosome Defect Rate</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>The incidence of a certain type of chromosome defect in the U.S. adult male population is believed to be 1 in 75. A random sample of 800 individuals in U.S. penal institutions reveals 16 who have such defects. Can it be concluded that the incidence rate of this defect among prisoners differs from the presumed rate for the entire adult male population?<br>
+                        (a) State and test the relevant hypotheses using $\alpha = .05$. What type of error might you have made in reaching a conclusion?<br>
+                        (b) Could $H_0$ be rejected at significance level .20?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) $H_0: p = 1/75$, $H_a: p \neq 1/75$. Fail to reject $H_0$ at $\alpha=0.05$ ($Z \approx 1.644$, P-value $\approx 0.10$). Might have made a Type II error.<br>
+                        (b) Yes. Since P-value $\approx 0.10 < 0.20$, $H_0$ could be rejected at $\alpha = 0.20$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $p$ = proportion of prisoners with defect. $p_0 = 1/75 \approx 0.01333$.<br>
+                            Given: $n=800$, $x=16$. $\hat{p} = 16/800 = 0.02$.</p>
+                            <strong>(a) Hypothesis Test at $\alpha = 0.05$:</strong>
+                            <p>1. Hypotheses: $H_0: p = 1/75$, $H_a: p \neq 1/75$ (Two-tailed).<br>
+                            2. Significance Level: $\alpha = 0.05$.<br>
+                            3. Test Statistic: Check conditions: $np_0 \approx 10.67 \ge 10$, $n(1-p_0) \approx 789.33 \ge 10$. Use Z-test.<br>
+                            $Z = \frac{\hat{p} - p_0}{\sqrt{p_0(1-p_0)/n}}$.<br>
+                            4. Calculation: $\sqrt{\frac{(1/75)(74/75)}{800}} \approx 0.004055$.<br>
+                            $Z = \frac{0.02 - (1/75)}{0.004055} \approx \frac{0.00666...}{0.004055} \approx 1.644$.<br>
+                            5. Critical Region / P-value: Crit. values $\pm z_{0.025} = \pm 1.96$. P-value $ = 2 \times P(Z \ge 1.644) \approx 0.1002$.<br>
+                            6. Decision: $Z=1.644$ is not in rejection region ($-1.96 < 1.644 < 1.96$). P-value $0.1002 > 0.05$. Fail to reject $H_0$.<br>
+                            7. Conclusion: At $\alpha=0.05$, insufficient evidence to conclude prisoner rate differs from 1/75.<br>
+                            Potential Error: Type II error (failing to detect a real difference).</p>
+                            <strong>(b) Test at $\alpha = 0.20$:</strong>
+                            <p>Compare P-value to new $\alpha$: $P \approx 0.1002 < \alpha = 0.20$.<br>
+                            Decision: Reject $H_0$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hyp Question 7 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>Hyp 7. College Student Alcohol Abstinence</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>The article “Heavy Drinking and Polydrug Use Among College Students" (J. of Drug Issues, 2008: 445–466) stated that 51 of the 462 college students in a sample had a lifetime abstinence from alcohol. Does this provide strong evidence for concluding that more than 10% of the population sampled had completely abstained from alcohol use? Test the appropriate hypotheses.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>Fail to reject $H_0$. There is not strong evidence (at conventional levels like $\alpha=0.05$) to conclude that more than 10% of the students abstained from alcohol (P-value $\approx 0.228$).</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $p$ = true proportion abstaining. Test if $p > 0.10$.<br>
+                            Given: $n=462$, $x=51$. $\hat{p} = 51/462 \approx 0.11039$. $p_0 = 0.10$.</p>
+                            <strong>1. Hypotheses:</strong>
+                            <p>$H_0: p = 0.10$ (or $p \le 0.10$)<br>
+                            $H_a: p > 0.10$ (Upper-tailed)</p>
+                            <strong>2. Significance Level:</strong>
+                            <p>Use $\alpha = 0.05$ (conventional level for "strong evidence").</p>
+                            <strong>3. Test Statistic:</strong>
+                            <p>Check conditions: $np_0 = 46.2 \ge 10$, $n(1-p_0) = 415.8 \ge 10$. Use Z-test.<br>
+                            $Z = \frac{\hat{p} - p_0}{\sqrt{p_0(1-p_0)/n}}$.</p>
+                            <strong>4. Calculation:</strong>
+                            <p>$\sqrt{\frac{0.10(0.90)}{462}} \approx 0.01396$.<br>
+                            $Z = \frac{0.11039 - 0.10}{0.01396} \approx 0.744$.</p>
+                            <strong>5. Critical Region / P-value:</strong>
+                            <p>Critical Value: $z_{0.05} = 1.645$. Reject if $Z > 1.645$.<br>
+                            P-value: $P = P(Z \ge 0.744) \approx 0.2284$.</p>
+                            <strong>6. Decision:</strong>
+                            <p>Critical Value: $0.744 \ngtr 1.645$. Fail to reject $H_0$.<br>
+                            P-value: $P \approx 0.2284 > \alpha = 0.05$. Fail to reject $H_0$.</p>
+                            <strong>7. Conclusion:</strong>
+                            <p>At $\alpha=0.05$, there is not strong evidence to conclude that more than 10% of the students sampled abstained from alcohol.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reg Question 1 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>Reg 1. Rainfall vs Runoff Volume</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>The article “Characterization of Highway Runoff in Austin, Texas, Area” (J. of Envir. Engr., 1998: 131 – 137) gave a scatterplot, along with the least squares line, of x = rainfall volume (m³) and y = runoff volume (m³) for a particular location. The accompanying values were read from the plot.<br>
+                        x | 5 | 12 | 14 | 17 | 23 | 30 | 40 | 47 | 55 | 67 | 72 | 81 | 96 | 112 | 127<br>
+                        y | 4 | 10 | 13 | 15 | 15 | 25 | 27 | 46 | 38 | 46 | 53 | 70 | 82 | 99 | 100<br>
+                        (a) Calculate point estimates of the slope and intercept of the population regression line.<br>
+                        (b) Calculate a point estimate of the true average runoff volume when rainfall volume is 50.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) Slope estimate $\hat{\beta}_1 \approx 0.827$, Intercept estimate $\hat{\beta}_0 \approx -1.133$.<br>
+                        (b) Estimated average runoff volume for rainfall = 50 m³ is $\hat{y} \approx 40.22$ m³.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Fit $y = \beta_0 + \beta_1 x + \epsilon$. $n=15$.</p>
+                            <strong>1. Calculate Sums:</strong>
+                            <p>$\sum x_i = 798$<br>
+                            $\sum y_i = 643$<br>
+                            $\sum x_i^2 = 63039$<br>
+                            $\sum y_i^2 = 41998$<br>
+                            $\sum x_i y_i = 51232$</p>
+                            <strong>2. Calculate Means:</strong>
+                            <p>$\bar{x} = 798 / 15 = 53.2$<br>
+                            $\bar{y} = 643 / 15 \approx 42.867$</p>
+                            <strong>3. Calculate $S_{xx}$ and $S_{xy}$:</strong>
+                            <p>$S_{xx} = \sum x_i^2 - (\sum x_i)^2/n = 63039 - (798)^2/15 = 20585.4$<br>
+                            $S_{xy} = \sum x_i y_i - (\sum x_i)(\sum y_i)/n = 51232 - (798)(643)/15 = 17024.4$</p>
+                            <strong>(a) Estimate Slope and Intercept:</strong>
+                            <p>Slope: $\hat{\beta}_1 = \frac{S_{xy}}{S_{xx}} = \frac{17024.4}{20585.4} \approx 0.8270$.<br>
+                            Intercept: $\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x} = 42.867 - (0.8270)(53.2) \approx 42.867 - 44.0004 \approx -1.1334$.<br>
+                            Estimated line: $\hat{y} = -1.133 + 0.827 x$.</p>
+                            <strong>(b) Estimate Average Runoff for $x=50$:</strong>
+                            <p>$\hat{y} = -1.1334 + 0.8270 \times 50 = -1.1334 + 41.35 = 40.2166$.<br>
+                            Estimated average runoff $\approx 40.22$ m³.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div> <!-- end accordion -->
+
+    <!-- Font Size Slider -->
+    <div class="font-control">
+        <input type="range" id="fontSizeSlider" min="10" max="50" value="16" step="1">
+        <span id="fontSizeValue">16px</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // --- Data for Ratings (Tutorials 11+12) ---
+        const questionsData = [
+             // Confidence Interval
+            { lengthRating: 3, complexityRating: 2 }, // CI Q1
+            { lengthRating: 4, complexityRating: 3 }, // CI Q2
+            { lengthRating: 4, complexityRating: 3 }, // CI Q3
+            { lengthRating: 2, complexityRating: 2 }, // CI Q4
+            { lengthRating: 2, complexityRating: 1 }, // CI Q5
+             // Hypothesis Testing
+            { lengthRating: 3, complexityRating: 2 }, // Hyp Q1
+            { lengthRating: 5, complexityRating: 3 }, // Hyp Q2
+            { lengthRating: 4, complexityRating: 2 }, // Hyp Q3
+            { lengthRating: 4, complexityRating: 3 }, // Hyp Q4
+            { lengthRating: 4, complexityRating: 4 }, // Hyp Q5
+            { lengthRating: 4, complexityRating: 3 }, // Hyp Q6
+            { lengthRating: 3, complexityRating: 2 }, // Hyp Q7
+             // Linear Regression
+            { lengthRating: 4, complexityRating: 2 }  // Reg Q1
+        ];
+
+        // --- Utility Functions ---
+        function generateStars(rating) { const roundedRating = Math.max(1, Math.min(5, Math.round(rating))); let colorClass; if (roundedRating <= 2) { colorClass = 'green'; } else if (roundedRating === 3) { colorClass = 'yellow'; } else { colorClass = 'red'; } let starsHTML = '<span class="stars">'; for (let i = 1; i <= 5; i++) { starsHTML += `<span class="star-${i <= roundedRating ? 'filled ' + colorClass : 'empty'}">${i <= roundedRating ? '★' : '☆'}</span>`; } starsHTML += '</span>'; return starsHTML; }
+        function calculateDifficulty(lengthRating, complexityRating) { const avg = (lengthRating + complexityRating) / 2; return Math.max(1, Math.min(5, Math.round(avg))); }
+        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
+        const mathJaxLoadedPromise = new Promise((resolve) => { if (window.MathJax && window.MathJax.startup) { window.MathJax.startup.promise.then(resolve); } else { window.addEventListener('MathJaxLoaded', resolve, {once: true}); } }); if (document.readyState === "complete" || document.readyState === "interactive") { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); } else { window.addEventListener('load', () => { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); }); }
+        function typesetMath(elements = [document.body]) { console.log("Attempting to typeset math in:", elements); mathJaxLoadedPromise.then(() => { console.log("MathJax confirmed ready, calling typesetPromise."); return MathJax.typesetPromise(elements); }).then(() => { console.log("MathJax typesetting complete for:", elements); }).catch(err => console.error('MathJax Typesetting Error:', err)); }
+
+        // --- Accordion Update Function ---
+         function updateAccordion(contentElement, makeActive) {
+            if (!contentElement) return;
+            const innerContent = contentElement.querySelector('.content-inner');
+            const collapseDelay = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--collapse-delay') || '0.1') * 1000; // Read from CSS var
+
+             if (makeActive) {
+                 // EXPANDING
+                 contentElement.classList.add('active');
+                 typesetMath([innerContent]);
+                 requestAnimationFrame(() => { // Ensure DOM update before measurement
+                    const currentTransition = contentElement.style.transition;
+                     contentElement.style.transition = 'none'; // Temporarily disable transitions for height calculation
+                    const scrollHeight = innerContent.offsetHeight;
+                    const style = window.getComputedStyle(contentElement);
+                    const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                     contentElement.style.maxHeight = totalHeight + "px"; // Set target height
+                    console.log(`Expanding: Calculated totalHeight = ${totalHeight}px`);
+                     requestAnimationFrame(() => { // Re-enable transitions after height is set
+                         contentElement.style.transition = currentTransition;
+                     });
+                });
+            } else {
+                 // CLOSING
+                contentElement.classList.remove('active'); // Starts inner content fade out immediately
+                console.log('Closing: Removed .active class, starting fade/pad collapse.');
+                 setTimeout(() => {
+                    contentElement.style.maxHeight = '0px'; // Start container collapse after delay
+                     console.log(`Closing: Delayed setting max-height=0 by ${collapseDelay}ms`);
+                 }, collapseDelay);
+            }
+         }
+
+        // --- Event Listeners and Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log("DOM Ready - Tutorial 11 + 12");
+            const accordionItems = document.querySelectorAll('.accordion-item');
+             const slider = document.getElementById('fontSizeSlider');
+            const sizeValueSpan = document.getElementById('fontSizeValue');
+
+            // --- Font Size Slider ---
+             const handleFontSizeChange = debounce(() => {
+                 console.log("Handling font size change..."); typesetMath(); // Retypeset on resize
+                 // Adjust height of any open accordion items after font size change
+                 accordionItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    if (content.classList.contains('active') && parseFloat(content.style.maxHeight) > 0) {
+                         console.log("Adjusting height for open item:", item);
+                         // Temporarily disable transitions to avoid jumpy resize
+                        const currentTransition = content.style.transition;
+                        content.style.transition = 'none';
+                        content.style.maxHeight = 'none'; // Allow content to reflow naturally
+
+                        requestAnimationFrame(() => { // Measure after reflow
+                            const innerContent = content.querySelector('.content-inner');
+                            const scrollHeight = innerContent.offsetHeight;
+                            const style = window.getComputedStyle(content);
+                            const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                            content.style.maxHeight = totalHeight + 'px'; // Apply new calculated height
+
+                            requestAnimationFrame(() => { // Restore transitions
+                                content.style.transition = currentTransition;
+                            });
+                            console.log("Font Change - Adjusted height to:", totalHeight);
+                        });
+                     }
+                 });
+             }, 250); // Debounce typesetting/height adjustment
+
+             slider.addEventListener('input', () => {
+                 const newSize = slider.value;
+                 document.documentElement.style.setProperty('--base-font-size', newSize + 'px');
+                 sizeValueSpan.textContent = newSize + 'px';
+                 handleFontSizeChange(); // Call debounced handler
+             });
+
+            // --- Accordion Logic ---
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const innerContent = content.querySelector('.content-inner');
+
+                // Ratings setup
+                const difficultyRatingSpan = header.querySelector('.difficulty-rating');
+                const lengthRatingSpan = content.querySelector('.length-rating');
+                const complexityRatingSpan = content.querySelector('.complexity-rating');
+                // Ensure index is within bounds of questionsData
+                if (index < questionsData.length) {
+                    const { lengthRating, complexityRating } = questionsData[index];
+                    difficultyRatingSpan.innerHTML = generateStars(calculateDifficulty(lengthRating, complexityRating));
+                    if (lengthRatingSpan) lengthRatingSpan.innerHTML = generateStars(lengthRating);
+                    if (complexityRatingSpan) complexityRatingSpan.innerHTML = generateStars(complexityRating);
+                } else {
+                    console.warn(`No data found for question index ${index}`);
+                }
+
+                 // Cache blocks & hide initially
+                 const questionBlock = innerContent.querySelector('.question-block');
+                 const ratingsBlock = innerContent.querySelector('.ratings-block');
+                 const finalAnswerBlock = innerContent.querySelector('.final-answer-block');
+                 const solutionBlock = innerContent.querySelector('.solution-block');
+                 [questionBlock, ratingsBlock, finalAnswerBlock, solutionBlock].forEach(el => {
+                     if (el) el.classList.add('hidden');
+                 });
+
+                 // Click Listener for state transitions
+                 item.addEventListener('click', (event) => {
+                     // Prevent toggle if click is inside the content area (e.g., selecting text)
+                     if (innerContent.contains(event.target)) {
+                         console.log("Clicked inside inner content, ignoring toggle.");
+                         return;
+                     }
+
+                     const currentState = item.getAttribute('data-state');
+                     let nextState;
+
+                     // State machine: collapsed -> state1 (Q+R+A) -> state2 (Q+R+S) -> collapsed
+                     switch (currentState) {
+                         case 'collapsed': nextState = 'state1'; break;
+                         case 'state1':    nextState = 'state2'; break;
+                         case 'state2':    nextState = 'collapsed'; break;
+                         default:          nextState = 'collapsed'; // Fallback
+                     }
+
+                     item.setAttribute('data-state', nextState);
+                     console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
+
+                     // Determine visibility based on the new state
+                     const showQ = nextState !== 'collapsed'; // Question visible in state1 & state2
+                     const showR = nextState !== 'collapsed'; // Ratings visible in state1 & state2
+                     const showA = nextState === 'state1';    // Answer only in state1
+                     const showS = nextState === 'state2';    // Solution only in state2
+
+                     // Toggle visibility classes
+                     if (questionBlock) questionBlock.classList.toggle('hidden', !showQ);
+                     if (ratingsBlock) ratingsBlock.classList.toggle('hidden', !showR);
+                     if (finalAnswerBlock) finalAnswerBlock.classList.toggle('hidden', !showA);
+                     if (solutionBlock) solutionBlock.classList.toggle('hidden', !showS);
+
+                     // Update Accordion Animation/Height
+                     updateAccordion(content, nextState !== 'collapsed');
+                });
+             });
+
+            // Initial Font Size & Log
+            const initialSize = slider.value;
+            document.documentElement.style.setProperty('--base-font-size', initialSize + 'px');
+            sizeValueSpan.textContent = initialSize + 'px';
+            console.log("Initial setup complete.");
+            typesetMath(); // Initial typeset after DOM ready
+
+        }); // End DOMContentLoaded
+
+    </script>
+
+</body>
+</html>
