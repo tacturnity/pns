@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en" style="--base-font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - 4</title> <!-- Updated Title -->
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+          options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'], ignoreHtmlClass: 'tex2jax_ignore', processHtmlClass: 'tex2jax_process' },
+          svg: { fontCache: 'global' },
+          startup: { ready: () => { console.log('MathJax ready.'); MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax initial typeset complete.')); } }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* --- START OF FINAL CSS --- */
+        :root {
+            --accent-color: #F08080;
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #555;
+            --header-bg: #2f2f2f;
+            --header-hover-bg: #3f3f3f;
+            --content-bg: #282828;
+            --solution-text-bg: #252525;
+            --slider-track-color: #444; /* Dark track for slider */
+            --base-font-size: 16px;
+            --anim-duration: 0.7s;
+            --content-fade-duration: 0.5s;
+            --collapse-delay: 0.1s;
+            --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
+            /* Star Colors */
+            --color-stars-red: #f1948a;
+            --color-stars-yellow: #f7dc6f;
+            --color-stars-green: #58d68d;
+            --color-stars-grey: #777;
+
+            /* Monospace Font Stack */
+            --monospace-font-stack: 'SF Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: var(--monospace-font-stack); /* Default to monospace */
+            line-height: 1.7;
+            margin: 0; padding: 20px; font-size: var(--base-font-size);
+            transition: font-size 0.2s ease-in-out;
+            padding-bottom: 80px; /* Space for slider */
+            overflow-x: hidden;
+        }
+        h1 {
+            color: var(--accent-color); text-align: center;
+            border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
+            margin-bottom: 30px; font-size: 2.5em;
+            /* Inherits monospace */
+        }
+        .accordion { max-width: 900px; margin: 20px auto; }
+        .accordion-item {
+            border: 1px solid var(--border-color); border-radius: 8px;
+            overflow: hidden; margin-bottom: 25px; background-color: var(--content-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+         .accordion-item:hover {
+            border-color: #777;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .accordion-header {
+            background-color: var(--header-bg);
+            padding: 18px 25px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
+            border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
+        }
+        .accordion-item[data-state="collapsed"] .accordion-header { border-bottom-color: transparent; }
+        .accordion-header:hover { background-color: var(--header-hover-bg); }
+        .accordion-header h2 {
+            margin: 0; font-size: 1.2em; color: var(--text-color);
+            /* Inherits monospace */
+         }
+
+        /* Content Area & Animations */
+        .accordion-content {
+            padding: 0 25px; max-height: 0; overflow: hidden;
+            transition: max-height var(--anim-duration) var(--anim-easing),
+                        padding-top var(--anim-duration) var(--anim-easing),
+                        padding-bottom var(--anim-duration) var(--anim-easing);
+            box-sizing: border-box; position: relative; z-index: 1;
+        }
+        .accordion-content.active { padding-top: 20px; }
+        .content-inner {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity var(--content-fade-duration) var(--anim-easing) 0s,
+                        transform var(--content-fade-duration) var(--anim-easing) 0s;
+            will-change: opacity, transform;
+            padding-bottom: 25px;
+        }
+        .accordion-content.active .content-inner {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: calc(var(--anim-duration) * 0.3);
+            transition-duration: var(--content-fade-duration);
+        }
+
+        /* Content Blocks Structure & Styling */
+        .question-block, .final-answer-block, .ratings-block, .solution-block {
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);
+        }
+        .content-inner > div:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .ratings-block { margin-bottom: 25px !important; padding-bottom: 20px !important; }
+
+        .question-block strong, .final-answer-block strong, .solution-block strong {
+            color: var(--accent-color); display: block; margin-bottom: 8px;
+            font-size: 1.1em;
+            /* Inherits monospace */
+        }
+        .question-block p,
+        .final-answer-block p {
+            font-size: inherit;
+            margin: 5px 0 1em 0;
+            /* Inherits monospace */
+        }
+        /* Code block specific styling */
+        .question-block pre, .solution-text pre {
+            background-color: var(--solution-text-bg); /* Match solution bg */
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px 15px;
+            overflow-x: auto;
+            font-family: var(--monospace-font-stack); /* Ensure monospace */
+            font-size: 0.95em; /* Slightly smaller */
+            white-space: pre; /* Preserve whitespace */
+            margin: 1em 0;
+        }
+        /* Style for simple tables within pre tags */
+        .solution-text table {
+            border-collapse: collapse;
+            margin: 1em 0;
+            font-size: 0.95em; /* Match pre size */
+            width: auto; /* Don't force full width */
+            border: 1px solid var(--border-color);
+        }
+        .solution-text th, .solution-text td {
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            text-align: center; /* Center align table content */
+        }
+        .solution-text th {
+            background-color: var(--header-bg); /* Use header background for table header */
+            font-weight: bold;
+        }
+
+
+        .solution-text {
+            background-color: var(--solution-text-bg); padding: 15px; border-radius: 5px;
+            border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
+            font-family: var(--monospace-font-stack); /* Explicitly set, inherits anyway */
+        }
+        .solution-text p, .solution-text li {
+            margin-bottom: 1em;
+            font-family: inherit; /* Inherit monospace */
+        }
+        .solution-text *:last-child { margin-bottom: 0; }
+        .solution-text ul, .solution-text ol { padding-left: 25px; margin: 0.5em 0 1em 0; }
+        .solution-text > strong {
+            color: var(--text-color); font-size: 1.05em; margin: 15px 0 10px 0;
+            display: block;
+            /* Inherits monospace */
+        }
+        .solution-text > strong:first-of-type { margin-top: 0; }
+
+        /* Star Ratings */
+        .stars { font-size: 1.3em; letter-spacing: 3px; display: inline-block;
+                 font-family: initial; /* Keep default font for star glyphs */
+               }
+        .star-filled.green { color: var(--color-stars-green); }
+        .star-filled.yellow { color: var(--color-stars-yellow); }
+        .star-filled.red { color: var(--color-stars-red); }
+        .star-empty { color: var(--color-stars-grey); }
+        .rating-label {
+            font-weight: bold; color: #bdbdbd; display: inline-block;
+            min-width: 140px; vertical-align: middle;
+            /* Inherits monospace */
+        }
+        .ratings-block .stars { vertical-align: middle; }
+
+        /* Utility & MathJax */
+        .hidden { display: none; }
+        mjx-container {
+            font-size: 1.05em; text-align: left !important;
+            overflow-x: auto; overflow-y: hidden; padding: 2px 0;
+            /* Keep specific math fonts for MathJax */
+            font-family: 'Latin Modern Math', 'STIX Two Math', serif;
+        }
+
+        /* Font Control - Minimalistic */
+        .font-control {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: transparent; /* No background */
+            padding: 0px 20px 15px 20px; /* Spacing */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            border-top: none; /* No border */
+            z-index: 10;
+        }
+        #fontSizeSlider {
+            flex-grow: 1;
+            cursor: pointer;
+            margin: 0 15px;
+            accent-color: var(--accent-color); /* Styles thumb in modern browsers */
+            min-width: 100px;
+            height: 6px; /* Track height */
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* Track Styling */
+        #fontSizeSlider::-webkit-slider-runnable-track {
+            height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        #fontSizeSlider::-moz-range-track {
+             height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        /* Thumb Styling */
+        #fontSizeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default */
+            appearance: none;
+            margin-top: -5px; /* Vertically center (16px thumb on 6px track) */
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%; /* Make it round */
+            cursor: pointer;
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+        #fontSizeSlider::-moz-range-thumb {
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* Remove Firefox border */
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+         /* Optional: Slight scale effect on interaction */
+         #fontSizeSlider:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+         #fontSizeSlider:active::-moz-range-thumb {
+            transform: scale(1.1);
+         }
+
+        #fontSizeValue {
+            min-width: 50px; text-align: right; font-weight: bold;
+            color: var(--text-color); font-size: 12px !important;
+            /* Inherits monospace */
+        }
+        /* --- END OF FINAL CSS --- */
+    </style>
+</head>
+<body>
+
+    <h1>Tutorial - 4</h1>
+
+    <div class="accordion">
+
+        <!-- Question 1 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>1. Garage Door Openers (Binomial)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Of all customers purchasing automatic garage-door openers, 75% purchase a chain-driven model. Let X = the number among the next 15 purchasers who select the chain-driven model.<br>
+                        (a) What is the pmf of X?<br>
+                        (b) Compute P(X > 10).<br>
+                        (c) Compute P(6 ≤ X ≤ 10).<br>
+                        (d) Compute μ and σ².<br>
+                        (e) If the store currently has in stock 10 chain-driven models and 8 shaft-driven models, what is the probability that the requests of these 15 customers can all be met from existing stock?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) $P(X=x) = \binom{15}{x} (0.75)^x (0.25)^{15-x}$ for $x = 0, ..., 15$.<br>
+                        (b) $P(X > 10) \approx 0.8516$.<br>
+                        (c) $P(6 \le X \le 10) \approx 0.1476$.<br>
+                        (d) $\mu = 11.25$, $\sigma^2 = 2.8125$.<br>
+                        (e) $P(7 \le X \le 10) \approx 0.1441$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>$X \sim Bin(n=15, p=0.75)$.</p>
+                            <strong>(a) PMF of X:</strong>
+                            <p>$P(X=x) = \binom{15}{x} (0.75)^x (0.25)^{15-x}$, for $x=0, 1, ..., 15$.</p>
+                            <strong>(b) Compute P(X > 10):</strong>
+                            <p>$P(X > 10) = 1 - P(X \le 10)$.<br>
+                            Using Binomial CDF, $P(X \le 10) \approx 0.14837$.<br>
+                            $P(X > 10) \approx 1 - 0.14837 = 0.85163$.</p>
+                            <strong>(c) Compute P(6 ≤ X ≤ 10):</strong>
+                            <p>$P(6 \le X \le 10) = P(X \le 10) - P(X \le 5)$.<br>
+                            $P(X \le 10) \approx 0.14837$.<br>
+                            $P(X \le 5) \approx 0.00079$.<br>
+                            $P(6 \le X \le 10) \approx 0.14837 - 0.00079 = 0.14758$.</p>
+                            <strong>(d) Compute μ and σ²:</strong>
+                            <p>$\mu = np = 15 \times 0.75 = 11.25$.<br>
+                            $\sigma^2 = np(1-p) = 15 \times 0.75 \times 0.25 = 2.8125$.</p>
+                            <strong>(e) Probability requests can be met:</strong>
+                            <p>Stock: 10 Chain (C), 8 Shaft (S). 15 customers.<br>
+                            X want C, 15-X want S.<br>
+                            Need $X \le 10$ AND $15-X \le 8 \implies X \ge 7$.<br>
+                            So, we need $P(7 \le X \le 10)$.<br>
+                            $P(7 \le X \le 10) = P(X \le 10) - P(X \le 6)$.<br>
+                            $P(X \le 10) \approx 0.14837$.<br>
+                            $P(X \le 6) \approx 0.00423$.<br>
+                            $P(7 \le X \le 10) \approx 0.14837 - 0.00423 = 0.14414$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>2. K-out-of-N System</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A k-out-of-n system is one that will function if and only if at least k of the n individual components in the system function. If individual components function independently of one another, each with probability .9, what is the probability that a 3-out-of-5 system functions?.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The probability that the system functions is 0.99144.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>System: n=5 components, functions if k=3 or more function.<br>
+                            Individual component function probability p=0.9. Components independent.<br>
+                            Let Y = number of functioning components. $Y \sim Bin(n=5, p=0.9)$.<br>
+                            System functions if $Y \ge 3$.</p>
+                            <p>$P(Y \ge 3) = P(Y=3) + P(Y=4) + P(Y=5)$.<br>
+                            $P(Y=y) = \binom{5}{y} (0.9)^y (0.1)^{5-y}$.</p>
+                            <p>$P(Y=3) = \binom{5}{3} (0.9)^3 (0.1)^2 = 10(0.729)(0.01) = 0.0729$.<br>
+                            $P(Y=4) = \binom{5}{4} (0.9)^4 (0.1)^1 = 5(0.6561)(0.1) = 0.32805$.<br>
+                            $P(Y=5) = \binom{5}{5} (0.9)^5 (0.1)^0 = 1(0.59049)(1) = 0.59049$.</p>
+                            <p>$P(Y \ge 3) = 0.0729 + 0.32805 + 0.59049 = 0.99144$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>3. Chip Batch Rejection</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A manufacturer of integrated circuit chips wishes to control the quality of its product by rejecting any batch in which the proportion of defective chips is too high. To this end, out of each batch (10,000 chips), 25 will be selected and tested. If at least 5 of these 25 are defective, the entire batch will be rejected.<br>
+                        (a) What is the probability that a batch will be rejected if 5% of the chips in the batch are in fact defective?<br>
+                        (b) Answer the question posed in (a) if the percentage of defective chips in the batch is 10%.<br>
+                        (c) What happens to the probabilities in (a)-(b) if the critical rejection number is increased from 5 to 6?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) If p=0.05, P(Reject) = P(X ≥ 5) ≈ 0.00716.<br>
+                        (b) If p=0.10, P(Reject) = P(X ≥ 5) ≈ 0.09798.<br>
+                        (c) If rejection number is 6:<br>
+                        For p=0.05, P(Reject) = P(X ≥ 6) ≈ 0.00139 (decreased).<br>
+                        For p=0.10, P(Reject) = P(X ≥ 6) ≈ 0.03338 (decreased).</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>N=10000, n=25. Reject if $X \ge 5$ defectives in sample.<br>
+                            Approximate with $X \sim Bin(n=25, p)$.</p>
+                            <strong>(a) P(Reject | p=0.05):</strong>
+                            <p>$P(X \ge 5 | p=0.05) = 1 - P(X \le 4 | p=0.05)$.<br>
+                            Using Binomial CDF, $P(X \le 4 | p=0.05) \approx 0.99284$.<br>
+                            $P(Reject) \approx 1 - 0.99284 = 0.00716$.</p>
+                            <strong>(b) P(Reject | p=0.10):</strong>
+                            <p>$P(X \ge 5 | p=0.10) = 1 - P(X \le 4 | p=0.10)$.<br>
+                            Using Binomial CDF, $P(X \le 4 | p=0.10) \approx 0.90202$.<br>
+                            $P(Reject) \approx 1 - 0.90202 = 0.09798$.</p>
+                            <strong>(c) Effect of rejection number = 6 (Reject if X ≥ 6):</strong>
+                            <p>Case p=0.05: $P(X \ge 6) = 1 - P(X \le 5)$.<br>
+                            $P(X \le 5 | p=0.05) \approx 0.99861$.<br>
+                            New P(Reject) $\approx 1 - 0.99861 = 0.00139$. (Decreased from 0.00716).</p>
+                            <p>Case p=0.10: $P(X \ge 6) = 1 - P(X \le 5)$.<br>
+                            $P(X \le 5 | p=0.10) \approx 0.96662$.<br>
+                            New P(Reject) $\approx 1 - 0.96662 = 0.03338$. (Decreased from 0.09798).</p>
+                            <p>Increasing the rejection number makes rejection less likely.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>4. Executive Travelers' Club Qualification</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A plan for an executive travelers' club has been developed by an airline on the premise that 10% of its current customers would qualify for membership.<br>
+                        (a) Assuming the validity of this premise, among 25 randomly selected current customers, what is the probability that between 2 and 6 (inclusive) qualify for membership?<br>
+                        (b) Again assuming the validity of this premise, what are the expected number of customers who qualify and the standard deviation of the number who qualify in a random sample of 100 current customers?<br>
+                        (c) Let X denote the number in a random sample of 25 current customers who qualify for membership. Consider rejecting the company's premise in favor of the claim that p > 0.10 if x ≥ 7 . What is the probability that the company's premise is rejected when it is actually valid?<br>
+                        (d) Refer to the decision rule introduced in part (c). What is the probability that the company's premise is not rejected even though p = 0.20 (i.e., 20% qualify)?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) $P(2 \le X \le 6) \approx 0.719$.<br>
+                        (b) For n=100: Expected = 10, Standard Deviation = 3.<br>
+                        (c) P(Reject H0 | p=0.10) = P(X ≥ 7 | n=25, p=0.10) ≈ 0.0095 (Type I error, α).<br>
+                        (d) P(Not Reject H0 | p=0.20) = P(X ≤ 6 | n=25, p=0.20) ≈ 0.7800 (Type II error, β).</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let X = number qualifying. Assume $p=0.10$.</p>
+                            <strong>(a) n=25, P(2 ≤ X ≤ 6):</strong>
+                            <p>$X \sim Bin(n=25, p=0.10)$.<br>
+                            $P(2 \le X \le 6) = P(X \le 6) - P(X \le 1)$.<br>
+                            Using Binomial CDF:<br>
+                            $P(X \le 6) \approx 0.99052$.<br>
+                            $P(X \le 1) \approx 0.27116$.<br>
+                            $P(2 \le X \le 6) \approx 0.99052 - 0.27116 = 0.71936$.</p>
+                            <strong>(b) n=100, E[X] and SD[X]:</strong>
+                            <p>$X \sim Bin(n=100, p=0.10)$.<br>
+                            $\mu = E[X] = np = 100(0.10) = 10$.<br>
+                            $\sigma^2 = np(1-p) = 100(0.10)(0.90) = 9$.<br>
+                            $\sigma = SD[X] = \sqrt{9} = 3$.</p>
+                            <strong>(c) Type I error probability (α):</strong>
+                            <p>Test $H_0: p=0.10$ vs $H_a: p>0.10$. n=25. Reject if $X \ge 7$.<br>
+                            $\alpha = P(\text{Reject } H_0 | H_0 \text{ true}) = P(X \ge 7 | p=0.10)$.<br>
+                            $\alpha = 1 - P(X \le 6 | p=0.10)$.<br>
+                            Using CDF from (a): $\alpha \approx 1 - 0.99052 = 0.00948$.</p>
+                            <strong>(d) Type II error probability (β):</strong>
+                            <p>Rule: Reject if $X \ge 7$, Fail to reject if $X \le 6$.<br>
+                            $\beta(0.20) = P(\text{Fail to reject } H_0 | p=0.20) = P(X \le 6 | p=0.20)$.<br>
+                            Now $X \sim Bin(n=25, p=0.20)$.<br>
+                            Using Binomial CDF: $\beta(0.20) = P(X \le 6 | p=0.20) \approx 0.7800$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>5. Poisson MGF, Mean, Variance</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Let X have the distribution with pmf<br>
+                        $f(x) = \frac{\lambda^x e^{-\lambda}}{x!}, \quad \lambda > 0 \text{ is a constant, for } x = 0, 1, ...$<br>
+                        (a) Find the moment generating function for X.<br>
+                        (b) Find E(X) & Var(X) using the moment generating function.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) MGF $M_X(t) = e^{\lambda(e^t - 1)}$.<br>
+                        (b) $E[X] = \lambda$, $Var(X) = \lambda$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>X follows Poisson($\lambda$).</p>
+                            <strong>(a) Moment Generating Function (MGF):</strong>
+                            <p>$M_X(t) = E[e^{tX}] = \sum_{x=0}^{\infty} e^{tx} \frac{\lambda^x e^{-\lambda}}{x!}$<br>
+                            $= e^{-\lambda} \sum_{x=0}^{\infty} \frac{(e^t \lambda)^x}{x!}$<br>
+                            Recognize the Taylor series for $e^y = \sum \frac{y^k}{k!}$ with $y = \lambda e^t$.<br>
+                            $= e^{-\lambda} e^{\lambda e^t} = e^{\lambda e^t - \lambda} = e^{\lambda(e^t - 1)}$.</p>
+                            <strong>(b) Find E(X) & Var(X) using MGF:</strong>
+                            <p>$M'_X(t) = \frac{d}{dt} e^{\lambda(e^t - 1)} = e^{\lambda(e^t - 1)} \cdot (\lambda e^t)$.<br>
+                            $E[X] = M'_X(0) = e^{\lambda(e^0 - 1)} \cdot (\lambda e^0) = e^0 \cdot \lambda = \lambda$.</p>
+                            <p>$M''_X(t) = \frac{d}{dt} [\lambda e^t e^{\lambda(e^t - 1)}]$ (Use product rule)<br>
+                            $= (\lambda e^t)(e^{\lambda(e^t - 1)}) + (\lambda e^t)(e^{\lambda(e^t - 1)} \cdot \lambda e^t)$<br>
+                            $= \lambda e^t e^{\lambda(e^t - 1)} + \lambda^2 e^{2t} e^{\lambda(e^t - 1)}$.<br>
+                            $E[X^2] = M''_X(0) = \lambda e^0 e^0 + \lambda^2 e^0 e^0 = \lambda + \lambda^2$.</p>
+                            <p>$Var(X) = E[X^2] - (E[X])^2 = (\lambda + \lambda^2) - (\lambda)^2 = \lambda$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>6. Geometric MGF, Mean, Variance</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Let X have the distribution with pmf<br>
+                        $f(x) = p(1 - p)^{x-1} \quad \text{for } x = 1, 2, ...$<br>
+                        (a) Obtain the moment generating function for $t < - \ln(1-p)$<br>
+                        (b) Obtain E(X) and E(X²) by differentiating the moment generating function.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) MGF $M_X(t) = \frac{pe^t}{1 - (1-p)e^t}$.<br>
+                        (b) $E[X] = 1/p$, $E[X^2] = \frac{2-p}{p^2}$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>X follows Geometric($p$). Let $q=1-p$. $f(x)=pq^{x-1}$ for $x=1, 2, ...$</p>
+                            <strong>(a) Moment Generating Function (MGF):</strong>
+                            <p>$M_X(t) = E[e^{tX}] = \sum_{x=1}^{\infty} e^{tx} pq^{x-1} = p \sum_{x=1}^{\infty} e^{tx} q^{x-1}$<br>
+                            $= pe^t \sum_{x=1}^{\infty} e^{t(x-1)} q^{x-1} = pe^t \sum_{k=0}^{\infty} (qe^t)^k$ (where $k=x-1$).</p>
+                            <p>This is a geometric series which converges if $|qe^t| < 1$, i.e., $e^t < 1/q \implies t < -\ln(q) = -\ln(1-p)$.<br>
+                            The sum is $\frac{1}{1-qe^t}$.<br>
+                            $M_X(t) = pe^t (\frac{1}{1-qe^t}) = \frac{pe^t}{1-qe^t}$.</p>
+                            <strong>(b) Obtain E(X) and E(X²) using MGF:</strong>
+                            <p>$M'_X(t) = \frac{(pe^t)(1 - qe^t) - (pe^t)(-qe^t)}{(1 - qe^t)^2} = \frac{pe^t - pqe^{2t} + pqe^{2t}}{(1 - qe^t)^2} = \frac{pe^t}{(1 - qe^t)^2}$.<br>
+                            $E[X] = M'_X(0) = \frac{pe^0}{(1 - qe^0)^2} = \frac{p}{(1 - q)^2} = \frac{p}{p^2} = \frac{1}{p}$.</p>
+                            <p>$M''_X(t) = \frac{d}{dt} [pe^t(1 - qe^t)^{-2}]$ (Use product rule)<br>
+                            $= (pe^t)(1 - qe^t)^{-2} + (pe^t)[-2(1 - qe^t)^{-3}(-qe^t)]$<br>
+                            $= \frac{pe^t}{(1 - qe^t)^2} + \frac{2pqe^{2t}}{(1 - qe^t)^3}$.<br>
+                            $E[X^2] = M''_X(0) = \frac{p}{(1 - q)^2} + \frac{2pq}{(1 - q)^3} = \frac{p}{p^2} + \frac{2pq}{p^3} = \frac{1}{p} + \frac{2q}{p^2}$<br>
+                            $= \frac{p + 2q}{p^2} = \frac{p + 2(1-p)}{p^2} = \frac{2-p}{p^2}$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div> <!-- end accordion -->
+
+    <!-- Font Size Slider -->
+    <div class="font-control">
+        <input type="range" id="fontSizeSlider" min="10" max="50" value="16" step="1">
+        <span id="fontSizeValue">16px</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // --- Data for Ratings (Tutorial 4) ---
+        const questionsData = [
+            { lengthRating: 4, complexityRating: 3 }, // Q1
+            { lengthRating: 3, complexityRating: 2 }, // Q2
+            { lengthRating: 4, complexityRating: 3 }, // Q3
+            { lengthRating: 4, complexityRating: 3 }, // Q4
+            { lengthRating: 3, complexityRating: 2 }, // Q5
+            { lengthRating: 4, complexityRating: 3 }  // Q6
+        ];
+
+        // --- Utility Functions ---
+        function generateStars(rating) { const roundedRating = Math.max(1, Math.min(5, Math.round(rating))); let colorClass; if (roundedRating <= 2) { colorClass = 'green'; } else if (roundedRating === 3) { colorClass = 'yellow'; } else { colorClass = 'red'; } let starsHTML = '<span class="stars">'; for (let i = 1; i <= 5; i++) { starsHTML += `<span class="star-${i <= roundedRating ? 'filled ' + colorClass : 'empty'}">${i <= roundedRating ? '★' : '☆'}</span>`; } starsHTML += '</span>'; return starsHTML; }
+        function calculateDifficulty(lengthRating, complexityRating) { const avg = (lengthRating + complexityRating) / 2; return Math.max(1, Math.min(5, Math.round(avg))); }
+        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
+        const mathJaxLoadedPromise = new Promise((resolve) => { if (window.MathJax && window.MathJax.startup) { window.MathJax.startup.promise.then(resolve); } else { window.addEventListener('MathJaxLoaded', resolve, {once: true}); } }); if (document.readyState === "complete" || document.readyState === "interactive") { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); } else { window.addEventListener('load', () => { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); }); }
+        function typesetMath(elements = [document.body]) { console.log("Attempting to typeset math in:", elements); mathJaxLoadedPromise.then(() => { console.log("MathJax confirmed ready, calling typesetPromise."); return MathJax.typesetPromise(elements); }).then(() => { console.log("MathJax typesetting complete for:", elements); }).catch(err => console.error('MathJax Typesetting Error:', err)); }
+
+        // --- Accordion Update Function ---
+         function updateAccordion(contentElement, makeActive) {
+            if (!contentElement) return;
+            const innerContent = contentElement.querySelector('.content-inner');
+            const collapseDelay = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--collapse-delay') || '0.1') * 1000; // Read from CSS var
+
+             if (makeActive) {
+                 // EXPANDING
+                 contentElement.classList.add('active');
+                 typesetMath([innerContent]);
+                 requestAnimationFrame(() => { // Ensure DOM update before measurement
+                    const currentTransition = contentElement.style.transition;
+                     contentElement.style.transition = 'none'; // Temporarily disable transitions for height calculation
+                    const scrollHeight = innerContent.offsetHeight;
+                    const style = window.getComputedStyle(contentElement);
+                    const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                     contentElement.style.maxHeight = totalHeight + "px"; // Set target height
+                    console.log(`Expanding: Calculated totalHeight = ${totalHeight}px`);
+                     requestAnimationFrame(() => { // Re-enable transitions after height is set
+                         contentElement.style.transition = currentTransition;
+                     });
+                });
+            } else {
+                 // CLOSING
+                contentElement.classList.remove('active'); // Starts inner content fade out immediately
+                console.log('Closing: Removed .active class, starting fade/pad collapse.');
+                 setTimeout(() => {
+                    contentElement.style.maxHeight = '0px'; // Start container collapse after delay
+                     console.log(`Closing: Delayed setting max-height=0 by ${collapseDelay}ms`);
+                 }, collapseDelay);
+            }
+         }
+
+        // --- Event Listeners and Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log("DOM Ready - Tutorial 4");
+            const accordionItems = document.querySelectorAll('.accordion-item');
+             const slider = document.getElementById('fontSizeSlider');
+            const sizeValueSpan = document.getElementById('fontSizeValue');
+
+            // --- Font Size Slider ---
+             const handleFontSizeChange = debounce(() => {
+                 console.log("Handling font size change..."); typesetMath(); // Retypeset on resize
+                 // Adjust height of any open accordion items after font size change
+                 accordionItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    if (content.classList.contains('active') && parseFloat(content.style.maxHeight) > 0) {
+                         console.log("Adjusting height for open item:", item);
+                         // Temporarily disable transitions to avoid jumpy resize
+                        const currentTransition = content.style.transition;
+                        content.style.transition = 'none';
+                        content.style.maxHeight = 'none'; // Allow content to reflow naturally
+
+                        requestAnimationFrame(() => { // Measure after reflow
+                            const innerContent = content.querySelector('.content-inner');
+                            const scrollHeight = innerContent.offsetHeight;
+                            const style = window.getComputedStyle(content);
+                            const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                            content.style.maxHeight = totalHeight + 'px'; // Apply new calculated height
+
+                            requestAnimationFrame(() => { // Restore transitions
+                                content.style.transition = currentTransition;
+                            });
+                            console.log("Font Change - Adjusted height to:", totalHeight);
+                        });
+                     }
+                 });
+             }, 250); // Debounce typesetting/height adjustment
+
+             slider.addEventListener('input', () => {
+                 const newSize = slider.value;
+                 document.documentElement.style.setProperty('--base-font-size', newSize + 'px');
+                 sizeValueSpan.textContent = newSize + 'px';
+                 handleFontSizeChange(); // Call debounced handler
+             });
+
+            // --- Accordion Logic ---
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const innerContent = content.querySelector('.content-inner');
+
+                // Ratings setup
+                const difficultyRatingSpan = header.querySelector('.difficulty-rating');
+                const lengthRatingSpan = content.querySelector('.length-rating');
+                const complexityRatingSpan = content.querySelector('.complexity-rating');
+                // Ensure index is within bounds of questionsData
+                if (index < questionsData.length) {
+                    const { lengthRating, complexityRating } = questionsData[index];
+                    difficultyRatingSpan.innerHTML = generateStars(calculateDifficulty(lengthRating, complexityRating));
+                    if (lengthRatingSpan) lengthRatingSpan.innerHTML = generateStars(lengthRating);
+                    if (complexityRatingSpan) complexityRatingSpan.innerHTML = generateStars(complexityRating);
+                } else {
+                    console.warn(`No data found for question index ${index}`);
+                }
+
+                 // Cache blocks & hide initially
+                 const questionBlock = innerContent.querySelector('.question-block');
+                 const ratingsBlock = innerContent.querySelector('.ratings-block');
+                 const finalAnswerBlock = innerContent.querySelector('.final-answer-block');
+                 const solutionBlock = innerContent.querySelector('.solution-block');
+                 [questionBlock, ratingsBlock, finalAnswerBlock, solutionBlock].forEach(el => {
+                     if (el) el.classList.add('hidden');
+                 });
+
+                 // Click Listener for state transitions
+                 item.addEventListener('click', (event) => {
+                     // Prevent toggle if click is inside the content area (e.g., selecting text)
+                     if (innerContent.contains(event.target)) {
+                         console.log("Clicked inside inner content, ignoring toggle.");
+                         return;
+                     }
+
+                     const currentState = item.getAttribute('data-state');
+                     let nextState;
+
+                     // State machine: collapsed -> state1 (Q+R+A) -> state2 (Q+R+S) -> collapsed
+                     switch (currentState) {
+                         case 'collapsed': nextState = 'state1'; break;
+                         case 'state1':    nextState = 'state2'; break;
+                         case 'state2':    nextState = 'collapsed'; break;
+                         default:          nextState = 'collapsed'; // Fallback
+                     }
+
+                     item.setAttribute('data-state', nextState);
+                     console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
+
+                     // Determine visibility based on the new state
+                     const showQ = nextState !== 'collapsed'; // Question visible in state1 & state2
+                     const showR = nextState !== 'collapsed'; // Ratings visible in state1 & state2
+                     const showA = nextState === 'state1';    // Answer only in state1
+                     const showS = nextState === 'state2';    // Solution only in state2
+
+                     // Toggle visibility classes
+                     if (questionBlock) questionBlock.classList.toggle('hidden', !showQ);
+                     if (ratingsBlock) ratingsBlock.classList.toggle('hidden', !showR);
+                     if (finalAnswerBlock) finalAnswerBlock.classList.toggle('hidden', !showA);
+                     if (solutionBlock) solutionBlock.classList.toggle('hidden', !showS);
+
+                     // Update Accordion Animation/Height
+                     updateAccordion(content, nextState !== 'collapsed');
+                });
+             });
+
+            // Initial Font Size & Log
+            const initialSize = slider.value;
+            document.documentElement.style.setProperty('--base-font-size', initialSize + 'px');
+            sizeValueSpan.textContent = initialSize + 'px';
+            console.log("Initial setup complete.");
+            typesetMath(); // Initial typeset after DOM ready
+
+        }); // End DOMContentLoaded
+
+    </script>
+
+</body>
+</html>

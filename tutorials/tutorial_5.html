@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en" style="--base-font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - 5</title> <!-- Updated Title -->
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+          options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'], ignoreHtmlClass: 'tex2jax_ignore', processHtmlClass: 'tex2jax_process' },
+          svg: { fontCache: 'global' },
+          startup: { ready: () => { console.log('MathJax ready.'); MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax initial typeset complete.')); } }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* --- START OF FINAL CSS --- */
+        :root {
+            --accent-color: #F08080;
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #555;
+            --header-bg: #2f2f2f;
+            --header-hover-bg: #3f3f3f;
+            --content-bg: #282828;
+            --solution-text-bg: #252525;
+            --slider-track-color: #444; /* Dark track for slider */
+            --base-font-size: 16px;
+            --anim-duration: 0.7s;
+            --content-fade-duration: 0.5s;
+            --collapse-delay: 0.1s;
+            --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
+            /* Star Colors */
+            --color-stars-red: #f1948a;
+            --color-stars-yellow: #f7dc6f;
+            --color-stars-green: #58d68d;
+            --color-stars-grey: #777;
+
+            /* Monospace Font Stack */
+            --monospace-font-stack: 'SF Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: var(--monospace-font-stack); /* Default to monospace */
+            line-height: 1.7;
+            margin: 0; padding: 20px; font-size: var(--base-font-size);
+            transition: font-size 0.2s ease-in-out;
+            padding-bottom: 80px; /* Space for slider */
+            overflow-x: hidden;
+        }
+        h1 {
+            color: var(--accent-color); text-align: center;
+            border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
+            margin-bottom: 30px; font-size: 2.5em;
+            /* Inherits monospace */
+        }
+        .accordion { max-width: 900px; margin: 20px auto; }
+        .accordion-item {
+            border: 1px solid var(--border-color); border-radius: 8px;
+            overflow: hidden; margin-bottom: 25px; background-color: var(--content-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+         .accordion-item:hover {
+            border-color: #777;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .accordion-header {
+            background-color: var(--header-bg);
+            padding: 18px 25px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
+            border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
+        }
+        .accordion-item[data-state="collapsed"] .accordion-header { border-bottom-color: transparent; }
+        .accordion-header:hover { background-color: var(--header-hover-bg); }
+        .accordion-header h2 {
+            margin: 0; font-size: 1.2em; color: var(--text-color);
+            /* Inherits monospace */
+         }
+
+        /* Content Area & Animations */
+        .accordion-content {
+            padding: 0 25px; max-height: 0; overflow: hidden;
+            transition: max-height var(--anim-duration) var(--anim-easing),
+                        padding-top var(--anim-duration) var(--anim-easing),
+                        padding-bottom var(--anim-duration) var(--anim-easing);
+            box-sizing: border-box; position: relative; z-index: 1;
+        }
+        .accordion-content.active { padding-top: 20px; }
+        .content-inner {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity var(--content-fade-duration) var(--anim-easing) 0s,
+                        transform var(--content-fade-duration) var(--anim-easing) 0s;
+            will-change: opacity, transform;
+            padding-bottom: 25px;
+        }
+        .accordion-content.active .content-inner {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: calc(var(--anim-duration) * 0.3);
+            transition-duration: var(--content-fade-duration);
+        }
+
+        /* Content Blocks Structure & Styling */
+        .question-block, .final-answer-block, .ratings-block, .solution-block {
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);
+        }
+        .content-inner > div:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .ratings-block { margin-bottom: 25px !important; padding-bottom: 20px !important; }
+
+        .question-block strong, .final-answer-block strong, .solution-block strong {
+            color: var(--accent-color); display: block; margin-bottom: 8px;
+            font-size: 1.1em;
+            /* Inherits monospace */
+        }
+        .question-block p,
+        .final-answer-block p {
+            font-size: inherit;
+            margin: 5px 0 1em 0;
+            /* Inherits monospace */
+        }
+        /* Code block specific styling */
+        .question-block pre, .solution-text pre {
+            background-color: var(--solution-text-bg); /* Match solution bg */
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px 15px;
+            overflow-x: auto;
+            font-family: var(--monospace-font-stack); /* Ensure monospace */
+            font-size: 0.95em; /* Slightly smaller */
+            white-space: pre; /* Preserve whitespace */
+            margin: 1em 0;
+        }
+        /* Style for simple tables within pre tags */
+        .solution-text table {
+            border-collapse: collapse;
+            margin: 1em 0;
+            font-size: 0.95em; /* Match pre size */
+            width: auto; /* Don't force full width */
+            border: 1px solid var(--border-color);
+        }
+        .solution-text th, .solution-text td {
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            text-align: center; /* Center align table content */
+        }
+        .solution-text th {
+            background-color: var(--header-bg); /* Use header background for table header */
+            font-weight: bold;
+        }
+
+
+        .solution-text {
+            background-color: var(--solution-text-bg); padding: 15px; border-radius: 5px;
+            border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
+            font-family: var(--monospace-font-stack); /* Explicitly set, inherits anyway */
+        }
+        .solution-text p, .solution-text li {
+            margin-bottom: 1em;
+            font-family: inherit; /* Inherit monospace */
+        }
+        .solution-text *:last-child { margin-bottom: 0; }
+        .solution-text ul, .solution-text ol { padding-left: 25px; margin: 0.5em 0 1em 0; }
+        .solution-text > strong {
+            color: var(--text-color); font-size: 1.05em; margin: 15px 0 10px 0;
+            display: block;
+            /* Inherits monospace */
+        }
+        .solution-text > strong:first-of-type { margin-top: 0; }
+
+        /* Star Ratings */
+        .stars { font-size: 1.3em; letter-spacing: 3px; display: inline-block;
+                 font-family: initial; /* Keep default font for star glyphs */
+               }
+        .star-filled.green { color: var(--color-stars-green); }
+        .star-filled.yellow { color: var(--color-stars-yellow); }
+        .star-filled.red { color: var(--color-stars-red); }
+        .star-empty { color: var(--color-stars-grey); }
+        .rating-label {
+            font-weight: bold; color: #bdbdbd; display: inline-block;
+            min-width: 140px; vertical-align: middle;
+            /* Inherits monospace */
+        }
+        .ratings-block .stars { vertical-align: middle; }
+
+        /* Utility & MathJax */
+        .hidden { display: none; }
+        mjx-container {
+            font-size: 1.05em; text-align: left !important;
+            overflow-x: auto; overflow-y: hidden; padding: 2px 0;
+            /* Keep specific math fonts for MathJax */
+            font-family: 'Latin Modern Math', 'STIX Two Math', serif;
+        }
+
+        /* Font Control - Minimalistic */
+        .font-control {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: transparent; /* No background */
+            padding: 0px 20px 15px 20px; /* Spacing */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            border-top: none; /* No border */
+            z-index: 10;
+        }
+        #fontSizeSlider {
+            flex-grow: 1;
+            cursor: pointer;
+            margin: 0 15px;
+            accent-color: var(--accent-color); /* Styles thumb in modern browsers */
+            min-width: 100px;
+            height: 6px; /* Track height */
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* Track Styling */
+        #fontSizeSlider::-webkit-slider-runnable-track {
+            height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        #fontSizeSlider::-moz-range-track {
+             height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        /* Thumb Styling */
+        #fontSizeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default */
+            appearance: none;
+            margin-top: -5px; /* Vertically center (16px thumb on 6px track) */
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%; /* Make it round */
+            cursor: pointer;
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+        #fontSizeSlider::-moz-range-thumb {
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* Remove Firefox border */
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+         /* Optional: Slight scale effect on interaction */
+         #fontSizeSlider:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+         #fontSizeSlider:active::-moz-range-thumb {
+            transform: scale(1.1);
+         }
+
+        #fontSizeValue {
+            min-width: 50px; text-align: right; font-weight: bold;
+            color: var(--text-color); font-size: 12px !important;
+            /* Inherits monospace */
+        }
+        /* --- END OF FINAL CSS --- */
+    </style>
+</head>
+<body>
+
+    <h1>Tutorial - 5</h1>
+
+    <div class="accordion">
+
+        <!-- Question 1 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>1. Hung Jury Interviews (Hypergeometric)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A trial has just resulted in a hung jury because eight members of the jury were in favor of a guilty verdict and the other four were for acquittal. If the jurors leave the jury room in random order and each of the first four leaving the room is accosted by a reporter in quest of an interview, what is the pmf of X = the number of jurors favoring acquittal among those interviewed? How many of those favoring acquittal do you expect to be interviewed?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>PMF p(x): p(0)=70/495, p(1)=224/495, p(2)=168/495, p(3)=32/495, p(4)=1/495.<br>
+                        Expected number favoring acquittal $E[X] = 4/3 \approx 1.33$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Hypergeometric distribution: Population N=12 (8 Guilty, 4 Acquittal). Sample n=4. X = number favoring acquittal in sample.</p>
+                            <p>Possible X values: 0, 1, 2, 3, 4.<br>
+                            PMF Formula: $P(X=x) = \frac{\binom{4}{x} \binom{8}{4-x}}{\binom{12}{4}}$.<br>
+                            Total combinations $\binom{12}{4} = 495$.</p>
+                            <ul>
+                                <li>$P(X=0) = \frac{\binom{4}{0}\binom{8}{4}}{495} = \frac{1 \times 70}{495} = 70/495$</li>
+                                <li>$P(X=1) = \frac{\binom{4}{1}\binom{8}{3}}{495} = \frac{4 \times 56}{495} = 224/495$</li>
+                                <li>$P(X=2) = \frac{\binom{4}{2}\binom{8}{2}}{495} = \frac{6 \times 28}{495} = 168/495$</li>
+                                <li>$P(X=3) = \frac{\binom{4}{3}\binom{8}{1}}{495} = \frac{4 \times 8}{495} = 32/495$</li>
+                                <li>$P(X=4) = \frac{\binom{4}{4}\binom{8}{0}}{495} = \frac{1 \times 1}{495} = 1/495$</li>
+                            </ul>
+                             <table>
+                                <thead><tr><th>x</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+                                <tbody><tr><td>p(x)</td><td>70/495</td><td>224/495</td><td>168/495</td><td>32/495</td><td>1/495</td></tr></tbody>
+                            </table>
+                            <strong>Expected Value:</strong>
+                            <p>$E[X] = n \frac{K}{N} = 4 \times \frac{4}{12} = \frac{16}{12} = \frac{4}{3}$.<br>
+                            Expected number interviewed favoring acquittal is 4/3.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>2. Family Children Gender (Negative Binomial Variant)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A family decides to have children until it has three children of the same gender. Assuming P(B)=P(G)=0.5, what is the pmf of X =the number of children in the family?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The pmf of X is: p(3) = 0.25, p(4) = 0.375, p(5) = 0.375.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>X = number of children. Stop when 3 Boys (B) or 3 Girls (G). P(B)=P(G)=0.5.<br>
+                            Possible values for X are {3, 4, 5}.</p>
+                            <p><strong>P(X=3):</strong> First 3 are same gender.<br>
+                            $P(BBB) + P(GGG) = (0.5)^3 + (0.5)^3 = 0.125 + 0.125 = 0.25$.</p>
+                            <p><strong>P(X=4):</strong> Stops at 4th child (3rd B or 3rd G).<br>
+                            Means first 3 had 2 of one gender, 1 of other, and 4th matches the majority.<br>
+                            $P(\text{3rd B at 4}) = P(\text{2B,1G in first 3}) \times P(\text{4th is B})$<br>
+                            $= [\binom{3}{2}(0.5)^2(0.5)^1] \times 0.5 = 3(0.5)^3 \times 0.5 = 3(0.5)^4 = 3/16$.<br>
+                            $P(\text{3rd G at 4}) = P(\text{2G,1B in first 3}) \times P(\text{4th is G})$<br>
+                            $= [\binom{3}{2}(0.5)^2(0.5)^1] \times 0.5 = 3(0.5)^4 = 3/16$.<br>
+                            $P(X=4) = 3/16 + 3/16 = 6/16 = 0.375$.</p>
+                            <p><strong>P(X=5):</strong> Stops at 5th child (3rd B or 3rd G).<br>
+                            Means first 4 had 2 Boys and 2 Girls.<br>
+                            $P(\text{3rd B at 5}) = P(\text{2B,2G in first 4}) \times P(\text{5th is B})$<br>
+                            $= [\binom{4}{2}(0.5)^2(0.5)^2] \times 0.5 = 6(0.5)^4 \times 0.5 = 6(0.5)^5 = 6/32$.<br>
+                            $P(\text{3rd G at 5}) = P(\text{2B,2G in first 4}) \times P(\text{5th is G})$<br>
+                            $= [\binom{4}{2}(0.5)^2(0.5)^2] \times 0.5 = 6(0.5)^5 = 6/32$.<br>
+                            $P(X=5) = 6/32 + 6/32 = 12/32 = 0.375$.</p>
+                             <table>
+                                <thead><tr><th>x</th><th>3</th><th>4</th><th>5</th></tr></thead>
+                                <tbody><tr><td>p(x)</td><td>0.25</td><td>0.375</td><td>0.375</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>3. Chess Game Sequence (Negative Binomial)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Individuals A and B begin to play a sequence of chess games. Let S = {A wins a game}, and suppose that outcomes of successive games are independent with P(S) = p and P(F) = 1 - p (they never draw). They will play until one of them wins ten games. Let X = the number of games played (with possible values 10, 11, ..., 19).<br>
+                        (a) For x = 10, 11, ..., 19, obtain an expression for p(x) = P(X = x).<br>
+                        (b) If a draw is possible, with p = P(S), q = P(F), 1 - p - q = P(draw), what are the possible values of X? What is P(20 ≤ X)?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) $p(x) = \binom{x-1}{9} [p^{10} q^{x-10} + q^{10} p^{x-10}]$ for $x=10, ..., 19$.<br>
+                        (b) Possible X = {10, 11, 12, ...}.<br>
+                         $P(X \ge 20) = P(\text{Neither player has 10 wins after 19 games})$.<br>
+                         $= \sum_{n_A=0}^{9} \sum_{n_B=0}^{\min(9, 19-n_A)} \frac{19!}{n_A! n_B! (19-n_A-n_B)!} p^{n_A} q^{n_B} r^{19-n_A-n_B}$ where $r=1-p-q$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $p=P(A \text{ wins}), q=1-p=P(B \text{ wins})$. Stop when 10 wins for A or B. X = games played.</p>
+                            <strong>(a) No Draws: P(X = x) for x = 10, ..., 19</strong>
+                            <p>Game ends at x if A wins game x AND A had 9 wins in first x-1 games, OR if B wins game x AND B had 9 wins in first x-1 games.<br>
+                            These are Negative Binomial scenarios for the 10th win.</p>
+                            <p>$P(\text{A wins on game } x) = P(\text{9 A wins in first } x-1 \text{ games}) \times P(\text{A wins game } x)$<br>
+                            $= \left[ \binom{x-1}{9} p^9 q^{(x-1)-9} \right] \times p = \binom{x-1}{9} p^{10} q^{x-10}$.</p>
+                            <p>$P(\text{B wins on game } x) = P(\text{9 B wins in first } x-1 \text{ games}) \times P(\text{B wins game } x)$<br>
+                            $= \left[ \binom{x-1}{9} q^9 p^{(x-1)-9} \right] \times q = \binom{x-1}{9} q^{10} p^{x-10}$.</p>
+                            <p>$p(x) = P(X=x) = P(\text{A wins on x}) + P(\text{B wins on x})$<br>
+                            $= \binom{x-1}{9} p^{10} q^{x-10} + \binom{x-1}{9} q^{10} p^{x-10}$<br>
+                            $= \binom{x-1}{9} [p^{10} q^{x-10} + q^{10} p^{x-10}]$ for $x=10, ..., 19$.</p>
+
+                            <strong>(b) Draws Possible: Possible X and P(X ≥ 20)</strong>
+                            <p>Let $p=P(A \text{ wins}), q=P(B \text{ wins}), r=P(\text{Draw})=1-p-q$.<br>
+                            Possible values of X: Since draws don't count towards the 10 wins needed, the game could theoretically continue indefinitely if draws keep occurring. So, X can be $10, 11, 12, ...$ (any integer $\ge 10$).</p>
+                            <p>$P(X \ge 20)$ means the game did not end by the 19th game.<br>
+                            This happens if after 19 games, A has $\le 9$ wins AND B has $\le 9$ wins.<br>
+                            Let $N_A, N_B, N_D$ be the number of A wins, B wins, Draws in 19 games.<br>
+                            $P(X \ge 20) = P(N_A \le 9 \text{ and } N_B \le 9 \text{ after 19 games})$.<br>
+                            This requires summing the multinomial probabilities for all outcomes $(n_A, n_B, n_D)$ such that $n_A \le 9$, $n_B \le 9$, and $n_A+n_B+n_D=19$.<br>
+                            $P(X \ge 20) = \sum_{n_A=0}^{9} \sum_{n_B=0}^{\min(9, 19-n_A)} \frac{19!}{n_A! n_B! (19-n_A-n_B)!} p^{n_A} q^{n_B} r^{19-n_A-n_B}$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>4. Information Operators (Poisson)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A reservation service employs five information operators who receive requests for information independently of one another, each according to a Poisson process with rate α = 2 per minute.<br>
+                        a. What is the probability that during a given 1-min period, the first operator receives no requests?<br>
+                        b. What is the probability that during a given 1-min period, exactly four of the five operators receive no requests?<br>
+                        c. Write an expression for the probability that during a given 1-min period, all of the operators receive exactly the same number of requests.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) $P(N_1=0) = e^{-2} \approx 0.1353$<br>
+                        (b) $P(Y=4) = 5e^{-8}(1-e^{-2}) \approx 0.00145$<br>
+                        (c) $P(\text{All same}) = \sum_{k=0}^{\infty} (\frac{e^{-2} 2^k}{k!})^5 = e^{-10} \sum_{k=0}^{\infty} \frac{32^k}{(k!)^5}$</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $N_i$ = requests for operator i in 1 min. $N_i \sim Poisson(\lambda = \alpha t = 2 \times 1 = 2)$.<br>
+                            $P(N_i = k) = \frac{e^{-2} 2^k}{k!}$. Operators are independent.</p>
+                            <strong>(a) P(first operator receives no requests):</strong>
+                            <p>$P(N_1 = 0) = \frac{e^{-2} 2^0}{0!} = e^{-2} \approx 0.1353$.</p>
+                            <strong>(b) P(exactly 4 operators receive no requests):</strong>
+                            <p>Let Y = number of operators with 0 requests. Y is Binomial.<br>
+                            n=5 trials (operators).<br>
+                            p = P(success) = P(N$_i$=0) = $e^{-2}$.<br>
+                            $Y \sim Bin(n=5, p=e^{-2})$.<br>
+                            We want P(Y=4).<br>
+                            $P(Y=4) = \binom{5}{4} p^4 (1-p)^1 = 5 (e^{-2})^4 (1 - e^{-2})^1$<br>
+                            $= 5 e^{-8} (1 - e^{-2}) \approx 5(0.000335)(0.8647) \approx 0.00145$.</p>
+                            <strong>(c) P(all operators receive same number of requests):</strong>
+                            <p>Let $E_k$ be the event that all 5 operators receive exactly k requests.<br>
+                            $P(E_k) = P(N_1=k \cap \dots \cap N_5=k)$. By independence:<br>
+                            $P(E_k) = [P(N_i=k)]^5 = (\frac{e^{-2} 2^k}{k!})^5$.<br>
+                            The events $E_k$ for $k=0, 1, 2, ...$ are mutually exclusive.<br>
+                            $P(\text{All same}) = \sum_{k=0}^{\infty} P(E_k) = \sum_{k=0}^{\infty} (\frac{e^{-2} 2^k}{k!})^5 = e^{-10} \sum_{k=0}^{\infty} \frac{32^k}{(k!)^5}$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>5. Grasshopper Sampling Region (Poisson)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Grasshoppers are distributed at random in a large field according to a Poisson process with parameter α = 2 per square meter. How large should the radius R of a circular sampling region be taken so that the probability of finding at least one in the region equals 0.99?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The radius R should be approximately 0.856 meters.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Rate $\alpha = 2 / m^2$. Area $A = \pi R^2$.<br>
+                            Let N = number of grasshoppers in region. $N \sim Poisson(\lambda = \alpha A = 2\pi R^2)$.</p>
+                            <p>We want $P(N \ge 1) = 0.99$.<br>
+                            $P(N \ge 1) = 1 - P(N=0)$.<br>
+                            $1 - P(N=0) = 0.99 \implies P(N=0) = 0.01$.</p>
+                            <p>The Poisson pmf gives $P(N=0) = \frac{e^{-\lambda} \lambda^0}{0!} = e^{-\lambda}$.<br>
+                            So, $e^{-\lambda} = 0.01$.<br>
+                            Substitute $\lambda = 2\pi R^2$: $e^{-2\pi R^2} = 0.01$.<br>
+                            Take natural log: $-2\pi R^2 = \ln(0.01)$.<br>
+                            $-2\pi R^2 = -2\ln(10)$.<br>
+                            $\pi R^2 = \ln(10)$.<br>
+                            $R^2 = \frac{\ln(10)}{\pi}$.<br>
+                            $R = \sqrt{\frac{\ln(10)}{\pi}} \approx \sqrt{\frac{2.3026}{3.1416}} \approx \sqrt{0.7329} \approx 0.856$ meters.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>6. Magazine Sales Expectation (Poisson)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A newsstand has ordered five copies of a certain issue of a photography magazine. Let X = the number of individuals who come in to purchase this magazine. If X has a Poisson distribution with parameter μ = 4, what is the expected number of copies that are sold?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The expected number of copies sold is approximately 3.59.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Stock = 5 copies. Demand $X \sim Poisson(\mu=4)$.<br>
+                            Let Y = number sold. $Y = \min(X, 5)$.<br>
+                            We want $E[Y] = E[\min(X, 5)]$.</p>
+                            <p>$E[Y] = \sum_{k=0}^{\infty} \min(k, 5) P(X=k)$<br>
+                            $E[Y] = \sum_{k=0}^{4} k P(X=k) + \sum_{k=5}^{\infty} 5 P(X=k)$<br>
+                            $E[Y] = \sum_{k=1}^{4} k P(X=k) + 5 P(X \ge 5)$.</p>
+                            <p>Calculate probabilities $P(X=k) = \frac{e^{-4} 4^k}{k!}$:<br>
+                            P(X=0) ≈ 0.0183<br>
+                            P(X=1) ≈ 0.0733<br>
+                            P(X=2) ≈ 0.1465<br>
+                            P(X=3) ≈ 0.1954<br>
+                            P(X=4) ≈ 0.1954</p>
+                            <p>$P(X \le 4) \approx 0.0183+0.0733+0.1465+0.1954+0.1954 \approx 0.6289$.<br>
+                            $P(X \ge 5) = 1 - P(X \le 4) \approx 1 - 0.6289 = 0.3711$.</p>
+                            <p>$E[Y] = (1 \times 0.0733) + (2 \times 0.1465) + (3 \times 0.1954) + (4 \times 0.1954) + (5 \times 0.3711)$<br>
+                            $E[Y] \approx 0.0733 + 0.2930 + 0.5862 + 0.7816 + 1.8555$<br>
+                            $E[Y] \approx 3.5896$.</p>
+                            <p>The expected number of copies sold is approx 3.59.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div> <!-- end accordion -->
+
+    <!-- Font Size Slider -->
+    <div class="font-control">
+        <input type="range" id="fontSizeSlider" min="10" max="50" value="16" step="1">
+        <span id="fontSizeValue">16px</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // --- Data for Ratings (Tutorial 5) ---
+        const questionsData = [
+            { lengthRating: 3, complexityRating: 2 }, // Q1
+            { lengthRating: 3, complexityRating: 3 }, // Q2
+            { lengthRating: 4, complexityRating: 3 }, // Q3
+            { lengthRating: 3, complexityRating: 3 }, // Q4
+            { lengthRating: 2, complexityRating: 2 }, // Q5
+            { lengthRating: 3, complexityRating: 2 }  // Q6
+        ];
+
+        // --- Utility Functions ---
+        function generateStars(rating) { const roundedRating = Math.max(1, Math.min(5, Math.round(rating))); let colorClass; if (roundedRating <= 2) { colorClass = 'green'; } else if (roundedRating === 3) { colorClass = 'yellow'; } else { colorClass = 'red'; } let starsHTML = '<span class="stars">'; for (let i = 1; i <= 5; i++) { starsHTML += `<span class="star-${i <= roundedRating ? 'filled ' + colorClass : 'empty'}">${i <= roundedRating ? '★' : '☆'}</span>`; } starsHTML += '</span>'; return starsHTML; }
+        function calculateDifficulty(lengthRating, complexityRating) { const avg = (lengthRating + complexityRating) / 2; return Math.max(1, Math.min(5, Math.round(avg))); }
+        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
+        const mathJaxLoadedPromise = new Promise((resolve) => { if (window.MathJax && window.MathJax.startup) { window.MathJax.startup.promise.then(resolve); } else { window.addEventListener('MathJaxLoaded', resolve, {once: true}); } }); if (document.readyState === "complete" || document.readyState === "interactive") { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); } else { window.addEventListener('load', () => { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); }); }
+        function typesetMath(elements = [document.body]) { console.log("Attempting to typeset math in:", elements); mathJaxLoadedPromise.then(() => { console.log("MathJax confirmed ready, calling typesetPromise."); return MathJax.typesetPromise(elements); }).then(() => { console.log("MathJax typesetting complete for:", elements); }).catch(err => console.error('MathJax Typesetting Error:', err)); }
+
+        // --- Accordion Update Function ---
+         function updateAccordion(contentElement, makeActive) {
+            if (!contentElement) return;
+            const innerContent = contentElement.querySelector('.content-inner');
+            const collapseDelay = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--collapse-delay') || '0.1') * 1000; // Read from CSS var
+
+             if (makeActive) {
+                 // EXPANDING
+                 contentElement.classList.add('active');
+                 typesetMath([innerContent]);
+                 requestAnimationFrame(() => { // Ensure DOM update before measurement
+                    const currentTransition = contentElement.style.transition;
+                     contentElement.style.transition = 'none'; // Temporarily disable transitions for height calculation
+                    const scrollHeight = innerContent.offsetHeight;
+                    const style = window.getComputedStyle(contentElement);
+                    const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                     contentElement.style.maxHeight = totalHeight + "px"; // Set target height
+                    console.log(`Expanding: Calculated totalHeight = ${totalHeight}px`);
+                     requestAnimationFrame(() => { // Re-enable transitions after height is set
+                         contentElement.style.transition = currentTransition;
+                     });
+                });
+            } else {
+                 // CLOSING
+                contentElement.classList.remove('active'); // Starts inner content fade out immediately
+                console.log('Closing: Removed .active class, starting fade/pad collapse.');
+                 setTimeout(() => {
+                    contentElement.style.maxHeight = '0px'; // Start container collapse after delay
+                     console.log(`Closing: Delayed setting max-height=0 by ${collapseDelay}ms`);
+                 }, collapseDelay);
+            }
+         }
+
+        // --- Event Listeners and Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log("DOM Ready - Tutorial 5");
+            const accordionItems = document.querySelectorAll('.accordion-item');
+             const slider = document.getElementById('fontSizeSlider');
+            const sizeValueSpan = document.getElementById('fontSizeValue');
+
+            // --- Font Size Slider ---
+             const handleFontSizeChange = debounce(() => {
+                 console.log("Handling font size change..."); typesetMath(); // Retypeset on resize
+                 // Adjust height of any open accordion items after font size change
+                 accordionItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    if (content.classList.contains('active') && parseFloat(content.style.maxHeight) > 0) {
+                         console.log("Adjusting height for open item:", item);
+                         // Temporarily disable transitions to avoid jumpy resize
+                        const currentTransition = content.style.transition;
+                        content.style.transition = 'none';
+                        content.style.maxHeight = 'none'; // Allow content to reflow naturally
+
+                        requestAnimationFrame(() => { // Measure after reflow
+                            const innerContent = content.querySelector('.content-inner');
+                            const scrollHeight = innerContent.offsetHeight;
+                            const style = window.getComputedStyle(content);
+                            const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                            content.style.maxHeight = totalHeight + 'px'; // Apply new calculated height
+
+                            requestAnimationFrame(() => { // Restore transitions
+                                content.style.transition = currentTransition;
+                            });
+                            console.log("Font Change - Adjusted height to:", totalHeight);
+                        });
+                     }
+                 });
+             }, 250); // Debounce typesetting/height adjustment
+
+             slider.addEventListener('input', () => {
+                 const newSize = slider.value;
+                 document.documentElement.style.setProperty('--base-font-size', newSize + 'px');
+                 sizeValueSpan.textContent = newSize + 'px';
+                 handleFontSizeChange(); // Call debounced handler
+             });
+
+            // --- Accordion Logic ---
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const innerContent = content.querySelector('.content-inner');
+
+                // Ratings setup
+                const difficultyRatingSpan = header.querySelector('.difficulty-rating');
+                const lengthRatingSpan = content.querySelector('.length-rating');
+                const complexityRatingSpan = content.querySelector('.complexity-rating');
+                // Ensure index is within bounds of questionsData
+                if (index < questionsData.length) {
+                    const { lengthRating, complexityRating } = questionsData[index];
+                    difficultyRatingSpan.innerHTML = generateStars(calculateDifficulty(lengthRating, complexityRating));
+                    if (lengthRatingSpan) lengthRatingSpan.innerHTML = generateStars(lengthRating);
+                    if (complexityRatingSpan) complexityRatingSpan.innerHTML = generateStars(complexityRating);
+                } else {
+                    console.warn(`No data found for question index ${index}`);
+                }
+
+                 // Cache blocks & hide initially
+                 const questionBlock = innerContent.querySelector('.question-block');
+                 const ratingsBlock = innerContent.querySelector('.ratings-block');
+                 const finalAnswerBlock = innerContent.querySelector('.final-answer-block');
+                 const solutionBlock = innerContent.querySelector('.solution-block');
+                 [questionBlock, ratingsBlock, finalAnswerBlock, solutionBlock].forEach(el => {
+                     if (el) el.classList.add('hidden');
+                 });
+
+                 // Click Listener for state transitions
+                 item.addEventListener('click', (event) => {
+                     // Prevent toggle if click is inside the content area (e.g., selecting text)
+                     if (innerContent.contains(event.target)) {
+                         console.log("Clicked inside inner content, ignoring toggle.");
+                         return;
+                     }
+
+                     const currentState = item.getAttribute('data-state');
+                     let nextState;
+
+                     // State machine: collapsed -> state1 (Q+R+A) -> state2 (Q+R+S) -> collapsed
+                     switch (currentState) {
+                         case 'collapsed': nextState = 'state1'; break;
+                         case 'state1':    nextState = 'state2'; break;
+                         case 'state2':    nextState = 'collapsed'; break;
+                         default:          nextState = 'collapsed'; // Fallback
+                     }
+
+                     item.setAttribute('data-state', nextState);
+                     console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
+
+                     // Determine visibility based on the new state
+                     const showQ = nextState !== 'collapsed'; // Question visible in state1 & state2
+                     const showR = nextState !== 'collapsed'; // Ratings visible in state1 & state2
+                     const showA = nextState === 'state1';    // Answer only in state1
+                     const showS = nextState === 'state2';    // Solution only in state2
+
+                     // Toggle visibility classes
+                     if (questionBlock) questionBlock.classList.toggle('hidden', !showQ);
+                     if (ratingsBlock) ratingsBlock.classList.toggle('hidden', !showR);
+                     if (finalAnswerBlock) finalAnswerBlock.classList.toggle('hidden', !showA);
+                     if (solutionBlock) solutionBlock.classList.toggle('hidden', !showS);
+
+                     // Update Accordion Animation/Height
+                     updateAccordion(content, nextState !== 'collapsed');
+                });
+             });
+
+            // Initial Font Size & Log
+            const initialSize = slider.value;
+            document.documentElement.style.setProperty('--base-font-size', initialSize + 'px');
+            sizeValueSpan.textContent = initialSize + 'px';
+            console.log("Initial setup complete.");
+            typesetMath(); // Initial typeset after DOM ready
+
+        }); // End DOMContentLoaded
+
+    </script>
+
+</body>
+</html>

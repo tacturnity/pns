@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en" style="--base-font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - 3</title> <!-- Updated Title -->
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+          options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'], ignoreHtmlClass: 'tex2jax_ignore', processHtmlClass: 'tex2jax_process' },
+          svg: { fontCache: 'global' },
+          startup: { ready: () => { console.log('MathJax ready.'); MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax initial typeset complete.')); } }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* --- START OF FINAL CSS --- */
+        :root {
+            --accent-color: #F08080;
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #555;
+            --header-bg: #2f2f2f;
+            --header-hover-bg: #3f3f3f;
+            --content-bg: #282828;
+            --solution-text-bg: #252525;
+            --slider-track-color: #444; /* Dark track for slider */
+            --base-font-size: 16px;
+            --anim-duration: 0.7s;
+            --content-fade-duration: 0.5s;
+            --collapse-delay: 0.1s;
+            --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
+            /* Star Colors */
+            --color-stars-red: #f1948a;
+            --color-stars-yellow: #f7dc6f;
+            --color-stars-green: #58d68d;
+            --color-stars-grey: #777;
+
+            /* Monospace Font Stack */
+            --monospace-font-stack: 'SF Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: var(--monospace-font-stack); /* Default to monospace */
+            line-height: 1.7;
+            margin: 0; padding: 20px; font-size: var(--base-font-size);
+            transition: font-size 0.2s ease-in-out;
+            padding-bottom: 80px; /* Space for slider */
+            overflow-x: hidden;
+        }
+        h1 {
+            color: var(--accent-color); text-align: center;
+            border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
+            margin-bottom: 30px; font-size: 2.5em;
+            /* Inherits monospace */
+        }
+        .accordion { max-width: 900px; margin: 20px auto; }
+        .accordion-item {
+            border: 1px solid var(--border-color); border-radius: 8px;
+            overflow: hidden; margin-bottom: 25px; background-color: var(--content-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+         .accordion-item:hover {
+            border-color: #777;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .accordion-header {
+            background-color: var(--header-bg);
+            padding: 18px 25px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
+            border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
+        }
+        .accordion-item[data-state="collapsed"] .accordion-header { border-bottom-color: transparent; }
+        .accordion-header:hover { background-color: var(--header-hover-bg); }
+        .accordion-header h2 {
+            margin: 0; font-size: 1.2em; color: var(--text-color);
+            /* Inherits monospace */
+         }
+
+        /* Content Area & Animations */
+        .accordion-content {
+            padding: 0 25px; max-height: 0; overflow: hidden;
+            transition: max-height var(--anim-duration) var(--anim-easing),
+                        padding-top var(--anim-duration) var(--anim-easing),
+                        padding-bottom var(--anim-duration) var(--anim-easing);
+            box-sizing: border-box; position: relative; z-index: 1;
+        }
+        .accordion-content.active { padding-top: 20px; }
+        .content-inner {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity var(--content-fade-duration) var(--anim-easing) 0s,
+                        transform var(--content-fade-duration) var(--anim-easing) 0s;
+            will-change: opacity, transform;
+            padding-bottom: 25px;
+        }
+        .accordion-content.active .content-inner {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: calc(var(--anim-duration) * 0.3);
+            transition-duration: var(--content-fade-duration);
+        }
+
+        /* Content Blocks Structure & Styling */
+        .question-block, .final-answer-block, .ratings-block, .solution-block {
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);
+        }
+        .content-inner > div:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .ratings-block { margin-bottom: 25px !important; padding-bottom: 20px !important; }
+
+        .question-block strong, .final-answer-block strong, .solution-block strong {
+            color: var(--accent-color); display: block; margin-bottom: 8px;
+            font-size: 1.1em;
+            /* Inherits monospace */
+        }
+        .question-block p,
+        .final-answer-block p {
+            font-size: inherit;
+            margin: 5px 0 1em 0;
+            /* Inherits monospace */
+        }
+        /* Code block specific styling */
+        .question-block pre, .solution-text pre {
+            background-color: var(--solution-text-bg); /* Match solution bg */
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px 15px;
+            overflow-x: auto;
+            font-family: var(--monospace-font-stack); /* Ensure monospace */
+            font-size: 0.95em; /* Slightly smaller */
+            white-space: pre; /* Preserve whitespace */
+            margin: 1em 0;
+        }
+        /* Style for simple tables within pre tags */
+        .solution-text table {
+            border-collapse: collapse;
+            margin: 1em 0;
+            font-size: 0.95em; /* Match pre size */
+            width: auto; /* Don't force full width */
+            border: 1px solid var(--border-color);
+        }
+        .solution-text th, .solution-text td {
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            text-align: center; /* Center align table content */
+        }
+        .solution-text th {
+            background-color: var(--header-bg); /* Use header background for table header */
+            font-weight: bold;
+        }
+
+
+        .solution-text {
+            background-color: var(--solution-text-bg); padding: 15px; border-radius: 5px;
+            border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
+            font-family: var(--monospace-font-stack); /* Explicitly set, inherits anyway */
+        }
+        .solution-text p, .solution-text li {
+            margin-bottom: 1em;
+            font-family: inherit; /* Inherit monospace */
+        }
+        .solution-text *:last-child { margin-bottom: 0; }
+        .solution-text ul, .solution-text ol { padding-left: 25px; margin: 0.5em 0 1em 0; }
+        .solution-text > strong {
+            color: var(--text-color); font-size: 1.05em; margin: 15px 0 10px 0;
+            display: block;
+            /* Inherits monospace */
+        }
+        .solution-text > strong:first-of-type { margin-top: 0; }
+
+        /* Star Ratings */
+        .stars { font-size: 1.3em; letter-spacing: 3px; display: inline-block;
+                 font-family: initial; /* Keep default font for star glyphs */
+               }
+        .star-filled.green { color: var(--color-stars-green); }
+        .star-filled.yellow { color: var(--color-stars-yellow); }
+        .star-filled.red { color: var(--color-stars-red); }
+        .star-empty { color: var(--color-stars-grey); }
+        .rating-label {
+            font-weight: bold; color: #bdbdbd; display: inline-block;
+            min-width: 140px; vertical-align: middle;
+            /* Inherits monospace */
+        }
+        .ratings-block .stars { vertical-align: middle; }
+
+        /* Utility & MathJax */
+        .hidden { display: none; }
+        mjx-container {
+            font-size: 1.05em; text-align: left !important;
+            overflow-x: auto; overflow-y: hidden; padding: 2px 0;
+            /* Keep specific math fonts for MathJax */
+            font-family: 'Latin Modern Math', 'STIX Two Math', serif;
+        }
+
+        /* Font Control - Minimalistic */
+        .font-control {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: transparent; /* No background */
+            padding: 0px 20px 15px 20px; /* Spacing */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            border-top: none; /* No border */
+            z-index: 10;
+        }
+        #fontSizeSlider {
+            flex-grow: 1;
+            cursor: pointer;
+            margin: 0 15px;
+            accent-color: var(--accent-color); /* Styles thumb in modern browsers */
+            min-width: 100px;
+            height: 6px; /* Track height */
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* Track Styling */
+        #fontSizeSlider::-webkit-slider-runnable-track {
+            height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        #fontSizeSlider::-moz-range-track {
+             height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        /* Thumb Styling */
+        #fontSizeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default */
+            appearance: none;
+            margin-top: -5px; /* Vertically center (16px thumb on 6px track) */
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%; /* Make it round */
+            cursor: pointer;
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+        #fontSizeSlider::-moz-range-thumb {
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* Remove Firefox border */
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+         /* Optional: Slight scale effect on interaction */
+         #fontSizeSlider:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+         #fontSizeSlider:active::-moz-range-thumb {
+            transform: scale(1.1);
+         }
+
+        #fontSizeValue {
+            min-width: 50px; text-align: right; font-weight: bold;
+            color: var(--text-color); font-size: 12px !important;
+            /* Inherits monospace */
+        }
+        /* --- END OF FINAL CSS --- */
+    </style>
+</head>
+<body>
+
+    <h1>Tutorial - 3</h1>
+
+    <div class="accordion">
+
+        <!-- Question 1 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>1. Card Sum PMF</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Consider a deck consisting of seven cards, marked 1, 2, . . ., 7. Three of these cards are selected at random. Define an random variable W by W = the sum of the resulting numbers, and compute the pmf of W. Then compute μ and σ².</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>PMF p(w): p(6)=1/35, p(7)=1/35, p(8)=2/35, p(9)=3/35, p(10)=4/35, p(11)=4/35, p(12)=5/35, p(13)=4/35, p(14)=4/35, p(15)=3/35, p(16)=2/35, p(17)=1/35, p(18)=1/35.<br>
+                        Mean $\mu = 12$.<br>
+                        Variance $\sigma^2 = 8$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Select 3 cards from {1, 2, 3, 4, 5, 6, 7}. Total combinations = $\binom{7}{3} = 35$.<br>
+                            W = sum of the 3 selected cards.</p>
+                            <strong>Possible Sums (W) and Combinations:</strong>
+                            <ul>
+                                <li>W=6: {1,2,3} (1)</li>
+                                <li>W=7: {1,2,4} (1)</li>
+                                <li>W=8: {1,2,5}, {1,3,4} (2)</li>
+                                <li>W=9: {1,2,6}, {1,3,5}, {2,3,4} (3)</li>
+                                <li>W=10: {1,2,7}, {1,3,6}, {1,4,5}, {2,3,5} (4)</li>
+                                <li>W=11: {1,3,7}, {1,4,6}, {2,3,6}, {2,4,5} (4)</li>
+                                <li>W=12: {1,4,7}, {1,5,6}, {2,3,7}, {2,4,6}, {3,4,5} (5)</li>
+                                <li>W=13: {1,5,7}, {2,4,7}, {2,5,6}, {3,4,6} (4)</li>
+                                <li>W=14: {1,6,7}, {2,5,7}, {3,4,7}, {3,5,6} (4)</li>
+                                <li>W=15: {2,6,7}, {3,5,7}, {4,5,6} (3)</li>
+                                <li>W=16: {3,6,7}, {4,5,7} (2)</li>
+                                <li>W=17: {4,6,7} (1)</li>
+                                <li>W=18: {5,6,7} (1)</li>
+                            </ul>
+                            <strong>PMF Table p(w) = Frequency / 35:</strong>
+                            <table>
+                                <thead><tr><th>w</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th></tr></thead>
+                                <tbody><tr><td>p(w)</td><td>1/35</td><td>1/35</td><td>2/35</td><td>3/35</td><td>4/35</td><td>4/35</td><td>5/35</td><td>4/35</td><td>4/35</td><td>3/35</td><td>2/35</td><td>1/35</td><td>1/35</td></tr></tbody>
+                            </table>
+                            <strong>Mean (μ):</strong>
+                            <p>$\mu = E[W] = \sum w \cdot p(w)$<br>
+                            $= \frac{1}{35} [6(1)+...+18(1)] = \frac{420}{35} = 12$.<br>
+                            (Alternatively, avg card value = 4, expected sum = $3 \times 4 = 12$).</p>
+                            <strong>Variance (σ²):</strong>
+                            <p>$E[W^2] = \sum w^2 \cdot p(w)$<br>
+                            $= \frac{1}{35} [36(1)+49(1)+64(2)+...+324(1)] = \frac{5320}{35} = 152$.<br>
+                            $\sigma^2 = Var(W) = E[W^2] - (E[W])^2 = 152 - (12)^2 = 152 - 144 = 8$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>2. Airline Overbooking</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Airlines sometimes overbook flights. Suppose that for a plane with 50 seats, 55 passengers have tickets. Define the random variable Y as the number of ticketed passengers who actually show up for the flight. The probability mass function of Y appears in the accompanying table.</p>
+                        <pre>
+  y      45     46     47     48     49     50     51     52     53     54     55
+---------------------------------------------------------------------------------
+p(y)   0.05   0.10   0.12   0.14   0.25   0.17   0.06   0.05   0.03   0.02   0.01
+                        </pre>
+                        <p>(a) What is the probability that the flight will accommodate all ticketed passengers who show up?<br>
+                        (b) What is the probability that not all ticketed passengers who show up can be accommodated?<br>
+                        (c) If you are the first person on the standby list, what is the probability that you will be able to take the flight? What is this probability if you are the third person on the standby list?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) P(Accommodate all) = P(Y ≤ 50) = 0.83<br>
+                        (b) P(Not accommodate all) = P(Y > 50) = 0.17<br>
+                        (c) P(1st standby flies) = P(Y ≤ 49) = 0.66. P(3rd standby flies) = P(Y ≤ 47) = 0.27.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Plane has 50 seats. Y = number showing up.</p>
+                            <strong>(a) P(Accommodate all) = P(Y ≤ 50):</strong>
+                            <p>$P(Y \le 50) = p(45)+p(46)+p(47)+p(48)+p(49)+p(50)$<br>
+                            $= 0.05 + 0.10 + 0.12 + 0.14 + 0.25 + 0.17 = 0.83$.</p>
+                            <strong>(b) P(Not accommodate all) = P(Y > 50):</strong>
+                            <p>$P(Y > 50) = p(51)+p(52)+p(53)+p(54)+p(55)$<br>
+                            $= 0.06 + 0.05 + 0.03 + 0.02 + 0.01 = 0.17$.<br>
+                            (Or $1 - P(Y \le 50) = 1 - 0.83 = 0.17$).</p>
+                            <strong>(c) Probabilities for standby passengers:</strong>
+                            <p>1st standby flies if $Y \le 49$:<br>
+                            $P(Y \le 49) = p(45)+p(46)+p(47)+p(48)+p(49)$<br>
+                            $= 0.05 + 0.10 + 0.12 + 0.14 + 0.25 = 0.66$.</p>
+                            <p>3rd standby flies if $Y \le 47$ (at least 3 empty seats):<br>
+                            $P(Y \le 47) = p(45)+p(46)+p(47)$<br>
+                            $= 0.05 + 0.10 + 0.12 = 0.27$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>3. Dice Toss Maximum (PMF & CDF)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Two fair six-sided dice are tossed independently. Let M=the maximum of the two tosses (so M(1,5) = 5, M(3,3) = 3, etc.).<br>
+                        (a) What is the pmf of M? [Hint: First determine p(1), then p(2), and so on.]<br>
+                        (b) Determine the cdf of M and graph it.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) PMF p(m): p(1)=1/36, p(2)=3/36, p(3)=5/36, p(4)=7/36, p(5)=9/36, p(6)=11/36.<br>
+                        (b) CDF F(m): F(m)=0 for m&lt;1; F(m)=1/36 for 1≤m&lt;2; F(m)=4/36 for 2≤m&lt;3; F(m)=9/36 for 3≤m&lt;4; F(m)=16/36 for 4≤m&lt;5; F(m)=25/36 for 5≤m&lt;6; F(m)=1 for m≥6. (Graph is a step function).</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $D_1, D_2$ be outcomes of two dice. $M = \max(D_1, D_2)$. Total outcomes = 36.</p>
+                            <strong>(a) PMF of M:</strong>
+                            <p>Use $p(m) = P(M=m) = P(M \le m) - P(M \le m-1)$.<br>
+                            $P(M \le m) = P(D_1 \le m \text{ and } D_2 \le m) = P(D_1 \le m) P(D_2 \le m) = (m/6)(m/6) = m^2/36$.<br>
+                            $p(1) = P(M \le 1) - P(M \le 0) = 1^2/36 - 0 = 1/36$.<br>
+                            $p(2) = P(M \le 2) - P(M \le 1) = 4/36 - 1/36 = 3/36$.<br>
+                            $p(3) = P(M \le 3) - P(M \le 2) = 9/36 - 4/36 = 5/36$.<br>
+                            $p(4) = P(M \le 4) - P(M \le 3) = 16/36 - 9/36 = 7/36$.<br>
+                            $p(5) = P(M \le 5) - P(M \le 4) = 25/36 - 16/36 = 9/36$.<br>
+                            $p(6) = P(M \le 6) - P(M \le 5) = 36/36 - 25/36 = 11/36$.</p>
+                            <table>
+                                <thead><tr><th>m</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead>
+                                <tbody><tr><td>p(m)</td><td>1/36</td><td>3/36</td><td>5/36</td><td>7/36</td><td>9/36</td><td>11/36</td></tr></tbody>
+                            </table>
+                            <strong>(b) CDF of M and graph:</strong>
+                            <p>$F(m) = P(M \le m) = m^2/36$ for $m \in \{1, 2, 3, 4, 5, 6\}$.</p>
+                            $F(m) = \begin{cases} 0 & m < 1 \\ 1/36 & 1 \le m < 2 \\ 4/36 & 2 \le m < 3 \\ 9/36 & 3 \le m < 4 \\ 16/36 & 4 \le m < 5 \\ 25/36 & 5 \le m < 6 \\ 1 & m \ge 6 \end{cases}$
+                            <p>Graph: A step function starting at 0, jumping at each integer 1 through 6 to the values 1/36, 4/36, 9/36, 16/36, 25/36, and 1 respectively.</p>
+                            <pre>
+  F(m)
+1.0 +-----------------------*
+    |                       |
+    |                  o----*
+25/36 +-------------*----|
+    |             |      |
+    |             |      |
+16/36 +--------*----|------|
+    |        |         |      |
+    |        |         |      |
+ 9/36 +----*---|---------|------|
+    |    |       |         |      |
+    |    |       |         |      |
+ 4/36 +-*--|-------|---------|------|
+    | |          |         |      |
+ 1/36 *-|----------|---------|------|
+    |              |         |      |
+0.0 +-+--+--+--+--+--+--+--> m
+      1  2  3  4  5  6
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>4. Investment Seminar Attendance</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Three couples and two single individuals have been invited to an investment seminar and have agreed to attend. Suppose the probability that any particular couple or individual arrives late is .4 (a couple will travel together in the same vehicle, so either both people will be on time or else both will arrive late). Assume that different couples and individuals are on time or late independently of one another. Let X =the number of people who arrive late for the seminar.<br>
+                        (a) Determine the probability mass function of X. [Hint: label the three couples #1, #2, and #3 and the two individuals #4 and #5.]<br>
+                        (b) Obtain the cumulative distribution function of X, and use it to calculate P(2 < X ≤ 6).</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) PMF p(x): p(0)=0.07776, p(1)=0.10368, p(2)=0.19008, p(3)=0.20736, p(4)=0.17280, p(5)=0.13824, p(6)=0.06912, p(7)=0.03072, p(8)=0.01024.<br>
+                        (b) CDF F(x) derived in solution. $P(2 < X \le 6) = F(6) - F(2) = 0.95904 - 0.37152 = 0.58752$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let $L_C$ = number of late couples, $L_S$ = number of late singles.<br>
+                            $L_C \sim Bin(n=3, p=0.4)$, $L_S \sim Bin(n=2, p=0.4)$. $L_C, L_S$ independent.<br>
+                            $X = 2 L_C + L_S$.</p>
+                            <strong>(a) PMF of X:</strong>
+                            <p>Calculate $P(L_C=k)$ for $k=0,1,2,3$: 0.216, 0.432, 0.288, 0.064.<br>
+                            Calculate $P(L_S=j)$ for $j=0,1,2$: 0.36, 0.48, 0.16.</p>
+                            <p>$p(x) = P(X=x) = \sum_{k,j: 2k+j=x} P(L_C=k)P(L_S=j)$.<br>
+                            p(0) = P(k=0,j=0) = 0.216*0.36 = 0.07776<br>
+                            p(1) = P(k=0,j=1) = 0.216*0.48 = 0.10368<br>
+                            p(2) = P(k=0,j=2) + P(k=1,j=0) = (0.216*0.16)+(0.432*0.36) = 0.03456+0.15552 = 0.19008<br>
+                            p(3) = P(k=1,j=1) = 0.432*0.48 = 0.20736<br>
+                            p(4) = P(k=1,j=2) + P(k=2,j=0) = (0.432*0.16)+(0.288*0.36) = 0.06912+0.10368 = 0.17280<br>
+                            p(5) = P(k=2,j=1) = 0.288*0.48 = 0.13824<br>
+                            p(6) = P(k=2,j=2) + P(k=3,j=0) = (0.288*0.16)+(0.064*0.36) = 0.04608+0.02304 = 0.06912<br>
+                            p(7) = P(k=3,j=1) = 0.064*0.48 = 0.03072<br>
+                            p(8) = P(k=3,j=2) = 0.064*0.16 = 0.01024</p>
+                            <table>
+                                <thead><tr><th>x</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr></thead>
+                                <tbody><tr><td>p(x)</td><td>.07776</td><td>.10368</td><td>.19008</td><td>.20736</td><td>.17280</td><td>.13824</td><td>.06912</td><td>.03072</td><td>.01024</td></tr></tbody>
+                            </table>
+                            <strong>(b) CDF and P(2 < X ≤ 6):</strong>
+                            <p>CDF $F(x) = P(X \le x)$:<br>
+                            F(0)=0.07776, F(1)=0.18144, F(2)=0.37152, F(3)=0.57888,<br>
+                            F(4)=0.75168, F(5)=0.88992, F(6)=0.95904, F(7)=0.98976, F(8)=1.00000.</p>
+                            <p>$P(2 < X \le 6) = F(6) - F(2)$<br>
+                            $= 0.95904 - 0.37152 = 0.58752$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>5. Magazine Ordering Decision</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A small market orders copies of a certain magazine for its magazine rack each week. Let X =demand for the magazine, with pmf</p>
+                        <pre>
+  x       1     2     3     4     5     6
+-------------------------------------------
+ p(x)   1/15  2/15  3/15  4/15  3/15  2/15
+                        </pre>
+                        <p>Suppose the store owner actually pays $2.00 for each copy of the magazine and the price to customers is $4.00. If magazines left at the end of the week have no salvage value, is it better to order three or four copies of the magazine?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>It is better to order four copies, as the expected net revenue ($E[R_4] \approx \$5.33$) is higher than for three copies ($E[R_3] \approx \$4.93$).</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Cost C=$2.00, Price P=$4.00. N=copies ordered. X=demand.<br>
+                            Net Revenue R = $4 \times \min(X, N) - 2 \times N$.</p>
+                            <strong>Case N=3 (Order 3 copies):</strong> Cost = $6.
+                            <p>R$_3$(X): -2 (if X=1), 2 (if X=2), 6 (if X=3,4,5,6).<br>
+                            E[R$_3$] = $\sum R_3(x)p(x)$<br>
+                            $= (-2)(1/15) + (2)(2/15) + (6)(3/15) + (6)(4/15) + (6)(3/15) + (6)(2/15)$<br>
+                            $= \frac{1}{15}[-2+4+18+24+18+12] = \frac{74}{15} \approx 4.933$.</p>
+                            <strong>Case N=4 (Order 4 copies):</strong> Cost = $8.
+                            <p>R$_4$(X): -4 (if X=1), 0 (if X=2), 4 (if X=3), 8 (if X=4,5,6).<br>
+                            E[R$_4$] = $\sum R_4(x)p(x)$<br>
+                            $= (-4)(1/15) + (0)(2/15) + (4)(3/15) + (8)(4/15) + (8)(3/15) + (8)(2/15)$<br>
+                            $= \frac{1}{15}[-4+0+12+32+24+16] = \frac{80}{15} \approx 5.333$.</p>
+                            <strong>Comparison:</strong>
+                            <p>Since $E[R_4] (5.333) > E[R_3] (4.933)$, it is better to order 4 copies.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div> <!-- end accordion -->
+
+    <!-- Font Size Slider -->
+    <div class="font-control">
+        <input type="range" id="fontSizeSlider" min="10" max="50" value="16" step="1">
+        <span id="fontSizeValue">16px</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // --- Data for Ratings (Tutorial 3) ---
+        const questionsData = [
+            { lengthRating: 4, complexityRating: 3 }, // Q1
+            { lengthRating: 3, complexityRating: 1 }, // Q2
+            { lengthRating: 3, complexityRating: 2 }, // Q3
+            { lengthRating: 5, complexityRating: 3 }, // Q4
+            { lengthRating: 4, complexityRating: 2 }  // Q5
+        ];
+
+        // --- Utility Functions ---
+        function generateStars(rating) { const roundedRating = Math.max(1, Math.min(5, Math.round(rating))); let colorClass; if (roundedRating <= 2) { colorClass = 'green'; } else if (roundedRating === 3) { colorClass = 'yellow'; } else { colorClass = 'red'; } let starsHTML = '<span class="stars">'; for (let i = 1; i <= 5; i++) { starsHTML += `<span class="star-${i <= roundedRating ? 'filled ' + colorClass : 'empty'}">${i <= roundedRating ? '★' : '☆'}</span>`; } starsHTML += '</span>'; return starsHTML; }
+        function calculateDifficulty(lengthRating, complexityRating) { const avg = (lengthRating + complexityRating) / 2; return Math.max(1, Math.min(5, Math.round(avg))); }
+        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
+        const mathJaxLoadedPromise = new Promise((resolve) => { if (window.MathJax && window.MathJax.startup) { window.MathJax.startup.promise.then(resolve); } else { window.addEventListener('MathJaxLoaded', resolve, {once: true}); } }); if (document.readyState === "complete" || document.readyState === "interactive") { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); } else { window.addEventListener('load', () => { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); }); }
+        function typesetMath(elements = [document.body]) { console.log("Attempting to typeset math in:", elements); mathJaxLoadedPromise.then(() => { console.log("MathJax confirmed ready, calling typesetPromise."); return MathJax.typesetPromise(elements); }).then(() => { console.log("MathJax typesetting complete for:", elements); }).catch(err => console.error('MathJax Typesetting Error:', err)); }
+
+        // --- Accordion Update Function ---
+         function updateAccordion(contentElement, makeActive) {
+            if (!contentElement) return;
+            const innerContent = contentElement.querySelector('.content-inner');
+            const collapseDelay = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--collapse-delay') || '0.1') * 1000; // Read from CSS var
+
+             if (makeActive) {
+                 // EXPANDING
+                 contentElement.classList.add('active');
+                 typesetMath([innerContent]);
+                 requestAnimationFrame(() => { // Ensure DOM update before measurement
+                    const currentTransition = contentElement.style.transition;
+                     contentElement.style.transition = 'none'; // Temporarily disable transitions for height calculation
+                    const scrollHeight = innerContent.offsetHeight;
+                    const style = window.getComputedStyle(contentElement);
+                    const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                     contentElement.style.maxHeight = totalHeight + "px"; // Set target height
+                    console.log(`Expanding: Calculated totalHeight = ${totalHeight}px`);
+                     requestAnimationFrame(() => { // Re-enable transitions after height is set
+                         contentElement.style.transition = currentTransition;
+                     });
+                });
+            } else {
+                 // CLOSING
+                contentElement.classList.remove('active'); // Starts inner content fade out immediately
+                console.log('Closing: Removed .active class, starting fade/pad collapse.');
+                 setTimeout(() => {
+                    contentElement.style.maxHeight = '0px'; // Start container collapse after delay
+                     console.log(`Closing: Delayed setting max-height=0 by ${collapseDelay}ms`);
+                 }, collapseDelay);
+            }
+         }
+
+        // --- Event Listeners and Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log("DOM Ready - Tutorial 3");
+            const accordionItems = document.querySelectorAll('.accordion-item');
+             const slider = document.getElementById('fontSizeSlider');
+            const sizeValueSpan = document.getElementById('fontSizeValue');
+
+            // --- Font Size Slider ---
+             const handleFontSizeChange = debounce(() => {
+                 console.log("Handling font size change..."); typesetMath(); // Retypeset on resize
+                 // Adjust height of any open accordion items after font size change
+                 accordionItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    if (content.classList.contains('active') && parseFloat(content.style.maxHeight) > 0) {
+                         console.log("Adjusting height for open item:", item);
+                         // Temporarily disable transitions to avoid jumpy resize
+                        const currentTransition = content.style.transition;
+                        content.style.transition = 'none';
+                        content.style.maxHeight = 'none'; // Allow content to reflow naturally
+
+                        requestAnimationFrame(() => { // Measure after reflow
+                            const innerContent = content.querySelector('.content-inner');
+                            const scrollHeight = innerContent.offsetHeight;
+                            const style = window.getComputedStyle(content);
+                            const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                            content.style.maxHeight = totalHeight + 'px'; // Apply new calculated height
+
+                            requestAnimationFrame(() => { // Restore transitions
+                                content.style.transition = currentTransition;
+                            });
+                            console.log("Font Change - Adjusted height to:", totalHeight);
+                        });
+                     }
+                 });
+             }, 250); // Debounce typesetting/height adjustment
+
+             slider.addEventListener('input', () => {
+                 const newSize = slider.value;
+                 document.documentElement.style.setProperty('--base-font-size', newSize + 'px');
+                 sizeValueSpan.textContent = newSize + 'px';
+                 handleFontSizeChange(); // Call debounced handler
+             });
+
+            // --- Accordion Logic ---
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const innerContent = content.querySelector('.content-inner');
+
+                // Ratings setup
+                const difficultyRatingSpan = header.querySelector('.difficulty-rating');
+                const lengthRatingSpan = content.querySelector('.length-rating');
+                const complexityRatingSpan = content.querySelector('.complexity-rating');
+                // Ensure index is within bounds of questionsData
+                if (index < questionsData.length) {
+                    const { lengthRating, complexityRating } = questionsData[index];
+                    difficultyRatingSpan.innerHTML = generateStars(calculateDifficulty(lengthRating, complexityRating));
+                    if (lengthRatingSpan) lengthRatingSpan.innerHTML = generateStars(lengthRating);
+                    if (complexityRatingSpan) complexityRatingSpan.innerHTML = generateStars(complexityRating);
+                } else {
+                    console.warn(`No data found for question index ${index}`);
+                }
+
+                 // Cache blocks & hide initially
+                 const questionBlock = innerContent.querySelector('.question-block');
+                 const ratingsBlock = innerContent.querySelector('.ratings-block');
+                 const finalAnswerBlock = innerContent.querySelector('.final-answer-block');
+                 const solutionBlock = innerContent.querySelector('.solution-block');
+                 [questionBlock, ratingsBlock, finalAnswerBlock, solutionBlock].forEach(el => {
+                     if (el) el.classList.add('hidden');
+                 });
+
+                 // Click Listener for state transitions
+                 item.addEventListener('click', (event) => {
+                     // Prevent toggle if click is inside the content area (e.g., selecting text)
+                     if (innerContent.contains(event.target)) {
+                         console.log("Clicked inside inner content, ignoring toggle.");
+                         return;
+                     }
+
+                     const currentState = item.getAttribute('data-state');
+                     let nextState;
+
+                     // State machine: collapsed -> state1 (Q+R+A) -> state2 (Q+R+S) -> collapsed
+                     switch (currentState) {
+                         case 'collapsed': nextState = 'state1'; break;
+                         case 'state1':    nextState = 'state2'; break;
+                         case 'state2':    nextState = 'collapsed'; break;
+                         default:          nextState = 'collapsed'; // Fallback
+                     }
+
+                     item.setAttribute('data-state', nextState);
+                     console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
+
+                     // Determine visibility based on the new state
+                     const showQ = nextState !== 'collapsed'; // Question visible in state1 & state2
+                     const showR = nextState !== 'collapsed'; // Ratings visible in state1 & state2
+                     const showA = nextState === 'state1';    // Answer only in state1
+                     const showS = nextState === 'state2';    // Solution only in state2
+
+                     // Toggle visibility classes
+                     if (questionBlock) questionBlock.classList.toggle('hidden', !showQ);
+                     if (ratingsBlock) ratingsBlock.classList.toggle('hidden', !showR);
+                     if (finalAnswerBlock) finalAnswerBlock.classList.toggle('hidden', !showA);
+                     if (solutionBlock) solutionBlock.classList.toggle('hidden', !showS);
+
+                     // Update Accordion Animation/Height
+                     updateAccordion(content, nextState !== 'collapsed');
+                });
+             });
+
+            // Initial Font Size & Log
+            const initialSize = slider.value;
+            document.documentElement.style.setProperty('--base-font-size', initialSize + 'px');
+            sizeValueSpan.textContent = initialSize + 'px';
+            console.log("Initial setup complete.");
+            typesetMath(); // Initial typeset after DOM ready
+
+        }); // End DOMContentLoaded
+
+    </script>
+
+</body>
+</html>

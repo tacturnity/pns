@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en" style="--base-font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - 6</title> <!-- Updated Title -->
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+          options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'], ignoreHtmlClass: 'tex2jax_ignore', processHtmlClass: 'tex2jax_process' },
+          svg: { fontCache: 'global' },
+          startup: { ready: () => { console.log('MathJax ready.'); MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax initial typeset complete.')); } }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* --- START OF FINAL CSS --- */
+        :root {
+            --accent-color: #F08080;
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #555;
+            --header-bg: #2f2f2f;
+            --header-hover-bg: #3f3f3f;
+            --content-bg: #282828;
+            --solution-text-bg: #252525;
+            --slider-track-color: #444; /* Dark track for slider */
+            --base-font-size: 16px;
+            --anim-duration: 0.7s;
+            --content-fade-duration: 0.5s;
+            --collapse-delay: 0.1s;
+            --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
+            /* Star Colors */
+            --color-stars-red: #f1948a;
+            --color-stars-yellow: #f7dc6f;
+            --color-stars-green: #58d68d;
+            --color-stars-grey: #777;
+
+            /* Monospace Font Stack */
+            --monospace-font-stack: 'SF Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: var(--monospace-font-stack); /* Default to monospace */
+            line-height: 1.7;
+            margin: 0; padding: 20px; font-size: var(--base-font-size);
+            transition: font-size 0.2s ease-in-out;
+            padding-bottom: 80px; /* Space for slider */
+            overflow-x: hidden;
+        }
+        h1 {
+            color: var(--accent-color); text-align: center;
+            border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
+            margin-bottom: 30px; font-size: 2.5em;
+            /* Inherits monospace */
+        }
+        .accordion { max-width: 900px; margin: 20px auto; }
+        .accordion-item {
+            border: 1px solid var(--border-color); border-radius: 8px;
+            overflow: hidden; margin-bottom: 25px; background-color: var(--content-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+         .accordion-item:hover {
+            border-color: #777;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .accordion-header {
+            background-color: var(--header-bg);
+            padding: 18px 25px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
+            border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
+        }
+        .accordion-item[data-state="collapsed"] .accordion-header { border-bottom-color: transparent; }
+        .accordion-header:hover { background-color: var(--header-hover-bg); }
+        .accordion-header h2 {
+            margin: 0; font-size: 1.2em; color: var(--text-color);
+            /* Inherits monospace */
+         }
+
+        /* Content Area & Animations */
+        .accordion-content {
+            padding: 0 25px; max-height: 0; overflow: hidden;
+            transition: max-height var(--anim-duration) var(--anim-easing),
+                        padding-top var(--anim-duration) var(--anim-easing),
+                        padding-bottom var(--anim-duration) var(--anim-easing);
+            box-sizing: border-box; position: relative; z-index: 1;
+        }
+        .accordion-content.active { padding-top: 20px; }
+        .content-inner {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity var(--content-fade-duration) var(--anim-easing) 0s,
+                        transform var(--content-fade-duration) var(--anim-easing) 0s;
+            will-change: opacity, transform;
+            padding-bottom: 25px;
+        }
+        .accordion-content.active .content-inner {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: calc(var(--anim-duration) * 0.3);
+            transition-duration: var(--content-fade-duration);
+        }
+
+        /* Content Blocks Structure & Styling */
+        .question-block, .final-answer-block, .ratings-block, .solution-block {
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);
+        }
+        .content-inner > div:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .ratings-block { margin-bottom: 25px !important; padding-bottom: 20px !important; }
+
+        .question-block strong, .final-answer-block strong, .solution-block strong {
+            color: var(--accent-color); display: block; margin-bottom: 8px;
+            font-size: 1.1em;
+            /* Inherits monospace */
+        }
+        .question-block p,
+        .final-answer-block p {
+            font-size: inherit;
+            margin: 5px 0 1em 0;
+            /* Inherits monospace */
+        }
+        /* Code block specific styling */
+        .question-block pre, .solution-text pre {
+            background-color: var(--solution-text-bg); /* Match solution bg */
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px 15px;
+            overflow-x: auto;
+            font-family: var(--monospace-font-stack); /* Ensure monospace */
+            font-size: 0.95em; /* Slightly smaller */
+            white-space: pre; /* Preserve whitespace */
+            margin: 1em 0;
+        }
+        /* Style for simple tables within pre tags */
+        .solution-text table {
+            border-collapse: collapse;
+            margin: 1em 0;
+            font-size: 0.95em; /* Match pre size */
+            width: auto; /* Don't force full width */
+            border: 1px solid var(--border-color);
+        }
+        .solution-text th, .solution-text td {
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            text-align: center; /* Center align table content */
+        }
+        .solution-text th {
+            background-color: var(--header-bg); /* Use header background for table header */
+            font-weight: bold;
+        }
+
+
+        .solution-text {
+            background-color: var(--solution-text-bg); padding: 15px; border-radius: 5px;
+            border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
+            font-family: var(--monospace-font-stack); /* Explicitly set, inherits anyway */
+        }
+        .solution-text p, .solution-text li {
+            margin-bottom: 1em;
+            font-family: inherit; /* Inherit monospace */
+        }
+        .solution-text *:last-child { margin-bottom: 0; }
+        .solution-text ul, .solution-text ol { padding-left: 25px; margin: 0.5em 0 1em 0; }
+        .solution-text > strong {
+            color: var(--text-color); font-size: 1.05em; margin: 15px 0 10px 0;
+            display: block;
+            /* Inherits monospace */
+        }
+        .solution-text > strong:first-of-type { margin-top: 0; }
+
+        /* Star Ratings */
+        .stars { font-size: 1.3em; letter-spacing: 3px; display: inline-block;
+                 font-family: initial; /* Keep default font for star glyphs */
+               }
+        .star-filled.green { color: var(--color-stars-green); }
+        .star-filled.yellow { color: var(--color-stars-yellow); }
+        .star-filled.red { color: var(--color-stars-red); }
+        .star-empty { color: var(--color-stars-grey); }
+        .rating-label {
+            font-weight: bold; color: #bdbdbd; display: inline-block;
+            min-width: 140px; vertical-align: middle;
+            /* Inherits monospace */
+        }
+        .ratings-block .stars { vertical-align: middle; }
+
+        /* Utility & MathJax */
+        .hidden { display: none; }
+        mjx-container {
+            font-size: 1.05em; text-align: left !important;
+            overflow-x: auto; overflow-y: hidden; padding: 2px 0;
+            /* Keep specific math fonts for MathJax */
+            font-family: 'Latin Modern Math', 'STIX Two Math', serif;
+        }
+
+        /* Font Control - Minimalistic */
+        .font-control {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: transparent; /* No background */
+            padding: 0px 20px 15px 20px; /* Spacing */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            border-top: none; /* No border */
+            z-index: 10;
+        }
+        #fontSizeSlider {
+            flex-grow: 1;
+            cursor: pointer;
+            margin: 0 15px;
+            accent-color: var(--accent-color); /* Styles thumb in modern browsers */
+            min-width: 100px;
+            height: 6px; /* Track height */
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* Track Styling */
+        #fontSizeSlider::-webkit-slider-runnable-track {
+            height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        #fontSizeSlider::-moz-range-track {
+             height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        /* Thumb Styling */
+        #fontSizeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default */
+            appearance: none;
+            margin-top: -5px; /* Vertically center (16px thumb on 6px track) */
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%; /* Make it round */
+            cursor: pointer;
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+        #fontSizeSlider::-moz-range-thumb {
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* Remove Firefox border */
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+         /* Optional: Slight scale effect on interaction */
+         #fontSizeSlider:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+         #fontSizeSlider:active::-moz-range-thumb {
+            transform: scale(1.1);
+         }
+
+        #fontSizeValue {
+            min-width: 50px; text-align: right; font-weight: bold;
+            color: var(--text-color); font-size: 12px !important;
+            /* Inherits monospace */
+        }
+        /* --- END OF FINAL CSS --- */
+    </style>
+</head>
+<body>
+
+    <h1>Tutorial - 6</h1>
+
+    <div class="accordion">
+
+        <!-- Question 1 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>1. Hydraulic Component Failure Time (PDF/CDF)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Let X denote the time to failure (in years) of a certain hydraulic component. Suppose the pdf of X is $f(x) = \frac{32}{(x+4)^3}$ for x > 0, and f(x) = 0 otherwise.<br>
+                        (a) Verify that f(x) is a legitimate pdf.<br>
+                        (b) Determine the cdf.<br>
+                        (c) Use the result of part (b) to calculate the probability that time to failure is between 2 and 5 years.<br>
+                        (d) What is the expected time to failure?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) Verified in solution (f(x)≥0 and integrates to 1).<br>
+                        (b) $F(x) = 1 - \frac{16}{(x+4)^2}$ for $x>0$, and 0 otherwise.<br>
+                        (c) $P(2 \le X \le 5) = 20/81 \approx 0.2469$.<br>
+                        (d) $E[X] = 4$ years.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>$f(x) = 32(x+4)^{-3}$ for $x > 0$.</p>
+                            <strong>(a) Verify PDF:</strong>
+                            <p>1. $f(x) > 0$ for $x>0$ since $x+4>0$ and $32>0$. $f(x)=0$ otherwise. So $f(x) \ge 0$.<br>
+                            2. $\int_{0}^{\infty} 32(x+4)^{-3} dx$. Let $u=x+4, du=dx$.<br>
+                            $\int_{4}^{\infty} 32u^{-3} du = [-16u^{-2}]_{4}^{\infty} = [\frac{-16}{u^2}]_{4}^{\infty} = 0 - (\frac{-16}{16}) = 1$. Verified.</p>
+                            <strong>(b) Determine CDF:</strong>
+                            <p>For $x>0$, $F(x) = \int_{0}^{x} 32(t+4)^{-3} dt$. Let $u=t+4$.<br>
+                            $F(x) = \int_{4}^{x+4} 32u^{-3} du = [\frac{-16}{u^2}]_{4}^{x+4} = \frac{-16}{(x+4)^2} - (\frac{-16}{16}) = 1 - \frac{16}{(x+4)^2}$.<br>
+                            $F(x) = \begin{cases} 0 & x \le 0 \\ 1 - 16/(x+4)^2 & x > 0 \end{cases}$</p>
+                            <strong>(c) P(2 ≤ X ≤ 5):</strong>
+                            <p>$P(2 \le X \le 5) = F(5) - F(2)$.<br>
+                            $F(5) = 1 - 16/(5+4)^2 = 1 - 16/81 = 65/81$.<br>
+                            $F(2) = 1 - 16/(2+4)^2 = 1 - 16/36 = 1 - 4/9 = 5/9$.<br>
+                            $P(2 \le X \le 5) = 65/81 - 5/9 = 65/81 - 45/81 = 20/81 \approx 0.2469$.</p>
+                            <strong>(d) Expected time to failure E[X]:</strong>
+                            <p>$E[X] = \int_{0}^{\infty} x f(x) dx = \int_{0}^{\infty} x \frac{32}{(x+4)^3} dx$.<br>
+                            Let $u=x+4 \implies x=u-4, du=dx$.<br>
+                            $E[X] = \int_{4}^{\infty} \frac{32(u-4)}{u^3} du = 32 \int_{4}^{\infty} (u^{-2} - 4u^{-3}) du$<br>
+                            $= 32 [ -u^{-1} + 2u^{-2} ]_{4}^{\infty} = 32 [ -\frac{1}{u} + \frac{2}{u^2} ]_{4}^{\infty}$<br>
+                            $= 32 [ (0) - (-\frac{1}{4} + \frac{2}{16}) ] = 32 [ - (-\frac{1}{4} + \frac{1}{8}) ]$<br>
+                            $= 32 [ - (-\frac{1}{8}) ] = 32/8 = 4$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>2. Navigation Error Distribution (Laplace)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>The article “Error Distribution in Navigation" (J. of the Institute of Navigation, 1971: 429-442) suggests that the frequency distribution of positive errors (magnitudes of errors) is well approximated by an exponential distribution. Let X = the lateral position error (nautical miles), which can be either negative or positive. Suppose the pdf of X is:<br>
+                        $f(x) = (0.1)e^{-0.2|x|}, \quad -\infty < x < \infty$<br>
+                        (a) Verify that f(x) is a legitimate pdf.<br>
+                        (b) Obtain the cdf of X.<br>
+                        (c) Compute P(X < 0), P(X ≤ 2), P(−1 ≤ X ≤ 2), and the probability that an error of more than 2 miles is made.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) Verified in solution (f(x)≥0 and integrates to 1).<br>
+                        (b) CDF $F(x) = 0.5 e^{0.2x}$ for $x<0$, and $F(x) = 1 - 0.5 e^{-0.2x}$ for $x \ge 0$.<br>
+                        (c) P(X < 0) = 0.5. P(X ≤ 2) ≈ 0.6648. P(−1 ≤ X ≤ 2) ≈ 0.2555. P(|X| > 2) ≈ 0.6703.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>$f(x) = 0.1 e^{-0.2|x|}$.</p>
+                            <strong>(a) Verify PDF:</strong>
+                            <p>1. $f(x) > 0$ since $e^{exponent}$ is always positive.<br>
+                            2. $\int_{-\infty}^{\infty} 0.1 e^{-0.2|x|} dx = 2 \int_{0}^{\infty} 0.1 e^{-0.2x} dx$ (by symmetry)<br>
+                            $= 0.2 [ \frac{e^{-0.2x}}{-0.2} ]_{0}^{\infty} = -1 [ e^{-0.2x} ]_{0}^{\infty} = -1 [0 - 1] = 1$. Verified.</p>
+                            <strong>(b) Obtain CDF:</strong>
+                            <p>Case $x < 0$: $F(x) = \int_{-\infty}^{x} 0.1 e^{0.2t} dt = 0.1 [\frac{e^{0.2t}}{0.2}]_{-\infty}^{x} = 0.5 [e^{0.2x} - 0] = 0.5 e^{0.2x}$.<br>
+                            Case $x \ge 0$: $F(x) = \int_{-\infty}^{0} f(t)dt + \int_{0}^{x} f(t)dt = F(0) + \int_{0}^{x} 0.1 e^{-0.2t} dt$.<br>
+                            $F(0) = 0.5 e^0 = 0.5$.<br>
+                            $F(x) = 0.5 + 0.1 [\frac{e^{-0.2t}}{-0.2}]_{0}^{x} = 0.5 - 0.5 [e^{-0.2t}]_{0}^{x}$<br>
+                            $= 0.5 - 0.5 (e^{-0.2x} - e^0) = 0.5 - 0.5e^{-0.2x} + 0.5 = 1 - 0.5 e^{-0.2x}$.</p>
+                            <p>$F(x) = \begin{cases} 0.5 e^{0.2x} & x < 0 \\ 1 - 0.5 e^{-0.2x} & x \ge 0 \end{cases}$</p>
+                            <strong>(c) Compute probabilities:</strong>
+                            <ul>
+                                <li>$P(X < 0) = F(0) = 1 - 0.5e^0 = 0.5$.</li>
+                                <li>$P(X \le 2) = F(2) = 1 - 0.5 e^{-0.2(2)} = 1 - 0.5e^{-0.4} \approx 1 - 0.5(0.67032) \approx 0.6648$.</li>
+                                <li>$P(−1 \le X \le 2) = F(2) - F(-1)$.<br>
+                                $F(-1) = 0.5 e^{0.2(-1)} = 0.5 e^{-0.2} \approx 0.5(0.81873) \approx 0.4094$.<br>
+                                $P(−1 \le X \le 2) \approx 0.6648 - 0.4094 = 0.2554$.</li>
+                                <li>$P(\text{Error > 2 miles}) = P(|X| > 2) = P(X < -2) + P(X > 2)$.<br>
+                                $P(X > 2) = 1 - F(2) = 1 - (1 - 0.5e^{-0.4}) = 0.5e^{-0.4} \approx 0.3352$.<br>
+                                $P(X < -2) = F(-2) = 0.5e^{0.2(-2)} = 0.5e^{-0.4} \approx 0.3352$.<br>
+                                $P(|X| > 2) = 0.3352 + 0.3352 = 0.6704$. (Or simply $e^{-0.4}$).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>3. Disk Head Location Time (Uniform)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Let X = the time it takes a read/write head to locate a desired record on a computer disk memory device once the head has been positioned over the correct track. If the disks rotate once every 25 millisec, a reasonable assumption is that X is uniformly distributed on the interval [0, 25].<br>
+                        (a) Compute P(10 ≤ X ≤ 20).<br>
+                        (b) Compute P(X ≥ 10).<br>
+                        (c) Obtain the cdf F(X). Find 80-th percentile of the distribution of X.<br>
+                        (d) Compute E(X) and σX.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) P(10 ≤ X ≤ 20) = 0.4.<br>
+                        (b) P(X ≥ 10) = 0.6.<br>
+                        (c) CDF $F(x) = x/25$ for $0 \le x \le 25$, 0 for $x<0$, 1 for $x>25$. 80th percentile = 20.<br>
+                        (d) E(X) = 12.5. $\sigma_X = \frac{25\sqrt{3}}{6} \approx 7.217$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>$X \sim U[0, 25]$. $f(x) = 1/25$ for $0 \le x \le 25$.</p>
+                            <strong>(a) Compute P(10 ≤ X ≤ 20):</strong>
+                            <p>$P(10 \le X \le 20) = \int_{10}^{20} \frac{1}{25} dx = \frac{1}{25} [x]_{10}^{20} = \frac{1}{25}(20-10) = \frac{10}{25} = 0.4$.</p>
+                            <strong>(b) Compute P(X ≥ 10):</strong>
+                            <p>$P(X \ge 10) = \int_{10}^{25} \frac{1}{25} dx = \frac{1}{25} [x]_{10}^{25} = \frac{1}{25}(25-10) = \frac{15}{25} = 0.6$.</p>
+                            <strong>(c) Obtain CDF F(X) and 80th percentile:</strong>
+                            <p>$F(x) = \begin{cases} 0 & x < 0 \\ \int_0^x (1/25)dt = x/25 & 0 \le x \le 25 \\ 1 & x > 25 \end{cases}$<br>
+                            Find $x_{0.80}$ such that $F(x_{0.80}) = 0.80$.<br>
+                            $x_{0.80}/25 = 0.80 \implies x_{0.80} = 0.80 \times 25 = 20$.</p>
+                            <strong>(d) Compute E(X) and σX:</strong>
+                            <p>$E[X] = \frac{A+B}{2} = \frac{0+25}{2} = 12.5$.<br>
+                            $Var(X) = \frac{(B-A)^2}{12} = \frac{(25-0)^2}{12} = \frac{625}{12}$.<br>
+                            $\sigma_X = \sqrt{Var(X)} = \sqrt{625/12} = \frac{25}{\sqrt{12}} = \frac{25}{2\sqrt{3}} = \frac{25\sqrt{3}}{6} \approx 7.217$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>4. Jar Contents (Normal)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>The article “Computer Assisted Net Weight Control” (Quality Progress, 1983: 22-25) suggests a normal distribution with mean 137.2 oz and standard deviation 1.6 oz for the actual contents of jars of a certain type. The stated contents was 135 oz.<br>
+                        (a) What is the probability that a single jar contains more than the stated contents?<br>
+                        (b) Among ten randomly selected jars, what is the probability that at least eight contain more than the stated contents?<br>
+                        (c) Assuming that the mean remains at 137.2, to what value would the standard deviation have to be changed so that 95% of all jars contain more than the stated contents?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) P(X > 135) ≈ 0.9154.<br>
+                        (b) P(Y ≥ 8) ≈ 0.9154.<br>
+                        (c) The standard deviation $\sigma'$ should be approximately 1.337 oz.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>$X \sim N(\mu = 137.2, \sigma = 1.6)$. Stated = 135 oz.</p>
+                            <strong>(a) P(X > 135):</strong>
+                            <p>$Z = \frac{135 - 137.2}{1.6} = \frac{-2.2}{1.6} = -1.375$.<br>
+                            $P(X > 135) = P(Z > -1.375) = 1 - \Phi(-1.375) \approx 1 - 0.0846 = 0.9154$.</p>
+                            <strong>(b) P(At least 8 of 10 jars > 135 oz):</strong>
+                            <p>Let Y = number of jars > 135 oz. $Y \sim Bin(n=10, p=0.9154)$.<br>
+                            $P(Y \ge 8) = P(Y=8) + P(Y=9) + P(Y=10)$.<br>
+                            $P(Y=8) = \binom{10}{8} (0.9154)^8 (0.0846)^2 \approx 45(0.4734)(0.00716) \approx 0.1525$.<br>
+                            $P(Y=9) = \binom{10}{9} (0.9154)^9 (0.0846)^1 \approx 10(0.4332)(0.0846) \approx 0.3665$.<br>
+                            $P(Y=10) = \binom{10}{10} (0.9154)^{10} (0.0846)^0 \approx 1(0.3964)(1) \approx 0.3964$.<br>
+                            $P(Y \ge 8) \approx 0.1525 + 0.3665 + 0.3964 = 0.9154$.</p>
+                            <strong>(c) Change σ for 95% P(X > 135):</strong>
+                            <p>Want $P(X > 135) = 0.95$ with $\mu=137.2$. Find $\sigma'$.<br>
+                            $P(Z > \frac{135 - 137.2}{\sigma'}) = 0.95$.<br>
+                            $P(Z > \frac{-2.2}{\sigma'}) = 0.95$.<br>
+                            This means $\frac{-2.2}{\sigma'}$ is the z-score with 0.95 area to its right (or 0.05 to its left).<br>
+                            $z_{0.05} \approx -1.645$.<br>
+                            $\frac{-2.2}{\sigma'} = -1.645$.<br>
+                            $\sigma' = \frac{2.2}{1.645} \approx 1.337$ oz.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>5. Wine Cork Production (Bayes)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Two machines that produce wine corks, the first one having a normal diameter distribution with mean value 3 cm and standard deviation .1 cm, and the second having a normal diameter distribution with mean value 3.04 cm and standard deviation .02 cm. Acceptable corks have diameters between 2.9 and 3.1 cm. If 60% of all corks used come from the first machine and a randomly selected cork is found to be acceptable, what is the probability that it was produced by the first machine?.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The probability it came from the first machine is approximately 0.5062.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let M1, M2 = Machine 1, Machine 2. A = Acceptable ($2.9 < X < 3.1$).<br>
+                            Given: P(M1)=0.6, P(M2)=0.4.<br>
+                            X|M1 ~ N(μ1=3, σ1=0.1). X|M2 ~ N(μ2=3.04, σ2=0.02).</p>
+                            <p>Want P(M1 | A). Use Bayes: $P(M1|A) = \frac{P(A|M1)P(M1)}{P(A)}$.</p>
+                            <p>Calculate conditional probabilities of A:<br>
+                            P(A|M1): $Z_1 = (2.9-3)/0.1 = -1$. $Z_2 = (3.1-3)/0.1 = 1$.<br>
+                            $P(A|M1) = P(-1 < Z < 1) = \Phi(1) - \Phi(-1) \approx 0.8413 - 0.1587 = 0.6826$.</p>
+                            <p>P(A|M2): $Z_1 = (2.9-3.04)/0.02 = -7$. $Z_2 = (3.1-3.04)/0.02 = 3$.<br>
+                            $P(A|M2) = P(-7 < Z < 3) = \Phi(3) - \Phi(-7) \approx 0.9987 - 0 = 0.9987$.</p>
+                            <p>Calculate P(A) using Law of Total Probability:<br>
+                            $P(A) = P(A|M1)P(M1) + P(A|M2)P(M2)$<br>
+                            $P(A) = (0.6826)(0.60) + (0.9987)(0.40)$<br>
+                            $P(A) = 0.40956 + 0.39948 = 0.80904$.</p>
+                            <p>Apply Bayes' Theorem:<br>
+                            $P(M1|A) = \frac{(0.6826)(0.60)}{0.80904} = \frac{0.40956}{0.80904} \approx 0.5062$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>6. Circuit Board Defectives (Normal Approx)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>When circuit boards used in the manufacture of compact disc players are tested, the long-run percentage of defectives is 5%. Suppose that a batch of 250 boards has been received and that the condition of any particular board is independent of that of any other board.<br>
+                        (a) What is the approximate probability that at least 10% of the boards in the batch are defective?<br>
+                        (b) What is the approximate probability that there are exactly 10 defectives in the batch?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) P(X ≥ 25) ≈ 0.00026.<br>
+                        (b) P(X = 10) ≈ 0.0888 (using Normal approx) or 0.0895 (using Binomial). </p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let X = number defective in batch. $n=250, p=0.05$.<br>
+                            $X \sim Bin(250, 0.05)$. Use Normal Approximation.<br>
+                            $\mu = np = 250(0.05) = 12.5$.<br>
+                            $\sigma^2 = np(1-p) = 12.5(0.95) = 11.875$.<br>
+                            $\sigma = \sqrt{11.875} \approx 3.446$.<br>
+                            Check: $np=12.5 \ge 10$, $n(1-p)=237.5 \ge 10$. Approx OK.</p>
+                            <strong>(a) P(At least 10% defective) = P(X ≥ 25):</strong>
+                            <p>Use continuity correction: $P(X \ge 24.5)$.<br>
+                            $Z = \frac{24.5 - 12.5}{3.446} = \frac{12}{3.446} \approx 3.482$.<br>
+                            $P(X \ge 25) \approx P(Z \ge 3.482) = 1 - \Phi(3.482) \approx 1 - 0.99974 = 0.00026$.</p>
+                            <strong>(b) P(Exactly 10 defectives) = P(X = 10):</strong>
+                            <p>Use continuity correction: $P(9.5 \le X \le 10.5)$.<br>
+                            $Z_1 = \frac{9.5 - 12.5}{3.446} \approx -0.8706$.<br>
+                            $Z_2 = \frac{10.5 - 12.5}{3.446} \approx -0.5804$.<br>
+                            $P(X=10) \approx P(-0.8706 \le Z \le -0.5804)$<br>
+                            $= \Phi(-0.5804) - \Phi(-0.8706)$<br>
+                            $\approx 0.2810 - 0.1922 = 0.0888$.</p>
+                            <p>(Direct Binomial calculation gives $P(X=10) \approx 0.0895$).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- end accordion -->
+
+    <!-- Font Size Slider -->
+    <div class="font-control">
+        <input type="range" id="fontSizeSlider" min="10" max="50" value="16" step="1">
+        <span id="fontSizeValue">16px</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // --- Data for Ratings (Tutorial 6) ---
+        const questionsData = [
+            { lengthRating: 4, complexityRating: 3 }, // Q1
+            { lengthRating: 3, complexityRating: 2 }, // Q2
+            { lengthRating: 4, complexityRating: 3 }, // Q3
+            { lengthRating: 4, complexityRating: 3 }, // Q4
+            { lengthRating: 4, complexityRating: 3 }, // Q5
+            { lengthRating: 3, complexityRating: 2 }  // Q6
+        ];
+
+        // --- Utility Functions ---
+        function generateStars(rating) { const roundedRating = Math.max(1, Math.min(5, Math.round(rating))); let colorClass; if (roundedRating <= 2) { colorClass = 'green'; } else if (roundedRating === 3) { colorClass = 'yellow'; } else { colorClass = 'red'; } let starsHTML = '<span class="stars">'; for (let i = 1; i <= 5; i++) { starsHTML += `<span class="star-${i <= roundedRating ? 'filled ' + colorClass : 'empty'}">${i <= roundedRating ? '★' : '☆'}</span>`; } starsHTML += '</span>'; return starsHTML; }
+        function calculateDifficulty(lengthRating, complexityRating) { const avg = (lengthRating + complexityRating) / 2; return Math.max(1, Math.min(5, Math.round(avg))); }
+        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
+        const mathJaxLoadedPromise = new Promise((resolve) => { if (window.MathJax && window.MathJax.startup) { window.MathJax.startup.promise.then(resolve); } else { window.addEventListener('MathJaxLoaded', resolve, {once: true}); } }); if (document.readyState === "complete" || document.readyState === "interactive") { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); } else { window.addEventListener('load', () => { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); }); }
+        function typesetMath(elements = [document.body]) { console.log("Attempting to typeset math in:", elements); mathJaxLoadedPromise.then(() => { console.log("MathJax confirmed ready, calling typesetPromise."); return MathJax.typesetPromise(elements); }).then(() => { console.log("MathJax typesetting complete for:", elements); }).catch(err => console.error('MathJax Typesetting Error:', err)); }
+
+        // --- Accordion Update Function ---
+         function updateAccordion(contentElement, makeActive) {
+            if (!contentElement) return;
+            const innerContent = contentElement.querySelector('.content-inner');
+            const collapseDelay = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--collapse-delay') || '0.1') * 1000; // Read from CSS var
+
+             if (makeActive) {
+                 // EXPANDING
+                 contentElement.classList.add('active');
+                 typesetMath([innerContent]);
+                 requestAnimationFrame(() => { // Ensure DOM update before measurement
+                    const currentTransition = contentElement.style.transition;
+                     contentElement.style.transition = 'none'; // Temporarily disable transitions for height calculation
+                    const scrollHeight = innerContent.offsetHeight;
+                    const style = window.getComputedStyle(contentElement);
+                    const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                     contentElement.style.maxHeight = totalHeight + "px"; // Set target height
+                    console.log(`Expanding: Calculated totalHeight = ${totalHeight}px`);
+                     requestAnimationFrame(() => { // Re-enable transitions after height is set
+                         contentElement.style.transition = currentTransition;
+                     });
+                });
+            } else {
+                 // CLOSING
+                contentElement.classList.remove('active'); // Starts inner content fade out immediately
+                console.log('Closing: Removed .active class, starting fade/pad collapse.');
+                 setTimeout(() => {
+                    contentElement.style.maxHeight = '0px'; // Start container collapse after delay
+                     console.log(`Closing: Delayed setting max-height=0 by ${collapseDelay}ms`);
+                 }, collapseDelay);
+            }
+         }
+
+        // --- Event Listeners and Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log("DOM Ready - Tutorial 6");
+            const accordionItems = document.querySelectorAll('.accordion-item');
+             const slider = document.getElementById('fontSizeSlider');
+            const sizeValueSpan = document.getElementById('fontSizeValue');
+
+            // --- Font Size Slider ---
+             const handleFontSizeChange = debounce(() => {
+                 console.log("Handling font size change..."); typesetMath(); // Retypeset on resize
+                 // Adjust height of any open accordion items after font size change
+                 accordionItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    if (content.classList.contains('active') && parseFloat(content.style.maxHeight) > 0) {
+                         console.log("Adjusting height for open item:", item);
+                         // Temporarily disable transitions to avoid jumpy resize
+                        const currentTransition = content.style.transition;
+                        content.style.transition = 'none';
+                        content.style.maxHeight = 'none'; // Allow content to reflow naturally
+
+                        requestAnimationFrame(() => { // Measure after reflow
+                            const innerContent = content.querySelector('.content-inner');
+                            const scrollHeight = innerContent.offsetHeight;
+                            const style = window.getComputedStyle(content);
+                            const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                            content.style.maxHeight = totalHeight + 'px'; // Apply new calculated height
+
+                            requestAnimationFrame(() => { // Restore transitions
+                                content.style.transition = currentTransition;
+                            });
+                            console.log("Font Change - Adjusted height to:", totalHeight);
+                        });
+                     }
+                 });
+             }, 250); // Debounce typesetting/height adjustment
+
+             slider.addEventListener('input', () => {
+                 const newSize = slider.value;
+                 document.documentElement.style.setProperty('--base-font-size', newSize + 'px');
+                 sizeValueSpan.textContent = newSize + 'px';
+                 handleFontSizeChange(); // Call debounced handler
+             });
+
+            // --- Accordion Logic ---
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const innerContent = content.querySelector('.content-inner');
+
+                // Ratings setup
+                const difficultyRatingSpan = header.querySelector('.difficulty-rating');
+                const lengthRatingSpan = content.querySelector('.length-rating');
+                const complexityRatingSpan = content.querySelector('.complexity-rating');
+                // Ensure index is within bounds of questionsData
+                if (index < questionsData.length) {
+                    const { lengthRating, complexityRating } = questionsData[index];
+                    difficultyRatingSpan.innerHTML = generateStars(calculateDifficulty(lengthRating, complexityRating));
+                    if (lengthRatingSpan) lengthRatingSpan.innerHTML = generateStars(lengthRating);
+                    if (complexityRatingSpan) complexityRatingSpan.innerHTML = generateStars(complexityRating);
+                } else {
+                    console.warn(`No data found for question index ${index}`);
+                }
+
+                 // Cache blocks & hide initially
+                 const questionBlock = innerContent.querySelector('.question-block');
+                 const ratingsBlock = innerContent.querySelector('.ratings-block');
+                 const finalAnswerBlock = innerContent.querySelector('.final-answer-block');
+                 const solutionBlock = innerContent.querySelector('.solution-block');
+                 [questionBlock, ratingsBlock, finalAnswerBlock, solutionBlock].forEach(el => {
+                     if (el) el.classList.add('hidden');
+                 });
+
+                 // Click Listener for state transitions
+                 item.addEventListener('click', (event) => {
+                     // Prevent toggle if click is inside the content area (e.g., selecting text)
+                     if (innerContent.contains(event.target)) {
+                         console.log("Clicked inside inner content, ignoring toggle.");
+                         return;
+                     }
+
+                     const currentState = item.getAttribute('data-state');
+                     let nextState;
+
+                     // State machine: collapsed -> state1 (Q+R+A) -> state2 (Q+R+S) -> collapsed
+                     switch (currentState) {
+                         case 'collapsed': nextState = 'state1'; break;
+                         case 'state1':    nextState = 'state2'; break;
+                         case 'state2':    nextState = 'collapsed'; break;
+                         default:          nextState = 'collapsed'; // Fallback
+                     }
+
+                     item.setAttribute('data-state', nextState);
+                     console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
+
+                     // Determine visibility based on the new state
+                     const showQ = nextState !== 'collapsed'; // Question visible in state1 & state2
+                     const showR = nextState !== 'collapsed'; // Ratings visible in state1 & state2
+                     const showA = nextState === 'state1';    // Answer only in state1
+                     const showS = nextState === 'state2';    // Solution only in state2
+
+                     // Toggle visibility classes
+                     if (questionBlock) questionBlock.classList.toggle('hidden', !showQ);
+                     if (ratingsBlock) ratingsBlock.classList.toggle('hidden', !showR);
+                     if (finalAnswerBlock) finalAnswerBlock.classList.toggle('hidden', !showA);
+                     if (solutionBlock) solutionBlock.classList.toggle('hidden', !showS);
+
+                     // Update Accordion Animation/Height
+                     updateAccordion(content, nextState !== 'collapsed');
+                });
+             });
+
+            // Initial Font Size & Log
+            const initialSize = slider.value;
+            document.documentElement.style.setProperty('--base-font-size', initialSize + 'px');
+            sizeValueSpan.textContent = initialSize + 'px';
+            console.log("Initial setup complete.");
+            typesetMath(); // Initial typeset after DOM ready
+
+        }); // End DOMContentLoaded
+
+    </script>
+
+</body>
+</html>

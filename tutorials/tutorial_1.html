@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en" style="--base-font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - 1</title> <!-- Updated Title -->
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+          options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'], ignoreHtmlClass: 'tex2jax_ignore', processHtmlClass: 'tex2jax_process' },
+          svg: { fontCache: 'global' },
+          startup: { ready: () => { console.log('MathJax ready.'); MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax initial typeset complete.')); } }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* --- START OF FINAL CSS --- */
+        :root {
+            --accent-color: #F08080;
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #555;
+            --header-bg: #2f2f2f;
+            --header-hover-bg: #3f3f3f;
+            --content-bg: #282828;
+            --solution-text-bg: #252525;
+            --slider-track-color: #444; /* Dark track for slider */
+            --base-font-size: 16px;
+            --anim-duration: 0.7s;
+            --content-fade-duration: 0.5s;
+            --collapse-delay: 0.1s;
+            --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
+            /* Star Colors */
+            --color-stars-red: #f1948a;
+            --color-stars-yellow: #f7dc6f;
+            --color-stars-green: #58d68d;
+            --color-stars-grey: #777;
+
+            /* Monospace Font Stack */
+            --monospace-font-stack: 'SF Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: var(--monospace-font-stack); /* Default to monospace */
+            line-height: 1.7;
+            margin: 0; padding: 20px; font-size: var(--base-font-size);
+            transition: font-size 0.2s ease-in-out;
+            padding-bottom: 80px; /* Space for slider */
+            overflow-x: hidden;
+        }
+        h1 {
+            color: var(--accent-color); text-align: center;
+            border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
+            margin-bottom: 30px; font-size: 2.5em;
+            /* Inherits monospace */
+        }
+        .accordion { max-width: 900px; margin: 20px auto; }
+        .accordion-item {
+            border: 1px solid var(--border-color); border-radius: 8px;
+            overflow: hidden; margin-bottom: 25px; background-color: var(--content-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+         .accordion-item:hover {
+            border-color: #777;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .accordion-header {
+            background-color: var(--header-bg);
+            padding: 18px 25px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
+            border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
+        }
+        .accordion-item[data-state="collapsed"] .accordion-header { border-bottom-color: transparent; }
+        .accordion-header:hover { background-color: var(--header-hover-bg); }
+        .accordion-header h2 {
+            margin: 0; font-size: 1.2em; color: var(--text-color);
+            /* Inherits monospace */
+         }
+
+        /* Content Area & Animations */
+        .accordion-content {
+            padding: 0 25px; max-height: 0; overflow: hidden;
+            transition: max-height var(--anim-duration) var(--anim-easing),
+                        padding-top var(--anim-duration) var(--anim-easing),
+                        padding-bottom var(--anim-duration) var(--anim-easing);
+            box-sizing: border-box; position: relative; z-index: 1;
+        }
+        .accordion-content.active { padding-top: 20px; }
+        .content-inner {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity var(--content-fade-duration) var(--anim-easing) 0s,
+                        transform var(--content-fade-duration) var(--anim-easing) 0s;
+            will-change: opacity, transform;
+            padding-bottom: 25px;
+        }
+        .accordion-content.active .content-inner {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: calc(var(--anim-duration) * 0.3);
+            transition-duration: var(--content-fade-duration);
+        }
+
+        /* Content Blocks Structure & Styling */
+        .question-block, .final-answer-block, .ratings-block, .solution-block {
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);
+        }
+        .content-inner > div:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .ratings-block { margin-bottom: 25px !important; padding-bottom: 20px !important; }
+
+        .question-block strong, .final-answer-block strong, .solution-block strong {
+            color: var(--accent-color); display: block; margin-bottom: 8px;
+            font-size: 1.1em;
+            /* Inherits monospace */
+        }
+        .question-block p,
+        .final-answer-block p {
+            font-size: inherit;
+            margin: 5px 0 1em 0;
+            /* Inherits monospace */
+        }
+        /* Code block specific styling */
+        .question-block pre, .solution-text pre {
+            background-color: var(--solution-text-bg); /* Match solution bg */
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px 15px;
+            overflow-x: auto;
+            font-family: var(--monospace-font-stack); /* Ensure monospace */
+            font-size: 0.95em; /* Slightly smaller */
+            white-space: pre; /* Preserve whitespace */
+            margin: 1em 0;
+        }
+        /* Style for simple tables within pre tags */
+        .solution-text table {
+            border-collapse: collapse;
+            margin: 1em 0;
+            font-size: 0.95em; /* Match pre size */
+            width: auto; /* Don't force full width */
+            border: 1px solid var(--border-color);
+        }
+        .solution-text th, .solution-text td {
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            text-align: left;
+        }
+        .solution-text th {
+            background-color: var(--header-bg); /* Use header background for table header */
+            font-weight: bold;
+        }
+
+
+        .solution-text {
+            background-color: var(--solution-text-bg); padding: 15px; border-radius: 5px;
+            border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
+            font-family: var(--monospace-font-stack); /* Explicitly set, inherits anyway */
+        }
+        .solution-text p, .solution-text li {
+            margin-bottom: 1em;
+            font-family: inherit; /* Inherit monospace */
+        }
+        .solution-text *:last-child { margin-bottom: 0; }
+        .solution-text ul, .solution-text ol { padding-left: 25px; margin: 0.5em 0 1em 0; }
+        .solution-text > strong {
+            color: var(--text-color); font-size: 1.05em; margin: 15px 0 10px 0;
+            display: block;
+            /* Inherits monospace */
+        }
+        .solution-text > strong:first-of-type { margin-top: 0; }
+
+        /* Star Ratings */
+        .stars { font-size: 1.3em; letter-spacing: 3px; display: inline-block;
+                 font-family: initial; /* Keep default font for star glyphs */
+               }
+        .star-filled.green { color: var(--color-stars-green); }
+        .star-filled.yellow { color: var(--color-stars-yellow); }
+        .star-filled.red { color: var(--color-stars-red); }
+        .star-empty { color: var(--color-stars-grey); }
+        .rating-label {
+            font-weight: bold; color: #bdbdbd; display: inline-block;
+            min-width: 140px; vertical-align: middle;
+            /* Inherits monospace */
+        }
+        .ratings-block .stars { vertical-align: middle; }
+
+        /* Utility & MathJax */
+        .hidden { display: none; }
+        mjx-container {
+            font-size: 1.05em; text-align: left !important;
+            overflow-x: auto; overflow-y: hidden; padding: 2px 0;
+            /* Keep specific math fonts for MathJax */
+            font-family: 'Latin Modern Math', 'STIX Two Math', serif;
+        }
+
+        /* Font Control - Minimalistic */
+        .font-control {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: transparent; /* No background */
+            padding: 0px 20px 15px 20px; /* Spacing */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            border-top: none; /* No border */
+            z-index: 10;
+        }
+        #fontSizeSlider {
+            flex-grow: 1;
+            cursor: pointer;
+            margin: 0 15px;
+            accent-color: var(--accent-color); /* Styles thumb in modern browsers */
+            min-width: 100px;
+            height: 6px; /* Track height */
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* Track Styling */
+        #fontSizeSlider::-webkit-slider-runnable-track {
+            height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        #fontSizeSlider::-moz-range-track {
+             height: 6px;
+            background: var(--slider-track-color);
+            border-radius: 3px;
+        }
+        /* Thumb Styling */
+        #fontSizeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default */
+            appearance: none;
+            margin-top: -5px; /* Vertically center (16px thumb on 6px track) */
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%; /* Make it round */
+            cursor: pointer;
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+        #fontSizeSlider::-moz-range-thumb {
+            background-color: var(--accent-color);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* Remove Firefox border */
+            transition: transform 0.15s ease-in-out; /* Smooth interaction */
+        }
+         /* Optional: Slight scale effect on interaction */
+         #fontSizeSlider:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+         #fontSizeSlider:active::-moz-range-thumb {
+            transform: scale(1.1);
+         }
+
+        #fontSizeValue {
+            min-width: 50px; text-align: right; font-weight: bold;
+            color: var(--text-color); font-size: 12px !important;
+            /* Inherits monospace */
+        }
+        /* --- END OF FINAL CSS --- */
+    </style>
+</head>
+<body>
+
+    <h1>Tutorial - 1</h1>
+
+    <div class="accordion">
+
+        <!-- Question 1 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>1. Flag Signals</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>How many different signals, each consisting of 9 flags hung in a line, can be made from a set of 4 white flags, 3 red flags, and 2 blue flags if all flags of the same color are identical?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>1260 different signals can be made.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>This problem involves permutations of a multiset. We have a total of $n = 9$ flags.</p>
+                            <p>Counts for each color:<br>
+                            $n_1 = 4$ (white)<br>
+                            $n_2 = 3$ (red)<br>
+                            $n_3 = 2$ (blue)<br>
+                            Check: $4 + 3 + 2 = 9$.</p>
+                            <p>The formula for distinct permutations is $\frac{n!}{n_1! n_2! ... n_k!}$.</p>
+                            <p>Number of signals = $\frac{9!}{4! 3! 2!}$<br>
+                            $= \frac{9 \times 8 \times 7 \times 6 \times 5 \times 4!}{4! \times (3 \times 2 \times 1) \times (2 \times 1)}$<br>
+                            $= \frac{9 \times 8 \times 7 \times 6 \times 5}{6 \times 2}$<br>
+                            $= 9 \times 8 \times 7 \times \frac{5}{2}$<br>
+                            $= 9 \times 4 \times 7 \times 5 = 1260$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>2. Police Officer Divisions</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A police department in a city consists of 10 officers. If the department policy is to have 5 of the officers patrolling the streets, 2 officers working full time at the station, and 3 officers on reserve at the station, how many different divisions of the 10 officers into the 3 groups are possible?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>There are 2520 different divisions possible.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>This is a partition problem, calculated using the multinomial coefficient.<br>
+                            Total officers $n=10$.<br>
+                            Group sizes: $n_1=5$ (patrolling), $n_2=2$ (station), $n_3=3$ (reserve).<br>
+                            Check: $5 + 2 + 3 = 10$.</p>
+                            <p>Number of divisions = $\binom{n}{n_1, n_2, n_3} = \frac{n!}{n_1! n_2! n_3!}$<br>
+                            $= \frac{10!}{5! 2! 3!}$<br>
+                            $= \frac{10 \times 9 \times 8 \times 7 \times 6 \times 5!}{5! \times (2 \times 1) \times (3 \times 2 \times 1)}$<br>
+                            $= \frac{10 \times 9 \times 8 \times 7 \times 6}{2 \times 6}$<br>
+                            $= 10 \times 9 \times 8 \times 7 \times \frac{1}{2} = 10 \times 9 \times 4 \times 7 = 2520$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>3. N-Digit Numbers</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Consider n-digit numbers where each digit is one of the 10 integers 0,1,2,...,9. How many such numbers are there for which<br>
+                        (a) no two consecutive digits are equal<br>
+                        (b) 0 appears as a digit a total of i times, i=0,1,2,..,n?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) $10 \times 9^{n-1}$<br>
+                        (b) $\binom{n}{i} \times 9^{n-i}$</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Assume "n-digit number" allows leading zeros.</p>
+                            <strong>(a) No two consecutive digits are equal:</strong>
+                            <p>1st digit: 10 choices (0-9).<br>
+                            2nd digit: 9 choices (any digit except the 1st).<br>
+                            3rd digit: 9 choices (any digit except the 2nd).<br>
+                            ...<br>
+                            nth digit: 9 choices (any digit except the (n-1)th).</p>
+                            <p>Total numbers = $10 \times 9 \times 9 \times \dots \times 9 = 10 \times 9^{n-1}$.</p>
+                            <strong>(b) 0 appears exactly i times:</strong>
+                            <p>Step 1: Choose the $i$ positions for the '0' digits out of $n$ positions: $\binom{n}{i}$ ways.<br>
+                            Step 2: Fill the remaining $n-i$ positions with non-zero digits (1-9). Each position has 9 choices.<br>
+                            Ways to fill remaining positions = $9^{n-i}$.</p>
+                            <p>Total numbers = (Ways to choose positions for 0s) $\times$ (Ways to fill other positions)<br>
+                            $= \binom{n}{i} \times 9^{n-i}$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>4. Seating Arrangements by Nationality</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>If 4 Americans, 3 French people, and 3 British people are to be seated in a row, how many seating arrangements are possible when people of the same nationality must sit next to each other?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>There are 5184 possible seating arrangements.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Treat each nationality as a single block: Block A (4 Americans), Block F (3 French), Block B (3 British).</p>
+                            <p>Step 1: Arrange the 3 blocks: $3! = 6$ ways.<br>
+                            Step 2: Arrange people within each block:<br>
+                            - Americans: $4! = 24$ ways.<br>
+                            - French: $3! = 6$ ways.<br>
+                            - British: $3! = 6$ ways.</p>
+                            <p>Step 3: Multiply the possibilities:<br>
+                            Total arrangements = (Ways to arrange blocks) $\times$ (Ways within A) $\times$ (Ways within F) $\times$ (Ways within B)<br>
+                            $= 3! \times 4! \times 3! \times 3!$<br>
+                            $= 6 \times 24 \times 6 \times 6 = 5184$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>5. Leap Year Sundays</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>What is the chance that a leap year selected at random will contain 53 Sundays?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The chance is 2/7.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>A leap year has 366 days.<br>
+                            $366 \div 7 = 52$ remainder $2$.<br>
+                            A leap year has 52 full weeks and 2 extra consecutive days.</p>
+                            <p>The 52 full weeks contain 52 Sundays. To have 53 Sundays, one of the two extra days must be a Sunday.</p>
+                            <p>The possible pairs for the two extra days are:<br>
+                            (Sun, Mon), (Mon, Tue), (Tue, Wed), (Wed, Thu), (Thu, Fri), (Fri, Sat), (Sat, Sun).</p>
+                            <p>There are 7 equally likely possibilities for these pairs.<br>
+                            The pairs containing a Sunday are (Sun, Mon) and (Sat, Sun). There are 2 favorable outcomes.</p>
+                            <p>The probability is $\frac{\text{Favorable outcomes}}{\text{Total outcomes}} = \frac{2}{7}$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>6. Digit Selection</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Among the digits 1,2,3,4,5 at first one is chosen and then a second selection is made among the remaining four digits. What are the possible outcomes? List the possible outcomes in which an odd digit is selected<br>
+                        (i) at first time,<br>
+                        (ii) at second time,<br>
+                        (iii) both the times.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>Total outcomes (20): {(1,2), (1,3), ..., (5,4)}<br>
+                        (i) Odd first (12): {(1,x), (3,x), (5,x) where x $\ne$ first digit}<br>
+                        (ii) Odd second (12): {(x,1), (x,3), (x,5) where x $\ne$ second digit}<br>
+                        (iii) Both odd (6): {(1,3), (1,5), (3,1), (3,5), (5,1), (5,3)}</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Digits S = {1, 2, 3, 4, 5}. Odd digits O = {1, 3, 5}. Select 2 without replacement.</p>
+                            <p><strong>Possible Outcomes (Total = 5x4=20):</strong><br>
+                            {(1,2), (1,3), (1,4), (1,5), (2,1), (2,3), (2,4), (2,5), (3,1), (3,2), (3,4), (3,5), (4,1), (4,2), (4,3), (4,5), (5,1), (5,2), (5,3), (5,4)}</p>
+                            <strong>(i) Odd digit selected first time:</strong><br>
+                            First digit $\in$ {1, 3, 5}. Second digit $\in$ S \ {first digit}.<br>
+                            {(1,2), (1,3), (1,4), (1,5), (3,1), (3,2), (3,4), (3,5), (5,1), (5,2), (5,3), (5,4)} (12 outcomes).</p>
+                            <strong>(ii) Odd digit selected second time:</strong><br>
+                            Second digit $\in$ {1, 3, 5}. First digit $\in$ S \ {second digit}.<br>
+                            {(2,1), (3,1), (4,1), (5,1), (1,3), (2,3), (4,3), (5,3), (1,5), (2,5), (3,5), (4,5)} (12 outcomes).</p>
+                            <strong>(iii) Odd digit selected both times:</strong><br>
+                            First digit $\in$ {1, 3, 5}. Second digit $\in$ {1, 3, 5} \ {first digit}.<br>
+                            {(1,3), (1,5), (3,1), (3,5), (5,1), (5,3)} (6 outcomes).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>7. Ring or Necklace</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Sixty percent of the students at a certain school wear neither a ring nor a necklace. Twenty percent wear a ring, and thirty percent wear a necklace. If one of the students is chosen randomly, what is the probability that this wearing<br>
+                        (a) a ring or a necklace<br>
+                        (b) a ring and a necklace.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) 0.40<br>
+                        (b) 0.10</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let R = wears ring, N = wears necklace.<br>
+                            Given: $P(R' \cap N') = 0.60$, $P(R) = 0.20$, $P(N) = 0.30$.</p>
+                            <strong>(a) P(Ring or Necklace) = P(R U N):</strong>
+                            <p>$P(R \cup N) = 1 - P((R \cup N)') = 1 - P(R' \cap N')$ (De Morgan's)<br>
+                            $P(R \cup N) = 1 - 0.60 = 0.40$.</p>
+                            <strong>(b) P(Ring and Necklace) = P(R ∩ N):</strong>
+                            <p>Use $P(R \cup N) = P(R) + P(N) - P(R \cap N)$.<br>
+                            $0.40 = 0.20 + 0.30 - P(R \cap N)$<br>
+                            $0.40 = 0.50 - P(R \cap N)$<br>
+                            $P(R \cap N) = 0.50 - 0.40 = 0.10$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>8. Credit Card Acceptance</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A retail establishment accepts either the American Express or the VISA credit card. A total of 24 percent of its customers carry an American Express card, 61 percent carry a VISA card, and 11 percent carry both. What percentage of its customers carry a credit card that the establishment will accept?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>74% of its customers carry a credit card the establishment will accept.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let A = carries AmEx, V = carries VISA.<br>
+                            Given: P(A) = 0.24, P(V) = 0.61, P(A $\cap$ V) = 0.11.</p>
+                            <p>We want the percentage who carry A or V, which is $P(A \cup V)$.<br>
+                            $P(A \cup V) = P(A) + P(V) - P(A \cap V)$<br>
+                            $P(A \cup V) = 0.24 + 0.61 - 0.11$<br>
+                            $P(A \cup V) = 0.85 - 0.11 = 0.74$.</p>
+                            <p>Percentage = $0.74 \times 100\% = 74\%$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>9. Computer Setups</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>The computers of 6 faculty members in a certain department are to be replaced. Two of the faculty members have selected laptop machines. Suppose that only 2 of the setups can be done on a particular day, and the 2 computers to be set up are randomly selected from the 6.<br>
+                        (a) What is the probability that both selected setups are for laptop computers?<br>
+                        (b) What is the probability that both selected setups are desktop machines?<br>
+                        (c) What is the probability that at least one selected setup is for a desktop machine?<br>
+                        (d) What is the probability that at least one computer of each type is chosen for setup?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) 1/15<br>
+                        (b) 6/15 = 2/5<br>
+                        (c) 14/15<br>
+                        (d) 8/15</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Total computers = 6.<br>
+                            Laptops (L) = 2.<br>
+                            Desktops (D) = 4.<br>
+                            Select 2 computers.</p>
+                            <p>Total ways to select 2 from 6 = $\binom{6}{2} = \frac{6 \times 5}{2} = 15$.</p>
+                            <strong>(a) P(Both Laptops):</strong>
+                            <p>Ways to choose 2 L from 2 = $\binom{2}{2} = 1$.<br>
+                            Probability = $1/15$.</p>
+                            <strong>(b) P(Both Desktops):</strong>
+                            <p>Ways to choose 2 D from 4 = $\binom{4}{2} = \frac{4 \times 3}{2} = 6$.<br>
+                            Probability = $6/15 = 2/5$.</p>
+                            <strong>(c) P(At least one Desktop):</strong>
+                            <p>This is the complement of P(Both Laptops).<br>
+                            P(At least one D) = $1 - P(\text{Both Laptops}) = 1 - 1/15 = 14/15$.</p>
+                            <strong>(d) P(At least one of each type) = P(1 L and 1 D):</strong>
+                            <p>Ways to choose 1 L from 2 = $\binom{2}{1} = 2$.<br>
+                            Ways to choose 1 D from 4 = $\binom{4}{1} = 4$.<br>
+                            Ways to choose 1 L and 1 D = $\binom{2}{1} \times \binom{4}{1} = 2 \times 4 = 8$.<br>
+                            Probability = $8/15$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>10. Clothes Dryer Purchases</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Consider the type of clothes dryer (gas or electric) purchased by each of 5 different customers at a certain store.<br>
+                        (a) If the probability that at most one of these purchases an electric dryer is 0.526, what is the probability that at least 2 purchase an electric dryer?<br>
+                        (b) If P(all 5 purchase gas)=0.239 and P(all 5 purchase electric)=0.03, what is the probability that at least one of each type is purchased?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) 0.474<br>
+                        (b) 0.731</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Let X = number of electric dryers purchased (out of 5).</p>
+                            <strong>(a) Calculation based on "at most one".</strong>
+                            <p>Given $P(X \le 1) = 0.526$.<br>
+                            We want $P(X \ge 2)$.<br>
+                            Since $\{X \ge 2\}$ is the complement of $\{X \le 1\}$,<br>
+                            $P(X \ge 2) = 1 - P(X \le 1) = 1 - 0.526 = 0.474$.</p>
+                            <strong>(b) Calculation based on "all gas" or "all electric".</strong>
+                            <p>Given $P(\text{all 5 gas}) = P(X=0) = 0.239$.<br>
+                            Given $P(\text{all 5 electric}) = P(X=5) = 0.03$.<br>
+                            We want $P(\text{at least one of each type})$.<br>
+                            This is the complement of the event (all gas OR all electric).<br>
+                            These two events (all gas, all electric) are mutually exclusive.<br>
+                            $P(\text{at least one of each}) = 1 - [P(\text{all gas}) + P(\text{all electric})]$<br>
+                            $= 1 - [0.239 + 0.03] = 1 - 0.269 = 0.731$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>11. Satellite Launch Schedule (Repeat)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>One satellite is scheduled to be launched from Cape Canaveral in Florida, and another launching is scheduled for Vandenberg Air Force Base in California. Let A denote the event that the Vandenberg launch goes off on schedule, and let B represent the event that the Cape Canaveral launch goes off on schedule. If A and B are independent events with P(A) > P(B), P(A U B) = 0.626, and P(A ∩ B) = 0.144, determine the values of P(A) and P(B).</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>$P(A) = 0.45$ and $P(B) = 0.32$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>(This is identical to Question 2 from Tutorial 2).</p>
+                            <p>Given: A, B independent, $P(A) > P(B)$, $P(A \cup B) = 0.626$, $P(A \cap B) = 0.144$.</p>
+                            <p>From independence: $P(A \cap B) = P(A) P(B) \implies P(A) P(B) = 0.144$.</p>
+                            <p>From union formula: $P(A \cup B) = P(A) + P(B) - P(A \cap B)$.<br>
+                            $0.626 = P(A) + P(B) - 0.144 \implies P(A) + P(B) = 0.770$.</p>
+                            <p>Let $x=P(A), y=P(B)$. Solve $xy=0.144$ and $x+y=0.770$.<br>
+                            $y = 0.770 - x \implies x(0.770-x)=0.144 \implies x^2 - 0.770x + 0.144 = 0$.<br>
+                            Quadratic formula gives $x = \frac{0.770 \pm 0.130}{2}$.<br>
+                            Solutions are $(x=0.45, y=0.32)$ or $(x=0.32, y=0.45)$.</p>
+                            <p>Since $P(A) > P(B)$, we choose $P(A) = 0.45$ and $P(B) = 0.32$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>12. Records Office Forms</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>An employee of the records office at a certain university currently has ten forms on his desk awaiting processing. Six of these are withdrawal petitions, and the other four are course substitution requests.<br>
+                        (a) If he randomly selects six of these forms to give to a subordinate, what is the probability that only one of the two types of forms remains on his desk?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>The probability is 16/210 = 8/105.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Total forms = 10 (6 W, 4 S). Select 6, remain 4.<br>
+                            Total ways to select 6 = $\binom{10}{6} = 210$.</p>
+                            <p>"Only one type remains" means the 4 remaining are all W or all S.</p>
+                            <p>Case 1: All 4 remaining are W.<br>
+                            This means the 6 selected were (2 W and 4 S).<br>
+                            Ways = $\binom{6}{2} \times \binom{4}{4} = 15 \times 1 = 15$.</p>
+                            <p>Case 2: All 4 remaining are S.<br>
+                            This means the 6 selected were (6 W and 0 S).<br>
+                            Ways = $\binom{6}{6} \times \binom{4}{0} = 1 \times 1 = 1$.</p>
+                            <p>Total favorable ways = $15 + 1 = 16$.<br>
+                            Probability = $\frac{16}{210} = \frac{8}{105}$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>13. Cricket and Football</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Consider randomly selecting a student at a Competition. Let A denote the event that a selected student is playing cricket and B denote the event that the student is playing football. Suppose that P(A) = 0.5, P(B) = 0.4 and P(A ∩ B) = 0.25.<br>
+                        (a) Compute the probability that the selected student is playing one of the two sports.<br>
+                        (b) What is the probability that the selected student is playing none of the sports?<br>
+                        (c) What is the probability that the selected student is playing both?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) 0.65<br>
+                        (b) 0.35<br>
+                        (c) 0.25</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Given: P(A)=0.5, P(B)=0.4, P(A $\cap$ B)=0.25.</p>
+                            <strong>(a) P(Playing one of the two sports) = P(A U B):</strong>
+                            <p>$P(A \cup B) = P(A) + P(B) - P(A \cap B)$<br>
+                            $= 0.5 + 0.4 - 0.25 = 0.65$.</p>
+                            <strong>(b) P(Playing none of the sports) = P(A' ∩ B'):</strong>
+                            <p>$P(A' \cap B') = P((A \cup B)') = 1 - P(A \cup B)$<br>
+                            $= 1 - 0.65 = 0.35$.</p>
+                            <strong>(c) P(Playing both) = P(A ∩ B):</strong>
+                            <p>Given directly as 0.25.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 14 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>14. Probability with Complements</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>Let A and B be events in sample space S such that P(A) = 1/2 = P(B) and $P(A^c \cap B^c) = 1/4$. Find P(A U B).</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>$P(A \cup B) = 3/4$.</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Given: P(A) = 1/2, P(B) = 1/2, $P(A^c \cap B^c) = 1/4$.</p>
+                            <p>We want $P(A \cup B)$.<br>
+                            Using De Morgan's law, $A^c \cap B^c = (A \cup B)^c$.<br>
+                            So, $P((A \cup B)^c) = P(A^c \cap B^c) = 1/4$.</p>
+                            <p>Since $P(E^c) = 1 - P(E)$, we have:<br>
+                            $P(A \cup B) = 1 - P((A \cup B)^c)$<br>
+                            $P(A \cup B) = 1 - 1/4 = 3/4$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 15 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>15. Word Arrangements (REGULATIONS, MISSISSIPPI)</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>(a) If the letters of the word 'REGULATIONS' be arranged at random, what is the chance that there will be exactly 4 letters between R and E?<br>
+                        (b) What is the probability that four S's come consecutively in the word 'MISSISSIPPI'?</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(a) 12/110 = 6/55<br>
+                        (b) 840 / 34650 = 4/165</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <strong>(a) REGULATIONS:</strong>
+                            <p>11 distinct letters. Total arrangements = $11!$.<br>
+                            We need arrangements like (R _ _ _ _ E) or (E _ _ _ _ R).<br>
+                            Possible position pairs for (R, E) with 4 letters between: (1,6), (2,7), (3,8), (4,9), (5,10), (6,11). 6 pairs.<br>
+                            Ways to place R and E in a chosen pair = 2! = 2.<br>
+                            Ways to arrange the remaining 9 letters in the remaining 9 spots = $9!$.<br>
+                            Favorable arrangements = $6 \times 2 \times 9! = 12 \times 9!$.<br>
+                            Probability = $\frac{12 \times 9!}{11!} = \frac{12 \times 9!}{11 \times 10 \times 9!} = \frac{12}{110} = \frac{6}{55}$.</p>
+                            <strong>(b) MISSISSIPPI:</strong>
+                            <p>11 letters: M(1), I(4), S(4), P(2).<br>
+                            Total distinct arrangements = $\frac{11!}{1! 4! 4! 2!} = 34,650$.<br>
+                            Treat "SSSS" as one block.<br>
+                            Arrange the units: {M, I, I, I, I, P, P, (SSSS)}. 8 units.<br>
+                            Repetitions: I(4), P(2).<br>
+                            Favorable arrangements = $\frac{8!}{1! 4! 2! 1!} = \frac{40320}{24 \times 2} = 840$.<br>
+                            Probability = $\frac{840}{34650} = \frac{84}{3465} = \frac{4}{165}$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 16 -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>16. Committee Selection</h2>
+                <span class="difficulty-rating"></span>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="question-block hidden">
+                        <strong>Question:</strong>
+                        <p>A committee of 4 people is to be appointed from 3 officers of the production department, 4 officers of the purchase department, 2 officers of the sales department and 1 chartered accountant. Find the probability of forming the committee in the following manner:<br>
+                        (i) There must be one from each category.<br>
+                        (ii) It should have at least one from the purchase department.<br>
+                        (iii) The chartered accountant must be in the committee.</p>
+                    </div>
+                     <div class="ratings-block hidden">
+                        <span class="rating-label">Length Rating:</span> <span class="length-rating"></span><br>
+                        <span class="rating-label">Complexity Rating:</span> <span class="complexity-rating"></span>
+                    </div>
+                    <div class="final-answer-block hidden">
+                        <strong>Final Answer:</strong>
+                        <p>(i) 24/210 = 4/35<br>
+                        (ii) 195/210 = 13/14<br>
+                        (iii) 84/210 = 2/5</p>
+                    </div>
+                    <div class="solution-block hidden">
+                        <strong>Full Solution:</strong>
+                        <div class="solution-text">
+                            <p>Total people = 3(Prod) + 4(Purch) + 2(Sales) + 1(CA) = 10.<br>
+                            Committee size = 4.<br>
+                            Total ways to form committee = $\binom{10}{4} = 210$.</p>
+                            <strong>(i) One from each category:</strong>
+                            <p>Ways = $\binom{3}{1} \times \binom{4}{1} \times \binom{2}{1} \times \binom{1}{1} = 3 \times 4 \times 2 \times 1 = 24$.<br>
+                            Probability = $24 / 210 = 4/35$.</p>
+                            <strong>(ii) At least one from Purchase:</strong>
+                            <p>Use complement: P(At least 1 Purch) = 1 - P(None from Purch).<br>
+                            Ways to choose none from Purch = Choose 4 from the other 6 people = $\binom{6}{4} = 15$.<br>
+                            P(None from Purch) = $15 / 210 = 1/14$.<br>
+                            P(At least 1 Purch) = $1 - 1/14 = 13/14$.</p>
+                            <strong>(iii) CA must be included:</strong>
+                            <p>Select the CA (1 way). Need to select 3 more from the remaining 9 people.<br>
+                            Ways = $\binom{1}{1} \times \binom{9}{3} = 1 \times \frac{9 \times 8 \times 7}{3 \times 2 \times 1} = 1 \times 84 = 84$.<br>
+                            Probability = $84 / 210 = 2/5$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div> <!-- end accordion -->
+
+    <!-- Font Size Slider -->
+    <div class="font-control">
+        <input type="range" id="fontSizeSlider" min="10" max="50" value="16" step="1">
+        <span id="fontSizeValue">16px</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // --- Data for Ratings (Tutorial 1) ---
+        const questionsData = [
+             { lengthRating: 2, complexityRating: 1 }, // Q1
+             { lengthRating: 2, complexityRating: 1 }, // Q2
+             { lengthRating: 2, complexityRating: 2 }, // Q3
+             { lengthRating: 2, complexityRating: 2 }, // Q4
+             { lengthRating: 2, complexityRating: 1 }, // Q5
+             { lengthRating: 3, complexityRating: 1 }, // Q6
+             { lengthRating: 2, complexityRating: 1 }, // Q7
+             { lengthRating: 1, complexityRating: 1 }, // Q8
+             { lengthRating: 3, complexityRating: 2 }, // Q9
+             { lengthRating: 2, complexityRating: 1 }, // Q10
+             { lengthRating: 3, complexityRating: 2 }, // Q11
+             { lengthRating: 3, complexityRating: 2 }, // Q12
+             { lengthRating: 2, complexityRating: 1 }, // Q13
+             { lengthRating: 1, complexityRating: 1 }, // Q14
+             { lengthRating: 4, complexityRating: 3 }, // Q15
+             { lengthRating: 3, complexityRating: 2 }  // Q16
+        ];
+
+        // --- Utility Functions ---
+        function generateStars(rating) { const roundedRating = Math.max(1, Math.min(5, Math.round(rating))); let colorClass; if (roundedRating <= 2) { colorClass = 'green'; } else if (roundedRating === 3) { colorClass = 'yellow'; } else { colorClass = 'red'; } let starsHTML = '<span class="stars">'; for (let i = 1; i <= 5; i++) { starsHTML += `<span class="star-${i <= roundedRating ? 'filled ' + colorClass : 'empty'}">${i <= roundedRating ? '★' : '☆'}</span>`; } starsHTML += '</span>'; return starsHTML; }
+        function calculateDifficulty(lengthRating, complexityRating) { const avg = (lengthRating + complexityRating) / 2; return Math.max(1, Math.min(5, Math.round(avg))); }
+        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
+        const mathJaxLoadedPromise = new Promise((resolve) => { if (window.MathJax && window.MathJax.startup) { window.MathJax.startup.promise.then(resolve); } else { window.addEventListener('MathJaxLoaded', resolve, {once: true}); } }); if (document.readyState === "complete" || document.readyState === "interactive") { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); } else { window.addEventListener('load', () => { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); }); }
+        function typesetMath(elements = [document.body]) { console.log("Attempting to typeset math in:", elements); mathJaxLoadedPromise.then(() => { console.log("MathJax confirmed ready, calling typesetPromise."); return MathJax.typesetPromise(elements); }).then(() => { console.log("MathJax typesetting complete for:", elements); }).catch(err => console.error('MathJax Typesetting Error:', err)); }
+
+        // --- Accordion Update Function ---
+         function updateAccordion(contentElement, makeActive) {
+            if (!contentElement) return;
+            const innerContent = contentElement.querySelector('.content-inner');
+            const collapseDelay = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--collapse-delay') || '0.1') * 1000; // Read from CSS var
+
+             if (makeActive) {
+                 // EXPANDING
+                 contentElement.classList.add('active');
+                 typesetMath([innerContent]);
+                 requestAnimationFrame(() => { // Ensure DOM update before measurement
+                    const currentTransition = contentElement.style.transition;
+                     contentElement.style.transition = 'none'; // Temporarily disable transitions for height calculation
+                    const scrollHeight = innerContent.offsetHeight;
+                    const style = window.getComputedStyle(contentElement);
+                    const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                     contentElement.style.maxHeight = totalHeight + "px"; // Set target height
+                    console.log(`Expanding: Calculated totalHeight = ${totalHeight}px`);
+                     requestAnimationFrame(() => { // Re-enable transitions after height is set
+                         contentElement.style.transition = currentTransition;
+                     });
+                });
+            } else {
+                 // CLOSING
+                contentElement.classList.remove('active'); // Starts inner content fade out immediately
+                console.log('Closing: Removed .active class, starting fade/pad collapse.');
+                 setTimeout(() => {
+                    contentElement.style.maxHeight = '0px'; // Start container collapse after delay
+                     console.log(`Closing: Delayed setting max-height=0 by ${collapseDelay}ms`);
+                 }, collapseDelay);
+            }
+         }
+
+        // --- Event Listeners and Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log("DOM Ready - Tutorial 1");
+            const accordionItems = document.querySelectorAll('.accordion-item');
+             const slider = document.getElementById('fontSizeSlider');
+            const sizeValueSpan = document.getElementById('fontSizeValue');
+
+            // --- Font Size Slider ---
+             const handleFontSizeChange = debounce(() => {
+                 console.log("Handling font size change..."); typesetMath(); // Retypeset on resize
+                 // Adjust height of any open accordion items after font size change
+                 accordionItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    if (content.classList.contains('active') && parseFloat(content.style.maxHeight) > 0) {
+                         console.log("Adjusting height for open item:", item);
+                         // Temporarily disable transitions to avoid jumpy resize
+                        const currentTransition = content.style.transition;
+                        content.style.transition = 'none';
+                        content.style.maxHeight = 'none'; // Allow content to reflow naturally
+
+                        requestAnimationFrame(() => { // Measure after reflow
+                            const innerContent = content.querySelector('.content-inner');
+                            const scrollHeight = innerContent.offsetHeight;
+                            const style = window.getComputedStyle(content);
+                            const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                            content.style.maxHeight = totalHeight + 'px'; // Apply new calculated height
+
+                            requestAnimationFrame(() => { // Restore transitions
+                                content.style.transition = currentTransition;
+                            });
+                            console.log("Font Change - Adjusted height to:", totalHeight);
+                        });
+                     }
+                 });
+             }, 250); // Debounce typesetting/height adjustment
+
+             slider.addEventListener('input', () => {
+                 const newSize = slider.value;
+                 document.documentElement.style.setProperty('--base-font-size', newSize + 'px');
+                 sizeValueSpan.textContent = newSize + 'px';
+                 handleFontSizeChange(); // Call debounced handler
+             });
+
+            // --- Accordion Logic ---
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const innerContent = content.querySelector('.content-inner');
+
+                // Ratings setup
+                const difficultyRatingSpan = header.querySelector('.difficulty-rating');
+                const lengthRatingSpan = content.querySelector('.length-rating');
+                const complexityRatingSpan = content.querySelector('.complexity-rating');
+                // Ensure index is within bounds of questionsData
+                if (index < questionsData.length) {
+                    const { lengthRating, complexityRating } = questionsData[index];
+                    difficultyRatingSpan.innerHTML = generateStars(calculateDifficulty(lengthRating, complexityRating));
+                    if (lengthRatingSpan) lengthRatingSpan.innerHTML = generateStars(lengthRating);
+                    if (complexityRatingSpan) complexityRatingSpan.innerHTML = generateStars(complexityRating);
+                } else {
+                    console.warn(`No data found for question index ${index}`);
+                }
+
+                 // Cache blocks & hide initially
+                 const questionBlock = innerContent.querySelector('.question-block');
+                 const ratingsBlock = innerContent.querySelector('.ratings-block');
+                 const finalAnswerBlock = innerContent.querySelector('.final-answer-block');
+                 const solutionBlock = innerContent.querySelector('.solution-block');
+                 [questionBlock, ratingsBlock, finalAnswerBlock, solutionBlock].forEach(el => {
+                     if (el) el.classList.add('hidden');
+                 });
+
+                 // Click Listener for state transitions
+                 item.addEventListener('click', (event) => {
+                     // Prevent toggle if click is inside the content area (e.g., selecting text)
+                     if (innerContent.contains(event.target)) {
+                         console.log("Clicked inside inner content, ignoring toggle.");
+                         return;
+                     }
+
+                     const currentState = item.getAttribute('data-state');
+                     let nextState;
+
+                     // State machine: collapsed -> state1 (Q+R+A) -> state2 (Q+R+S) -> collapsed
+                     switch (currentState) {
+                         case 'collapsed': nextState = 'state1'; break;
+                         case 'state1':    nextState = 'state2'; break;
+                         case 'state2':    nextState = 'collapsed'; break;
+                         default:          nextState = 'collapsed'; // Fallback
+                     }
+
+                     item.setAttribute('data-state', nextState);
+                     console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
+
+                     // Determine visibility based on the new state
+                     const showQ = nextState !== 'collapsed'; // Question visible in state1 & state2
+                     const showR = nextState !== 'collapsed'; // Ratings visible in state1 & state2
+                     const showA = nextState === 'state1';    // Answer only in state1
+                     const showS = nextState === 'state2';    // Solution only in state2
+
+                     // Toggle visibility classes
+                     if (questionBlock) questionBlock.classList.toggle('hidden', !showQ);
+                     if (ratingsBlock) ratingsBlock.classList.toggle('hidden', !showR);
+                     if (finalAnswerBlock) finalAnswerBlock.classList.toggle('hidden', !showA);
+                     if (solutionBlock) solutionBlock.classList.toggle('hidden', !showS);
+
+                     // Update Accordion Animation/Height
+                     updateAccordion(content, nextState !== 'collapsed');
+                });
+             });
+
+            // Initial Font Size & Log
+            const initialSize = slider.value;
+            document.documentElement.style.setProperty('--base-font-size', initialSize + 'px');
+            sizeValueSpan.textContent = initialSize + 'px';
+            console.log("Initial setup complete.");
+            typesetMath(); // Initial typeset after DOM ready
+
+        }); // End DOMContentLoaded
+
+    </script>
+
+</body>
+</html>
