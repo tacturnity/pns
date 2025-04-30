@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en" style="--base-font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summary of Formulas and Concepts</title> <!-- Updated Title -->
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+          options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'], ignoreHtmlClass: 'tex2jax_ignore', processHtmlClass: 'tex2jax_process' },
+          svg: { fontCache: 'global' },
+          startup: { ready: () => { console.log('MathJax ready.'); MathJax.startup.defaultReady(); MathJax.startup.promise.then(() => console.log('MathJax initial typeset complete.')); } }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* --- START OF FINAL CSS --- */
+        :root {
+            --accent-color: #F08080; /* Light Coral */
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #555;
+            --header-bg: #2f2f2f;
+            --header-hover-bg: #3f3f3f;
+            --content-bg: #282828;
+            --solution-text-bg: #252525;
+            --slider-track-color: #444;
+            --base-font-size: 16px;
+            --anim-duration: 0.7s;
+            --content-fade-duration: 0.5s;
+            --collapse-delay: 0.1s;
+            --anim-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
+            /* Monospace Font Stack */
+            --monospace-font-stack: 'SF Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: var(--monospace-font-stack); /* Default to monospace */
+            line-height: 1.7;
+            margin: 0; padding: 20px; font-size: var(--base-font-size);
+            transition: font-size 0.2s ease-in-out;
+            padding-bottom: 80px; /* Space for slider */
+            overflow-x: hidden;
+        }
+        h1 {
+            color: var(--accent-color); text-align: center;
+            border-bottom: 3px solid var(--accent-color); padding-bottom: 15px;
+            margin-bottom: 30px; font-size: 2.2em; /* Slightly smaller for summary title */
+            /* Inherits monospace */
+        }
+        .accordion { max-width: 900px; margin: 20px auto; }
+        .accordion-item {
+            border: 1px solid var(--border-color); border-radius: 8px;
+            overflow: hidden; margin-bottom: 25px; background-color: var(--content-bg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+         .accordion-item:hover {
+            border-color: #777;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .accordion-header {
+            background-color: var(--header-bg);
+            padding: 18px 25px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background-color 0.3s ease, border-color var(--anim-duration) var(--anim-easing);
+            border-bottom: 1px solid var(--border-color); position: relative; z-index: 2;
+        }
+        .accordion-item[data-state="collapsed"] .accordion-header { border-bottom-color: transparent; }
+        .accordion-header:hover { background-color: var(--header-hover-bg); }
+        .accordion-header h2 {
+            margin: 0; font-size: 1.3em; color: var(--text-color); /* Slightly larger for section titles */
+            font-weight: bold;
+            /* Inherits monospace */
+         }
+
+        /* Content Area & Animations (Unchanged) */
+        .accordion-content {
+            padding: 0 25px; max-height: 0; overflow: hidden;
+            transition: max-height var(--anim-duration) var(--anim-easing),
+                        padding-top var(--anim-duration) var(--anim-easing),
+                        padding-bottom var(--anim-duration) var(--anim-easing);
+            box-sizing: border-box; position: relative; z-index: 1;
+        }
+        .accordion-content.active { padding-top: 20px; }
+        .content-inner {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity var(--content-fade-duration) var(--anim-easing) 0s,
+                        transform var(--content-fade-duration) var(--anim-easing) 0s;
+            will-change: opacity, transform;
+            padding-bottom: 25px;
+        }
+        .accordion-content.active .content-inner {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: calc(var(--anim-duration) * 0.3);
+            transition-duration: var(--content-fade-duration);
+        }
+
+        /* Content Blocks Structure & Styling - Simplified for Summary */
+        /* Only .solution-block is used */
+        .solution-block {
+             margin-bottom: 0; padding-bottom: 0; border-bottom: none; /* Remove bottom border/margin */
+        }
+        /* Remove the 'Summary:' label styling */
+         .solution-block strong { display: none; }
+
+        /* Styling within solution-text for formulas */
+        .solution-text {
+            background-color: var(--solution-text-bg); padding: 20px; border-radius: 5px;
+            border: 1px solid #444; color: #ccc; font-size: 1em; line-height: 1.8;
+            font-family: var(--monospace-font-stack);
+        }
+        .solution-text p {
+            margin-bottom: 1.2em; /* Slightly more space between formula items */
+            font-family: inherit;
+        }
+         .solution-text p:last-child {
+            margin-bottom: 0;
+        }
+        /* Styling for Term Labels */
+        .solution-text .term {
+            color: var(--accent-color); /* Use accent color for terms */
+            font-weight: bold;
+            margin-right: 0.7em;
+            display: inline-block;
+        }
+        /* Section Headings (Roman numerals) - Make them prominent */
+         .solution-text > strong {
+            color: var(--text-color); /* White text */
+            font-size: 1.2em; /* Larger */
+            font-weight: bold;
+            margin: 25px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--accent-color); /* Accent color underline */
+            display: block;
+            /* Inherits monospace */
+        }
+        .solution-text > strong:first-of-type { margin-top: 0; }
+
+        /* Utility & MathJax */
+        .hidden { display: none; }
+        mjx-container {
+            font-size: 1.05em; text-align: left !important;
+            overflow-x: auto; overflow-y: hidden; padding: 2px 0;
+            /* Keep specific math fonts for MathJax */
+            font-family: 'Latin Modern Math', 'STIX Two Math', serif;
+        }
+
+        /* Font Control - Minimalistic (Unchanged) */
+        .font-control {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background-color: transparent; padding: 0px 20px 15px 20px;
+            box-sizing: border-box; display: flex; align-items: center;
+            border-top: none; z-index: 10;
+        }
+        #fontSizeSlider {
+            flex-grow: 1; cursor: pointer; margin: 0 15px;
+            accent-color: var(--accent-color); min-width: 100px;
+            height: 6px; background: transparent;
+            -webkit-appearance: none; appearance: none;
+        }
+        #fontSizeSlider::-webkit-slider-runnable-track { height: 6px; background: var(--slider-track-color); border-radius: 3px; }
+        #fontSizeSlider::-moz-range-track { height: 6px; background: var(--slider-track-color); border-radius: 3px; }
+        #fontSizeSlider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -5px; background-color: var(--accent-color); height: 16px; width: 16px; border-radius: 50%; cursor: pointer; transition: transform 0.15s ease-in-out; }
+        #fontSizeSlider::-moz-range-thumb { background-color: var(--accent-color); height: 16px; width: 16px; border-radius: 50%; cursor: pointer; border: none; transition: transform 0.15s ease-in-out; }
+        #fontSizeSlider:active::-webkit-slider-thumb { transform: scale(1.1); }
+        #fontSizeSlider:active::-moz-range-thumb { transform: scale(1.1); }
+        #fontSizeValue { min-width: 50px; text-align: right; font-weight: bold; color: var(--text-color); font-size: 12px !important; }
+        /* --- END OF FINAL CSS --- */
+    </style>
+</head>
+<body>
+
+    <h1>Summary of Formulas and Concepts (Tutorials 1-12)</h1>
+
+    <div class="accordion">
+
+        <!-- Section I -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>I. Basic Probability Rules</h2>
+                <!-- Removed star rating span -->
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden"> <!-- Only solution block -->
+                        <!-- Removed <strong> label -->
+                        <div class="solution-text">
+                            <p><span class="term">Complement Rule:</span> $P(A^c) = 1 - P(A)$ ($A^c$: A does not occur).</p>
+                            <p><span class="term">Addition Rule (General):</span> $P(A \cup B) = P(A) + P(B) - P(A \cap B)$ ($A \cup B$: A or B or both; $A \cap B$: both A and B).</p>
+                            <p><span class="term">Addition Rule (Mutually Exclusive):</span> If $A \cap B = \emptyset$, then $P(A \cup B) = P(A) + P(B)$.</p>
+                            <p><span class="term">De Morgan's Laws:</span> $P((A \cup B)^c) = P(A^c \cap B^c)$; $P((A \cap B)^c) = P(A^c \cup B^c)$.</p>
+                            <p><span class="term">Law of Total Probability:</span> $P(A) = P(A|B)P(B) + P(A|B^c)P(B^c)$. (Partitions sample space based on B and its complement. Can be generalized).</p>
+                            <p><span class="term">Independence:</span> A and B are independent if $P(A \cap B) = P(A)P(B)$. If independent, $P(A|B) = P(A)$, $P(B|A) = P(B)$, and $P(A \cup B) = P(A) + P(B) - P(A)P(B)$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section II -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>II. Combinatorics (Counting Techniques)</h2>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden">
+                        <div class="solution-text">
+                            <p><span class="term">Permutations (Order matters):</span> $P_{n,k} = \frac{n!}{(n-k)!}$ (Arrange k items from n distinct).</p>
+                            <p><span class="term">Combinations (Order doesn't matter):</span> $\binom{n}{k} = C_{n,k} = \frac{n!}{k!(n-k)!}$ (Choose k items from n distinct).</p>
+                            <p><span class="term">Permutations with Repetitions:</span> $\frac{n!}{n_1! n_2! ... n_k!}$ (Arrange n items with $n_i$ identical items of type i, $\sum n_i = n$).</p>
+                            <p><span class="term">Multinomial Coefficients (Partitioning):</span> $\binom{n}{n_1, n_2, ..., n_k} = \frac{n!}{n_1! n_2! ... n_k!}$ (Partition n items into groups of size $n_i$, $\sum n_i = n$).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section III -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>III. Discrete Probability Distributions</h2>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden">
+                        <div class="solution-text">
+                            <strong>General Properties:</strong>
+                            <p><span class="term">PMF (Probability Mass Function):</span> $p(x) = P(X=x)$. Properties: $p(x) \ge 0$, $\sum_{all x} p(x) = 1$.</p>
+                            <p><span class="term">CDF (Cumulative Distribution Function):</span> $F(x) = P(X \le x) = \sum_{t \le x} p(t)$.</p>
+                            <p><span class="term">Expected Value (Mean):</span> $\mu = E[X] = \sum_{all x} x \cdot p(x)$.</p>
+                            <p><span class="term">Expected Value of Function:</span> $E[g(X)] = \sum_{all x} g(x) \cdot p(x)$.</p>
+                            <p><span class="term">Variance:</span> $\sigma^2 = Var(X) = E[(X-\mu)^2] = \sum_{all x} (x-\mu)^2 p(x) = E[X^2] - (E[X])^2$.</p>
+                            <p><span class="term">Standard Deviation:</span> $\sigma = \sqrt{Var(X)}$.</p>
+                            <strong>Specific Distributions:</strong>
+                            <p><span class="term">Binomial</span> $X \sim Bin(n, p)$: # successes in n independent Bernoulli trials. PMF: $P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}$. Mean: $np$. Var: $np(1-p)$.</p>
+                            <p><span class="term">Hypergeometric:</span> # successes (k) in sample (n) w/o replacement from pop (N) w/ K successes. PMF: $P(X=k) = \frac{\binom{K}{k} \binom{N-K}{n-k}}{\binom{N}{n}}$. Mean: $n \frac{K}{N}$.</p>
+                            <p><span class="term">Geometric</span> $X \sim Geom(p)$: # trials until 1st success. PMF: $P(X=k) = (1-p)^{k-1}p$. Mean: $1/p$. Var: $(1-p)/p^2$. MGF: $M_X(t) = \frac{pe^t}{1-(1-p)e^t}$.</p>
+                            <p><span class="term">Negative Binomial:</span> # trials (x) for r successes. PMF: $P(X=x) = \binom{x-1}{r-1} p^r (1-p)^{x-r}$.</p>
+                            <p><span class="term">Poisson</span> $X \sim Poisson(\lambda)$: # events in fixed interval. PMF: $P(X=k) = \frac{e^{-\lambda} \lambda^k}{k!}$. Mean: $\lambda$. Var: $\lambda$. MGF: $M_X(t) = e^{\lambda(e^t - 1)}$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section IV -->
+         <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>IV. Continuous Probability Distributions</h2>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden">
+                        <div class="solution-text">
+                            <strong>General Properties:</strong>
+                            <p><span class="term">PDF (Probability Density Function):</span> $f(x)$. Properties: $f(x) \ge 0$, $\int_{-\infty}^{\infty} f(x) dx = 1$.</p>
+                            <p><span class="term">CDF (Cumulative Distribution Function):</span> $F(x) = P(X \le x) = \int_{-\infty}^{x} f(t) dt$.</p>
+                            <p><span class="term">Probability from PDF:</span> $P(a \le X \le b) = \int_{a}^{b} f(x) dx$.</p>
+                            <p><span class="term">Probability from CDF:</span> $P(a \le X \le b) = F(b) - F(a)$.</p>
+                            <p><span class="term">PDF from CDF:</span> $f(x) = F'(x) = \frac{d}{dx}F(x)$.</p>
+                            <p><span class="term">Expected Value (Mean):</span> $\mu = E[X] = \int_{-\infty}^{\infty} x f(x) dx$.</p>
+                            <p><span class="term">Expected Value of Function:</span> $E[g(X)] = \int_{-\infty}^{\infty} g(x) f(x) dx$.</p>
+                            <p><span class="term">Variance:</span> $\sigma^2 = Var(X) = E[(X-\mu)^2] = \int_{-\infty}^{\infty} (x-\mu)^2 f(x) dx = E[X^2] - (E[X])^2$.</p>
+                            <p><span class="term">Standard Deviation:</span> $\sigma = \sqrt{Var(X)}$.</p>
+                            <strong>Specific Distributions:</strong>
+                            <p><span class="term">Uniform</span> $X \sim U[A, B]$: PDF: $f(x)=\frac{1}{B-A}$ for $A \le x \le B$. CDF: $F(x)=\frac{x-A}{B-A}$. Mean: $\mu=\frac{A+B}{2}$. Var: $\sigma^2=\frac{(B-A)^2}{12}$.</p>
+                            <p><span class="term">Exponential</span> $X \sim Exp(\lambda)$: PDF: $f(x)=\lambda e^{-\lambda x}$ for $x \ge 0$. CDF: $F(x)=1-e^{-\lambda x}$. Mean: $\mu=1/\lambda$. Var: $\sigma^2=1/\lambda^2$. Memoryless Property.</p>
+                            <p><span class="term">Gamma</span> $X \sim Gamma(\alpha, \beta)$: PDF: $f(x)=\frac{1}{\beta^\alpha \Gamma(\alpha)} x^{\alpha-1} e^{-x/\beta}$ for $x \ge 0$. Mean: $\mu=\alpha\beta$. Var: $\sigma^2=\alpha\beta^2$. Scaling: $cX \sim Gamma(\alpha, c\beta)$.</p>
+                            <p><span class="term">Normal</span> $X \sim N(\mu, \sigma^2)$: PDF: $f(x)=\frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(x-\mu)^2}{2\sigma^2}}$. Standard Normal $Z \sim N(0,1)$. Standardization: $Z = \frac{X-\mu}{\sigma}$. Use $\Phi(z)$ table.</p>
+                            <p><span class="term">Log-Normal:</span> If $Y \sim N(\mu, \sigma^2)$, $X=e^Y$. PDF: $f_X(x) = \frac{1}{\sqrt{2\pi}\sigma x} e^{-\frac{(\ln(x)-\mu)^2}{2\sigma^2}}$ for $x > 0$.</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section V -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                 <h2>V. Joint Distributions</h2>
+             </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden">
+                        <div class="solution-text">
+                            <p><span class="term">Joint PMF:</span> $p(x, y) = P(X=x, Y=y)$. $\sum_x \sum_y p(x,y) = 1$.</p>
+                            <p><span class="term">Joint PDF:</span> $f(x, y)$. $\int \int f(x,y) dx dy = 1$.</p>
+                            <p><span class="term">Marginal PMF:</span> $p_X(x) = \sum_y p(x,y)$, $p_Y(y) = \sum_x p(x,y)$.</p>
+                            <p><span class="term">Marginal PDF:</span> $f_X(x) = \int f(x,y) dy$, $f_Y(y) = \int f(x,y) dx$.</p>
+                            <p><span class="term">Independence:</span> $p(x,y)=p_X(x)p_Y(y)$ or $f(x,y)=f_X(x)f_Y(y)$ for all x,y (and product space support for continuous).</p>
+                            <p><span class="term">Expected Value:</span> $E[g(X,Y)] = \sum\sum g(x,y)p(x,y)$ or $\int\int g(x,y)f(x,y)dxdy$.</p>
+                            <p><span class="term">Covariance:</span> $Cov(X,Y) = E[XY] - E[X]E[Y]$.</p>
+                            <p><span class="term">Correlation:</span> $\rho = Corr(X,Y) = \frac{Cov(X,Y)}{\sigma_X \sigma_Y}$. ($-1 \le \rho \le 1$).</p>
+                            <p><span class="term">Expectation of Sum:</span> $E[aX+bY] = aE[X]+bE[Y]$.</p>
+                            <p><span class="term">Variance of Sum:</span> $Var(aX+bY) = a^2Var(X)+b^2Var(Y)+2abCov(X,Y)$. (Cov term is 0 if independent).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section VI -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>VI. Conditional Probability & Bayes' Theorem</h2>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden">
+                        <div class="solution-text">
+                            <p><span class="term">Conditional Probability:</span> $P(A|B) = \frac{P(A \cap B)}{P(B)}$.</p>
+                            <p><span class="term">Multiplication Rule:</span> $P(A \cap B) = P(A|B)P(B) = P(B|A)P(A)$.</p>
+                            <p><span class="term">Bayes' Theorem:</span> $P(B_i|A) = \frac{P(A|B_i)P(B_i)}{\sum_j P(A|B_j)P(B_j)}$. ($B_i$=hypotheses, A=evidence).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section VII -->
+        <div class="accordion-item" data-state="collapsed">
+             <div class="accordion-header">
+                 <h2>VII. Moment Generating Functions (MGFs)</h2>
+             </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden">
+                        <div class="solution-text">
+                            <p><span class="term">Definition:</span> $M_X(t) = E[e^{tX}]$.</p>
+                            <p><span class="term">Moments from MGF:</span> $E[X^k] = M_X^{(k)}(0)$ (k-th derivative at t=0).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section VIII -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                 <h2>VIII. Approximations</h2>
+             </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden">
+                        <div class="solution-text">
+                            <p><span class="term">Normal Approx to Binomial:</span> If $X \sim Bin(n,p)$ and $np \ge 10, n(1-p) \ge 10$, then $X \approx N(np, np(1-p))$.</p>
+                            <p><span class="term">Continuity Correction:</span> $P(X=k) \approx P(k-0.5 \le X_{norm} \le k+0.5)$; $P(X \le k) \approx P(X_{norm} \le k+0.5)$; $P(X \ge k) \approx P(X_{norm} \ge k-0.5)$.</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section IX -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                 <h2>IX. Parameter Estimation</h2>
+             </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden">
+                        <div class="solution-text">
+                             <p><span class="term">Method of Moments (MoM):</span> Equate population moments ($E[X], E[X^2]$) to sample moments ($\bar{X}, \frac{1}{n}\sum X_i^2$).</p>
+                            <p><span class="term">Max Likelihood Estimation (MLE):</span> Maximize Likelihood $L(\theta)=\prod f(x_i;\theta)$ or Log-Likelihood $\ln L(\theta)$.</p>
+                            <p><span class="term">MLE (Normal):</span> $\hat{\mu}_{MLE}=\bar{X}$, $\hat{\sigma}^2_{MLE}=\frac{1}{n}\sum(X_i-\bar{X})^2$.</p>
+                            <p><span class="term">Invariance Property:</span> MLE of $g(\theta)$ is $g(\hat{\theta}_{MLE})$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section X -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>X. Confidence Intervals (CI)</h2>
+            </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                     <div class="solution-block hidden">
+                        <div class="solution-text">
+                            <p><span class="term">CI Mean (σ known):</span> $\bar{x} \pm z_{\alpha/2} \frac{\sigma}{\sqrt{n}}$.</p>
+                            <p><span class="term">CI Mean (σ unknown, large n):</span> $\bar{x} \pm z_{\alpha/2} \frac{s}{\sqrt{n}}$.</p>
+                            <p><span class="term">CI Mean (σ unknown, small n, Normal pop):</span> $\bar{x} \pm t_{\alpha/2, n-1} \frac{s}{\sqrt{n}}$.</p>
+                            <p><span class="term">CI Proportion (Large n):</span> $\hat{p} \pm z_{\alpha/2} \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$.</p>
+                            <p><span class="term">Upper Bound (Prop):</span> $\hat{p} + z_{\alpha} \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$.</p>
+                            <p><span class="term">Sample Size (Mean):</span> $n = (\frac{z_{\alpha/2}\sigma}{E})^2$.</p>
+                            <p><span class="term">Sample Size (Prop, Conservative):</span> $n = \frac{(z_{\alpha/2})^2(0.25)}{E^2}$.</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section XI -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                 <h2>XI. Hypothesis Testing</h2>
+             </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div class="solution-block hidden">
+                        <div class="solution-text">
+                             <p><span class="term">Components:</span> $H_0, H_a$, Test Statistic, Rejection Region/P-value, $\alpha$.</p>
+                            <p><span class="term">Errors:</span> Type I (Reject $H_0$ when true, prob=$\alpha$), Type II (Fail to reject $H_0$ when false, prob=$\beta$).</p>
+                            <p><span class="term">Test Stat (Mean, σ known/large n):</span> $Z = \frac{\bar{X}-\mu_0}{\sigma/\sqrt{n}}$.</p>
+                            <p><span class="term">Test Stat (Mean, σ unknown, small n):</span> $T = \frac{\bar{X}-\mu_0}{s/\sqrt{n}}$. (t-dist, df=n-1).</p>
+                            <p><span class="term">Test Stat (Prop, large n):</span> $Z = \frac{\hat{p}-p_0}{\sqrt{p_0(1-p_0)/n}}$.</p>
+                            <p><span class="term">Decision:</span> Reject $H_0$ if Test Stat in Rejection Region, or if P-value $\le \alpha$.</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section XII -->
+        <div class="accordion-item" data-state="collapsed">
+            <div class="accordion-header">
+                <h2>XII. Linear Regression</h2>
+             </div>
+             <div class="accordion-content">
+                 <div class="content-inner">
+                    <div class="solution-block hidden">
+                         <div class="solution-text">
+                            <p><span class="term">Model:</span> $Y = \beta_0 + \beta_1 x + \epsilon$.</p>
+                            <p><span class="term">Estimates:</span> $\hat{\beta}_1 = S_{xy}/S_{xx}$, $\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$.</p>
+                            <p><span class="term">Where:</span> $S_{xy} = \sum x_i y_i - \frac{(\sum x_i)(\sum y_i)}{n}$, $S_{xx} = \sum x_i^2 - \frac{(\sum x_i)^2}{n}$.</p>
+                            <p><span class="term">Prediction:</span> $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$.</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section XIII -->
+         <div class="accordion-item" data-state="collapsed">
+             <div class="accordion-header">
+                 <h2>XIII. Miscellaneous Concepts</h2>
+             </div>
+            <div class="accordion-content">
+                <div class="content-inner">
+                     <div class="solution-block hidden">
+                        <div class="solution-text">
+                            <p><span class="term">Transformation (PDF):</span> $g(y) = f_X(k(y)) |k'(y)|$ where $x=k(y)$ is inverse of $y=h(x)$.</p>
+                            <p><span class="term">Transformation (CDF):</span> Find $F_Y(y)=P(Y \le y)$ using $F_X$. Differentiate for pdf $f_Y(y)$.</p>
+                            <p><span class="term">Percentiles:</span> Value $x_p$ such that $F(x_p)=p$. Median is 50th percentile.</p>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+
+
+    </div> <!-- end accordion -->
+
+    <!-- Font Size Slider -->
+    <div class="font-control">
+        <input type="range" id="fontSizeSlider" min="10" max="50" value="16" step="1">
+        <span id="fontSizeValue">16px</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // --- Data for Ratings (None needed for Summary) ---
+        // const questionsData = []; // No ratings needed
+
+        // --- Utility Functions (Removed star functions) ---
+        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; }
+        const mathJaxLoadedPromise = new Promise((resolve) => { if (window.MathJax && window.MathJax.startup) { window.MathJax.startup.promise.then(resolve); } else { window.addEventListener('MathJaxLoaded', resolve, {once: true}); } }); if (document.readyState === "complete" || document.readyState === "interactive") { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); } else { window.addEventListener('load', () => { if(window.MathJax && window.MathJax.startup) window.dispatchEvent(new Event('MathJaxLoaded')); }); }
+        function typesetMath(elements = [document.body]) { console.log("Attempting to typeset math in:", elements); mathJaxLoadedPromise.then(() => { console.log("MathJax confirmed ready, calling typesetPromise."); return MathJax.typesetPromise(elements); }).then(() => { console.log("MathJax typesetting complete for:", elements); }).catch(err => console.error('MathJax Typesetting Error:', err)); }
+
+        // --- Accordion Update Function (Unchanged) ---
+         function updateAccordion(contentElement, makeActive) {
+            if (!contentElement) return;
+            const innerContent = contentElement.querySelector('.content-inner');
+            const collapseDelay = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--collapse-delay') || '0.1') * 1000;
+
+             if (makeActive) {
+                 contentElement.classList.add('active');
+                 typesetMath([innerContent]); // Typeset only revealed content
+                 requestAnimationFrame(() => {
+                    const currentTransition = contentElement.style.transition;
+                    contentElement.style.transition = 'none';
+                    const scrollHeight = innerContent.offsetHeight;
+                    const style = window.getComputedStyle(contentElement);
+                    const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                     contentElement.style.maxHeight = totalHeight + "px";
+                    console.log(`Expanding: Calculated totalHeight = ${totalHeight}px`);
+                     requestAnimationFrame(() => { contentElement.style.transition = currentTransition; });
+                });
+            } else {
+                contentElement.classList.remove('active');
+                 setTimeout(() => {
+                    contentElement.style.maxHeight = '0px';
+                     console.log(`Closing: Delayed setting max-height=0 by ${collapseDelay}ms`);
+                 }, collapseDelay);
+            }
+         }
+
+        // --- Event Listeners and Setup (Simplified) ---
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log("DOM Ready - Formula Summary");
+            const accordionItems = document.querySelectorAll('.accordion-item');
+             const slider = document.getElementById('fontSizeSlider');
+            const sizeValueSpan = document.getElementById('fontSizeValue');
+
+            // --- Font Size Slider ---
+             const handleFontSizeChange = debounce(() => {
+                 console.log("Handling font size change..."); typesetMath();
+                 accordionItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    if (content.classList.contains('active') && parseFloat(content.style.maxHeight) > 0) {
+                         console.log("Adjusting height for open item:", item);
+                        const currentTransition = content.style.transition; content.style.transition = 'none';
+                        content.style.maxHeight = 'none';
+                        requestAnimationFrame(() => {
+                            const innerContent = content.querySelector('.content-inner'); const scrollHeight = innerContent.offsetHeight;
+                            const style = window.getComputedStyle(content); const totalHeight = scrollHeight + parseFloat(style.paddingTop);
+                            content.style.maxHeight = totalHeight + 'px';
+                            requestAnimationFrame(() => { content.style.transition = currentTransition; });
+                            console.log("Font Change - Adjusted height to:", totalHeight);
+                        });
+                     }
+                 });
+             }, 250);
+             slider.addEventListener('input', () => { const newSize = slider.value; document.documentElement.style.setProperty('--base-font-size', newSize + 'px'); sizeValueSpan.textContent = newSize + 'px'; handleFontSizeChange(); });
+
+            // --- Accordion Logic (Simplified for Summary) ---
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const innerContent = content.querySelector('.content-inner');
+
+                // No ratings setup needed
+
+                // Cache the only relevant block & hide initially
+                const solutionBlock = innerContent.querySelector('.solution-block');
+                if (solutionBlock) solutionBlock.classList.add('hidden');
+
+                 // Click Listener for state transitions (Collapsed <-> Expanded)
+                 item.addEventListener('click', (event) => {
+                     if (innerContent.contains(event.target)) { return; } // Ignore clicks inside content
+
+                     const currentState = item.getAttribute('data-state');
+                     let nextState;
+
+                     // Simple Toggle: collapsed -> state1 -> collapsed
+                     if (currentState === 'collapsed') {
+                         nextState = 'state1';
+                     } else {
+                         nextState = 'collapsed';
+                     }
+
+                     item.setAttribute('data-state', nextState);
+                     console.log(`Item ${index + 1} state changed: ${currentState} -> ${nextState}`);
+
+                     const showContent = nextState === 'state1';
+
+                     // Toggle visibility of the solution block
+                     if (solutionBlock) solutionBlock.classList.toggle('hidden', !showContent);
+
+                     // Update Accordion Animation/Height
+                     updateAccordion(content, showContent);
+                });
+             });
+
+            // Initial Font Size & Log
+            const initialSize = slider.value;
+            document.documentElement.style.setProperty('--base-font-size', initialSize + 'px');
+            sizeValueSpan.textContent = initialSize + 'px';
+            console.log("Initial setup complete.");
+            typesetMath(); // Initial typeset after DOM ready
+
+        }); // End DOMContentLoaded
+
+    </script>
+
+</body>
+</html>
